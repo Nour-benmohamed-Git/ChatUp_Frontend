@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import StoreProvider from "./StoreProvider";
 
 export const metadata: Metadata = {
   title: "ChatUp",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="relative overflow-hidden">{children}</body>
+      <body className="relative overflow-hidden">
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

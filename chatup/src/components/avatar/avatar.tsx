@@ -9,8 +9,7 @@ const Avatar: FC<AvatarProps> = (props) => {
       <Image
         src={me}
         alt="User profile image"
-        layout="responsive"
-        objectFit="cover"
+        style={{ objectFit: "cover" }}
         className="rounded-full"
         placeholder="blur"
       />
