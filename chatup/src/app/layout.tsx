@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import StoreProvider from "./StoreProvider";
+import StoreProvider from "../redux/store-provider";
 
 export const metadata: Metadata = {
   title: "ChatUp",

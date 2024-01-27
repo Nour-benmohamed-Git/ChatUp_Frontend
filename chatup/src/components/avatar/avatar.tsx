@@ -3,9 +3,9 @@ import { FC, memo } from "react";
 import me from "../../../public/me.jpg";
 import { AvatarProps } from "./avatar.types";
 const Avatar: FC<AvatarProps> = (props) => {
-  const { sizeClass } = props;
+  const { additionalClasses } = props;
   return (
-    <div className={`${sizeClass} rounded-full overflow-hidden`}>
+    <div className={`${additionalClasses} rounded-full overflow-hidden`}>
       <Image
         src={me}
         alt="User profile image"

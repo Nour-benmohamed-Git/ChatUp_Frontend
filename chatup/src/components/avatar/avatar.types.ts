@@ -1,3 +1,3 @@
 export interface AvatarProps {
-  sizeClass: string;
+  additionalClasses: string;
 }

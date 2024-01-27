@@ -31,8 +31,8 @@ const SignUpForm: FC = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="w-full max-w-lg px-6 md:px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="w-full max-w-lg">
+        <div className="grid grid-cols-2 gap-4">
           <InputField
             id="firstName"
             name="firstName"
@@ -48,7 +48,7 @@ const SignUpForm: FC = () => {
             autoComplete="family-name"
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1">
           <InputField
             id="email"
             name="email"
@@ -64,7 +64,7 @@ const SignUpForm: FC = () => {
             autoComplete="tel"
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1">
           <InputField
             id="password"
             name="password"
@@ -78,15 +78,6 @@ const SignUpForm: FC = () => {
             type="password"
             placeholder="Confirm Password"
             autoComplete="new-password"
-          />
-        </div>
-        <div className="mb-4">
-          <InputField
-            id="birthDate"
-            name="birthDate"
-            type="date"
-            placeholder="Birth Date"
-            autoComplete="bday"
           />
         </div>
         <button

@@ -1,18 +1,28 @@
 "use client";
 import InputField from "@/components/input-field/input-field";
 import { useSignInMutation } from "@/redux/apis/auth/authApi";
-import { UserSignIn } from "@/types/UserSignIn";
+import { useAppDispatch } from "@/redux/hooks";
+import { setCurrentUser } from "@/redux/slices/userSlice";
+import { UserSignInRequest } from "@/types/UserSignIn";
+import { globals } from "@/utils/constants/globals";
+import { paths } from "@/utils/constants/paths";
+import { storeItem } from "@/utils/helpers/cookies-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { ImSpinner9 } from "react-icons/im";
 import { z } from "zod";
+
 const schema = z.object({
   email: z.string().nonempty("Email is required.").email("Email is invalid."),
   password: z.string().nonempty("Password is invalid."),
 });
 const SignInForm: FC = () => {
-  const [signIn, { isLoading, error }] = useSignInMutation();
-  const methods = useForm<UserSignIn>({
+  const [signIn, { isLoading }] = useSignInMutation();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const methods = useForm<UserSignInRequest>({
     defaultValues: {
       email: "",
       password: "",
@@ -21,23 +31,15 @@ const SignInForm: FC = () => {
     shouldFocusError: true,
     resolver: zodResolver(schema),
   });
-  const onSubmit = (data: UserSignIn) => {
+  const onSubmit = (data: UserSignInRequest) => {
     signIn(data)
       .unwrap()
-      .then((newData) => {
-        console.log(newData);
-        // localStorage.setItem(globalVariables.TOKEN, newData?.token);
-        // localStorage.setItem(globalVariables.EMAIL, newData?.user?.email);
-        // localStorage.setItem(globalVariables.PROFILE, newData?.user?.profile);
-        // localStorage.setItem(
-        //   globalVariables.PERMISSIONS,
-        //   JSON.stringify(newData?.user.permissions)
-        // );
-        // translation.i18n.changeLanguage("gb");
-        // PersistSelectedLanguage("gb");
-        // navigate(getDefaultRoute(newData?.user.permissions), { replace: true });
+      .then((data) => {
+        dispatch(setCurrentUser(data?.data));
+        storeItem(globals.tokenKey, data?.data?.token, globals.expireIn);
+        router.replace(paths.protectedRoutes.home);
       })
-      .catch((signInError: any) => {
+      .catch((error: any) => {
         // toast.clearWaitingQueue();
         // toast.error(signInError?.data?.message, {
         //   position: "top-right",
@@ -46,30 +48,36 @@ const SignInForm: FC = () => {
   };
   return (
     <FormProvider {...methods}>
-      <InputField
-        id="email"
-        name="email"
-        type="email"
-        placeholder="Email"
-        autoComplete="email"
-      />
-      <InputField
-        id="password"
-        name="password"
-        type="password"
-        placeholder="Password"
-        autoComplete="password"
-      />
-      <div>
-        <button
-          type="button"
-          data-te-ripple-init
-          data-te-ripple-color="light"
-          className="w-full rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase  text-gray-900 transition duration-150 ease-in-out hover:bg-gold-700"
-        >
-          LOGIN
-        </button>
+      <div className="w-full max-w-lg">
+        <InputField
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Email"
+          autoComplete="email"
+        />
+        <InputField
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          autoComplete="password"
+        />
       </div>
+      <button
+        type="button"
+        onClick={methods.handleSubmit(onSubmit)}
+        disabled={isLoading}
+        data-te-ripple-init
+        data-te-ripple-color="light"
+        className="w-full flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-700"
+      >
+        {isLoading ? (
+          <ImSpinner9 size={20} className="animate-spin" />
+        ) : (
+          "LOGIN"
+        )}
+      </button>
     </FormProvider>
   );
 };

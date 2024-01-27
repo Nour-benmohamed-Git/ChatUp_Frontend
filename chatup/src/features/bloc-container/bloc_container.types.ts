@@ -1,6 +1,7 @@
 export interface BlocContainerProps {
   children: React.ReactNode;
   actions: {
+    label?: string;
     name: string;
     icon: JSX.Element;
   }[];
@@ -8,4 +9,8 @@ export interface BlocContainerProps {
   hasSearchField?: boolean;
   hasChatControlPanel?: boolean;
   paddingClass?: string;
+  toggleHandlers: {
+    [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
+  };
+  label: "chat_list_sidebar" | "chat_conversation";
 }

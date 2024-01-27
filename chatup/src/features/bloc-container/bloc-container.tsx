@@ -12,20 +12,23 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     hasChatControlPanel,
     hasSearchField,
     paddingClass,
+    toggleHandlers,
+    label,
   } = props;
+
   return (
     <>
-      <Header actions={actions} />
+      <Header actions={actions} toggleHandlers={toggleHandlers} label={label} />
       {hasSearchField ? (
         <SearchField
-          id={"search_field"}
+          id={"sidebar_search_field"}
           name={"search_field"}
           placeholder={"Search"}
           autoComplete={"search..."}
         />
       ) : null}
       <div
-        className={`overflow-y-auto bg-slate-700 ${paddingClass}`}
+        className={`overflow-y-auto ${paddingClass}`}
         style={{ height: height }}
       >
         {children}

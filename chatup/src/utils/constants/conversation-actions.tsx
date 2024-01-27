@@ -7,6 +7,7 @@ export const conversationActions = [
     icon: <MdCall size={24} />,
   },
   {
+    label: "searchMessages",
     name: "search",
     icon: <MdSearch size={24} />,
   },

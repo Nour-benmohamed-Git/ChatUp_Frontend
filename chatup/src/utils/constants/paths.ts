@@ -1,4 +1,4 @@
 export const paths = {
-  signIn: "/sign-in",
-  signUp: "/sign-up",
+  protectedRoutes: { home: "/" },
+  authRoutes: { signIn: "/sign-in", signUp: "/sign-up" },
 };
