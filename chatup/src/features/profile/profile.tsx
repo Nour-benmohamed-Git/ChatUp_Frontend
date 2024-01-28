@@ -1,62 +1,53 @@
+import ErrorBox from "@/components/error-box/error-box";
+import Loader from "@/components/loader/loader";
+import ProfileListItem from "@/components/profile-list-item/profile-list-item";
 import ProfilePicture from "@/components/profile-picture/profile-picture";
-import { FC, memo } from "react";
-import { FaMobileAlt } from "react-icons/fa";
-import { FaRegAddressCard } from "react-icons/fa6";
-import { IoLocationOutline, IoMailOutline } from "react-icons/io5";
+import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
+import { profileFields } from "@/utils/constants/profile-fields";
+import { FC } from "react";
+import { FaUserEdit } from "react-icons/fa";
 
 const Profile: FC = () => {
+  const { data, isLoading, error } = useGetCurrentUserQuery();
+
+  let content = null;
+  if (isLoading) {
+    content = <Loader />;
+  }
+  if (error) {
+    content = <ErrorBox error={error} />;
+  }
+
+  content = profileFields.map((field) => (
+    <ProfileListItem
+      key={field.name}
+      icon={field.icon}
+      value={data?.data?.[field.name]}
+    />
+  ));
+
   return (
     <div
       className="flex flex-col justify-between"
       style={{ height: "calc(100% - 4rem)" }}
     >
-      <div className="flex flex-col items-center justify-center gap-6 rounded-md bg-gradient-to-r from-gray-700 via-gold-100 to-slate-700 py-6 w-full">
+      <div className="flex flex-col items-center justify-center gap-10 md:gap-6 rounded-md py-2 w-full">
         <ProfilePicture />
-        <div className="flex flex-col gap-2 w-11/12">
+        <div className="flex flex-col gap-2 w-full">
           <div className="flex justify-between w-full">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              Personal Information
+            <div className="text-xs font-medium text-gold-600 truncate">
+              Personal information
             </div>
-            <button>Edit</button>
+            <button className="text-gold-900 rounded-full hover:text-gold-50">
+              <FaUserEdit className="text-lg" />
+            </button>
           </div>
-          <div className="flex flex-col items-center gap-4 w-full">
-            <div className="flex items-center justify-between min-w-0 bg-gray-900 rounded-md px-2 py-3 w-full">
-              <div className="flex items-center rounded-md text-gold-900 hover:text-gold-50">
-                <FaRegAddressCard size={20} />
-              </div>
-              <div className="text-xs text-white truncate">
-                nourelhakbenmohamed@gmail.com
-              </div>
-            </div>
-            <div className="flex items-center justify-between min-w-0 bg-gray-900 rounded-md px-2 py-3 w-full">
-              <div className="flex items-center rounded-md text-gold-900 hover:text-gold-50">
-                <FaMobileAlt size={20} />
-              </div>
-              <div className="text-xs text-white truncate">21628271230</div>
-            </div>
-            <div className="flex items-center justify-between min-w-0 bg-gray-900 rounded-md px-2 py-3 w-full">
-              <div className="flex items-center rounded-md text-gold-900 hover:text-gold-50">
-                <IoMailOutline size={20} />
-              </div>
-              <div className="text-xs text-white truncate">
-                nour elhak benmohamed
-              </div>
-            </div>
-            <div className="flex items-center justify-between min-w-0 bg-gray-900 rounded-md px-2 py-3 w-full">
-              <div className="flex items-center rounded-md text-gold-900 hover:text-gold-50">
-                <IoLocationOutline size={20} />
-              </div>
-              <div className="text-xs text-white truncate">
-                tunis, kasserine 2237 ,cité olypmique.
-              </div>
-            </div>
+          <div className="flex flex-col items-center gap-6 md:gap-4 w-full">
+            {content}
           </div>
         </div>
-      </div>
-      <div className="flex items-center justify-center rounded-lg bg-gradient-to-r from-gray-700 via-gold-100 to-slate-700 w-full">
-        logout
       </div>
     </div>
   );
 };
-export default memo(Profile);
+export default Profile;

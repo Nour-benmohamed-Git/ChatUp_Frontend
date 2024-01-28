@@ -4,22 +4,21 @@ import { prepareHeaders } from "@/utils/config/rtk-prepare-headers";
 import { endpoints } from "@/utils/constants/endpoints";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const userApi = createApi({
-  reducerPath: "userApi",
+export const profileApi = createApi({
+    reducerPath: "profileApi",
   baseQuery: fetchBaseQuery({
     baseUrl: environment.baseUrl,
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["Users"],
   endpoints: (build) => ({
-    getUsers: build.query<UsersResponse, void>({
+    getCurrentUser: build.query<UsersResponse, void>({
       query() {
         return {
-          url: endpoints.getUsers,
+          url: endpoints.currentUser,
         };
       },
     }),
   }),
 });
 
-export const { useGetUsersQuery } = userApi;
+export const { useGetCurrentUserQuery } = profileApi;

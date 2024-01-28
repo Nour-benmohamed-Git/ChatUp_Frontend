@@ -1,19 +1,23 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { rtkQueryErrorsMiddleware } from "../utils/config/rtk-query-errors-middleware";
 import { authApi } from "./apis/auth/authApi";
-import userSlice from "./slices/userSlice";
+import { messageApi } from "./apis/message/messageApi";
+import { profileApi } from "./apis/profile/profileApi";
 import { userApi } from "./apis/user/userApi";
 export const makeStore = () => {
   return configureStore({
     reducer: {
       [authApi.reducerPath]: authApi.reducer,
       [userApi.reducerPath]: userApi.reducer,
-      userSlice: userSlice,
+      [profileApi.reducerPath]: profileApi.reducer,
+      [messageApi.reducerPath]: messageApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat([
         authApi.middleware,
         userApi.middleware,
+        profileApi.middleware,
+        messageApi.middleware,
         rtkQueryErrorsMiddleware,
       ]),
   });

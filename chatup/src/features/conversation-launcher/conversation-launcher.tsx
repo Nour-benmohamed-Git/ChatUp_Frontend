@@ -8,21 +8,30 @@ import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper"
 import { ConversationLauncherProps } from "./conversation-launcher.types";
 
 const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
-  const { label } = props;
+  const { label, onSelectChat, togglePanel } = props;
   const { data, isLoading, error } = useGetUsersQuery();
-
+  const handleCreateNewChat = (userId: number) => {
+    onSelectChat(userId);
+    togglePanel();
+  };
   let content = null;
   if (isLoading) {
     content = <Loader />;
   }
+
   if (error) {
     content = <ErrorBox error={error} />;
   }
+
   if (data?.data?.length === 0) {
     content = <NoDataFound message="No data found" />;
   }
   content = data?.data?.map?.((user) => (
-    <UserListItem key={user.username} userData={user} />
+    <UserListItem
+      key={user.username}
+      userData={user}
+      handleCreateNewChat={handleCreateNewChat}
+    />
   ));
 
   return (

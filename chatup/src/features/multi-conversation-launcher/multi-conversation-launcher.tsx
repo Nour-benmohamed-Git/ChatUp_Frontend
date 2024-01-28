@@ -1,7 +1,6 @@
 import ErrorBox from "@/components/error-box/error-box";
 import Loader from "@/components/loader/loader";
 import NoDataFound from "@/components/no-data-found/no-data-found";
-import UserListItem from "@/components/user-list-item/user-list-item";
 import { useGetUsersQuery } from "@/redux/apis/user/userApi";
 import { FC } from "react";
 import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper";
@@ -10,7 +9,7 @@ import { MultiConversationLauncherProps } from "./multi-conversation-launcher.ty
 const MultiConversationLauncher: FC<MultiConversationLauncherProps> = (
   props
 ) => {
-  const { label } = props;
+  const { label, togglePanel } = props;
   const { data, isLoading, error } = useGetUsersQuery();
 
   let content = null;
@@ -24,7 +23,8 @@ const MultiConversationLauncher: FC<MultiConversationLauncherProps> = (
     content = <NoDataFound message="No data found" />;
   }
   content = data?.data?.map?.((user) => (
-    <UserListItem key={user.username} userData={user} />
+    <h1 key={user.email}>{user.email}</h1>
+    // <UserListItem key={user.username} userData={user} onSelectChat={}/>
   ));
 
   return (

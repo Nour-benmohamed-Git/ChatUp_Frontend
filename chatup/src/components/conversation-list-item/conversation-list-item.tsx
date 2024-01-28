@@ -6,8 +6,9 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
   const { onSelectChat } = props;
   return (
     <div
+      role="button"
       className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"
-      onClick={onSelectChat as any}
+      onClick={() => onSelectChat(300)}
     >
       <Avatar additionalClasses="h-12 w-12" />
       <div className="flex flex-col flex-1 min-w-0 gap-2">

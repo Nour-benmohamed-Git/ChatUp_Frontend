@@ -1,11 +1,9 @@
 "use client";
-import { useAppSelector } from "@/redux/hooks";
 import { FC, useState } from "react";
 import ChatConversation from "../chat-conversation/chat-conversation";
 import ChatListSidebar from "../chat-list-sidebar/chat-list-sidebar";
 
 const ChatContainer: FC = () => {
-  const currentUser = useAppSelector((state) => state.userSlice);
   const [selectedChatId, setSelectedChatId] = useState<number>(1);
   const handleSelectChatItem = (id: number) => {
     setSelectedChatId(id);

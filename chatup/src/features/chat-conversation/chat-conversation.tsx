@@ -4,10 +4,12 @@ import usePanel from "@/hooks/use-panel";
 import { conversationActions } from "@/utils/constants/conversation-actions";
 import { FC, memo } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
+import MessageListView from "../message-list-view/message-list-view";
 import { ChatConversationProps } from "./chat-conversation.types";
 
 const ChatConversation: FC<ChatConversationProps> = (props) => {
   const { chatId } = props;
+
   const {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
@@ -62,7 +64,7 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
         toggleHandlers={toggleHandlers}
         label="chat_conversation"
       >
-        Chat Conversation
+        <MessageListView chatId={chatId} />
       </BlocContainer>
     </main>
   );

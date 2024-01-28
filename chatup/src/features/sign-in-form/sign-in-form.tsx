@@ -1,8 +1,6 @@
 "use client";
 import InputField from "@/components/input-field/input-field";
 import { useSignInMutation } from "@/redux/apis/auth/authApi";
-import { useAppDispatch } from "@/redux/hooks";
-import { setCurrentUser } from "@/redux/slices/userSlice";
 import { UserSignInRequest } from "@/types/UserSignIn";
 import { globals } from "@/utils/constants/globals";
 import { paths } from "@/utils/constants/paths";
@@ -20,7 +18,6 @@ const schema = z.object({
 });
 const SignInForm: FC = () => {
   const [signIn, { isLoading }] = useSignInMutation();
-  const dispatch = useAppDispatch();
   const router = useRouter();
   const methods = useForm<UserSignInRequest>({
     defaultValues: {
@@ -35,7 +32,6 @@ const SignInForm: FC = () => {
     signIn(data)
       .unwrap()
       .then((data) => {
-        dispatch(setCurrentUser(data?.data));
         storeItem(globals.tokenKey, data?.data?.token, globals.expireIn);
         router.replace(paths.protectedRoutes.home);
       })

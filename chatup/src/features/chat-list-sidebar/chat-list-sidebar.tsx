@@ -41,7 +41,13 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenNewChatPanel,
       togglePanel: toggleNewChatPanel,
       panelRef: newChatPanelRef,
-      children: <ConversationLauncher label="new_chat" />,
+      children: (
+        <ConversationLauncher
+          label="new_chat"
+          onSelectChat={onSelectChat}
+          togglePanel={toggleNewChatPanel}
+        />
+      ),
       fromSide: "left",
       title: "New chat",
     },
@@ -49,7 +55,7 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenNewGroupPanel,
       togglePanel: toggleNewGroupPanel,
       panelRef: newGroupPanelRef,
-      children: <MultiConversationLauncher label="new_group" />,
+      children: <MultiConversationLauncher label="new_group" togglePanel={toggleNewGroupPanel}/>,
       fromSide: "left",
       title: "New group",
     },
