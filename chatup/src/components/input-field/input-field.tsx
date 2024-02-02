@@ -13,7 +13,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <Controller
       name={name}
       render={({ field, fieldState }) => (
-        <div className="flex flex-col min-h-16">
+        <div className="flex flex-col min-h-16 w-full">
           <input
             {...field}
             id={id}

@@ -1,15 +1,14 @@
 import SlidingPanel from "@/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/components/sliding-panel/sliding-panel.types";
 import usePanel from "@/hooks/use-panel";
-import { conversationActions } from "@/utils/constants/conversation-actions";
+import { conversationActions } from "@/utils/constants/action-lists/conversation-actions";
 import { FC, memo } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
 import MessageListView from "../message-list-view/message-list-view";
 import { ChatConversationProps } from "./chat-conversation.types";
 
 const ChatConversation: FC<ChatConversationProps> = (props) => {
-  const { chatId } = props;
-
+  const { selectedChatItem } = props;
   const {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
@@ -63,8 +62,9 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
         paddingClass="px-8 py-4"
         toggleHandlers={toggleHandlers}
         label="chat_conversation"
+        selectedChatItem={selectedChatItem}
       >
-        <MessageListView chatId={chatId} />
+        <MessageListView selectedChatItem={selectedChatItem} />
       </BlocContainer>
     </main>
   );

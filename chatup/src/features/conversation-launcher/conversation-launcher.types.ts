@@ -1,5 +1,8 @@
 export interface ConversationLauncherProps {
   label: string;
-  onSelectChat: (id: number) => void
+  handleSelectChatItem: (data: {
+    chatId: number;
+    secondMemberId?: number;
+}) => void
   togglePanel: (event?: React.MouseEvent) => void;
 }

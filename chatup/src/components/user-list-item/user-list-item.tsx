@@ -4,7 +4,6 @@ import { UserListItemProps } from "./user-list-item.types";
 
 const UserListItem: FC<UserListItemProps> = (props) => {
   const { userData, handleCreateNewChat } = props;
-
   return (
     <div
       role="button"

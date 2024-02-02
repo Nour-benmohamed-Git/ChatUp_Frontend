@@ -1,3 +1,5 @@
+import { ChatItem } from "@/types/ChatItem";
+
 export interface MessageListViewProps {
-  chatId: number;
+  selectedChatItem: ChatItem;
 }

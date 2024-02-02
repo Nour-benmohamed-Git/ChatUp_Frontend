@@ -1,3 +1,5 @@
+import { ChatItem } from "@/types/ChatItem";
+
 export interface ChatListSidebarProps {
-  onSelectChat: (id: number) => void;
+  handleSelectChatItem: (data: ChatItem) => void;
 }

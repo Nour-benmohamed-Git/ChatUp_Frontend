@@ -3,7 +3,7 @@ import { BiDotsVerticalRounded } from "react-icons/bi";
 import Avatar from "../avatar/avatar";
 import { HeaderProps } from "./header.types";
 import ConversationHeaderUserInfo from "../conversation-header-user-info/conversation-header-user-info";
-import { avatarActions } from "@/utils/constants/avatar-actions";
+import { avatarActions } from "@/utils/constants/action-lists/avatar-actions";
 
 const Header: FC<HeaderProps> = (props) => {
   const { actions, toggleHandlers, conversationData, label } = props;

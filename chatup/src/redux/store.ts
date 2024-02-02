@@ -4,6 +4,7 @@ import { authApi } from "./apis/auth/authApi";
 import { messageApi } from "./apis/message/messageApi";
 import { profileApi } from "./apis/profile/profileApi";
 import { userApi } from "./apis/user/userApi";
+import { chatSessionsApi } from "./apis/chat-sessions/chatSessionsApi";
 export const makeStore = () => {
   return configureStore({
     reducer: {
@@ -11,6 +12,8 @@ export const makeStore = () => {
       [userApi.reducerPath]: userApi.reducer,
       [profileApi.reducerPath]: profileApi.reducer,
       [messageApi.reducerPath]: messageApi.reducer,
+      [chatSessionsApi.reducerPath]: chatSessionsApi.reducer,
+      
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat([
@@ -18,6 +21,7 @@ export const makeStore = () => {
         userApi.middleware,
         profileApi.middleware,
         messageApi.middleware,
+        chatSessionsApi.middleware,
         rtkQueryErrorsMiddleware,
       ]),
   });

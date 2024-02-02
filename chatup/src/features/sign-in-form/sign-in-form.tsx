@@ -32,7 +32,13 @@ const SignInForm: FC = () => {
     signIn(data)
       .unwrap()
       .then((data) => {
-        storeItem(globals.tokenKey, data?.data?.token, globals.expireIn);
+        storeItem(
+          [
+            { key: globals.tokenKey, value: data?.data?.token },
+            { key: globals.currentUserId, value: data?.data?.id },
+          ],
+          globals.expireIn
+        );
         router.replace(paths.protectedRoutes.home);
       })
       .catch((error: any) => {

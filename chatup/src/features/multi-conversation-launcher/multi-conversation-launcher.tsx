@@ -24,7 +24,7 @@ const MultiConversationLauncher: FC<MultiConversationLauncherProps> = (
   }
   content = data?.data?.map?.((user) => (
     <h1 key={user.email}>{user.email}</h1>
-    // <UserListItem key={user.username} userData={user} onSelectChat={}/>
+    // <UserListItem key={user.username} userData={user} handleSelectChatItem={}/>
   ));
 
   return (

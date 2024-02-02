@@ -2,31 +2,48 @@ import ErrorBox from "@/components/error-box/error-box";
 import Loader from "@/components/loader/loader";
 import NoDataFound from "@/components/no-data-found/no-data-found";
 import UserListItem from "@/components/user-list-item/user-list-item";
+import { useGetChatSessionByParticipantsMutation } from "@/redux/apis/chat-sessions/chatSessionsApi";
 import { useGetUsersQuery } from "@/redux/apis/user/userApi";
 import { FC } from "react";
 import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper";
 import { ConversationLauncherProps } from "./conversation-launcher.types";
 
 const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
-  const { label, onSelectChat, togglePanel } = props;
-  const { data, isLoading, error } = useGetUsersQuery();
+  const { label, handleSelectChatItem, togglePanel } = props;
+  const {
+    data: users,
+    isLoading: isLoadingUsers,
+    error: usersError,
+  } = useGetUsersQuery();
+  const [getChatSessionByParticipants] =
+    useGetChatSessionByParticipantsMutation();
   const handleCreateNewChat = (userId: number) => {
-    onSelectChat(userId);
+    getChatSessionByParticipants({ secondMemberId: userId })
+      .unwrap()
+      .then((response) => {
+        handleSelectChatItem({
+          chatId: response.data.id,
+          secondMemberId: userId,
+        });
+      })
+      .catch((_error) => {
+        handleSelectChatItem({ chatId: 0, secondMemberId: userId });
+      });
     togglePanel();
   };
   let content = null;
-  if (isLoading) {
+  if (isLoadingUsers) {
     content = <Loader />;
   }
 
-  if (error) {
-    content = <ErrorBox error={error} />;
+  if (usersError) {
+    content = <ErrorBox error={usersError} />;
   }
 
-  if (data?.data?.length === 0) {
+  if (users?.data?.length === 0) {
     content = <NoDataFound message="No data found" />;
   }
-  content = data?.data?.map?.((user) => (
+  content = users?.data?.map?.((user) => (
     <UserListItem
       key={user.username}
       userData={user}

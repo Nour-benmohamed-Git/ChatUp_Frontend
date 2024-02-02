@@ -1,13 +1,15 @@
 import Cookies from "js-cookie";
+interface Item {
+  key: string;
+  value: string;
+}
 
-export function storeItem(
-  key: string,
-  value: string,
-  expirationDays: number
-): void {
+export function storeItem(items: Item[], expirationDays: number): void {
+  const expirationTime = expirationDays * 24 * 60 * 60 * 1000;
   try {
-    const expirationTime = expirationDays * 24 * 60 * 60 * 1000;
-    Cookies.set(key, value, { expires: expirationTime });
+    items.forEach((item) => {
+      Cookies.set(item.key, item.value, { expires: expirationTime });
+    });
   } catch (error) {
     console.error("Error saving to cookies", error);
   }

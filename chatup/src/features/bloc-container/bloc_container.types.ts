@@ -1,3 +1,5 @@
+import { ChatItem } from "@/types/ChatItem";
+
 export interface BlocContainerProps {
   children: React.ReactNode;
   actions: {
@@ -12,5 +14,6 @@ export interface BlocContainerProps {
   toggleHandlers: {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
+  selectedChatItem?: ChatItem;
   label: "chat_list_sidebar" | "chat_conversation";
 }

@@ -1,3 +1,8 @@
+import { ChatItem } from "@/types/ChatItem";
+import { ChatSessionResponse } from "@/types/ChatSession";
+
 export interface ConversationListItemProps {
-  onSelectChat: (id: number) => void;
+  handleSelectChatItem: (data: ChatItem) => void;
+  chatSession: ChatSessionResponse;
+  currentUserId: string;
 }

@@ -1,18 +1,50 @@
 import ConversationListItem from "@/components/conversation-list-item/conversation-list-item";
+import ErrorBox from "@/components/error-box/error-box";
+import Loader from "@/components/loader/loader";
+import NoDataFound from "@/components/no-data-found/no-data-found";
 import SlidingPanel from "@/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/components/sliding-panel/sliding-panel.types";
 import usePanel from "@/hooks/use-panel";
-import { sideBarActions } from "@/utils/constants/sidebar-actions";
+import { useGetCurrentUserChatSessionsQuery } from "@/redux/apis/chat-sessions/chatSessionsApi";
+import { sideBarActions } from "@/utils/constants/action-lists/sidebar-actions";
 import { FC, memo } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
 import ConversationLauncher from "../conversation-launcher/conversation-launcher";
 import MultiConversationLauncher from "../multi-conversation-launcher/multi-conversation-launcher";
-import { ChatListSidebarProps } from "./chat-list-sidebar.types";
 import Profile from "../profile/profile";
+import { ChatListSidebarProps } from "./chat-list-sidebar.types";
+import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
 
 const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
-  const { onSelectChat } = props;
+  const { handleSelectChatItem } = props;
+  const { data, isLoading, error } = useGetCurrentUserChatSessionsQuery();
+  const {
+    data: currentUserInfo,
+    isLoading: isLoadingCurrentUserInfo,
+    error: currentUserInfoError,
+  } = useGetCurrentUserQuery();
+  let content = null;
+  if (isLoading) {
+    content = <Loader />;
+  }
 
+  if (error || currentUserInfoError) {
+    content = <ErrorBox error={error || currentUserInfoError} />;
+  }
+
+  if (data?.data?.length === 0) {
+    content = <NoDataFound message="No data found" />;
+  }
+  content =
+    currentUserInfo &&
+    data?.data?.map?.((chatSession) => (
+      <ConversationListItem
+        handleSelectChatItem={handleSelectChatItem}
+        key={chatSession.id}
+        chatSession={chatSession}
+        currentUserId={`${currentUserInfo.id}`}
+      />
+    ));
   const {
     isOpen: isOpenNewChatPanel,
     togglePanel: toggleNewChatPanel,
@@ -33,7 +65,13 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenProfilePanel,
       togglePanel: toggleProfilePanel,
       panelRef: ProfilePanelRef,
-      children: <Profile />,
+      children: (
+        <Profile
+          data={currentUserInfo}
+          isLoading={isLoadingCurrentUserInfo}
+          error={currentUserInfoError}
+        />
+      ),
       fromSide: "left",
       title: "Profile",
     },
@@ -44,7 +82,7 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       children: (
         <ConversationLauncher
           label="new_chat"
-          onSelectChat={onSelectChat}
+          handleSelectChatItem={handleSelectChatItem}
           togglePanel={toggleNewChatPanel}
         />
       ),
@@ -55,7 +93,12 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenNewGroupPanel,
       togglePanel: toggleNewGroupPanel,
       panelRef: newGroupPanelRef,
-      children: <MultiConversationLauncher label="new_group" togglePanel={toggleNewGroupPanel}/>,
+      children: (
+        <MultiConversationLauncher
+          label="new_group"
+          togglePanel={toggleNewGroupPanel}
+        />
+      ),
       fromSide: "left",
       title: "New group",
     },
@@ -89,7 +132,7 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
         toggleHandlers={toggleHandlers}
         label="chat_list_sidebar"
       >
-        <ConversationListItem onSelectChat={onSelectChat} />
+        {content}
       </BlocContainer>
     </aside>
   );

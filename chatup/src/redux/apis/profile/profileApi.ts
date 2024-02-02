@@ -1,4 +1,4 @@
-import { UsersResponse } from "@/types/User";
+import { UserResponse } from "@/types/User";
 import environment from "@/utils/config/environment";
 import { prepareHeaders } from "@/utils/config/rtk-prepare-headers";
 import { endpoints } from "@/utils/constants/endpoints";
@@ -11,7 +11,7 @@ export const profileApi = createApi({
     prepareHeaders: prepareHeaders,
   }),
   endpoints: (build) => ({
-    getCurrentUser: build.query<UsersResponse, void>({
+    getCurrentUser: build.query<UserResponse, void>({
       query() {
         return {
           url: endpoints.currentUser,

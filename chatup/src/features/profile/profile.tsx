@@ -2,14 +2,13 @@ import ErrorBox from "@/components/error-box/error-box";
 import Loader from "@/components/loader/loader";
 import ProfileListItem from "@/components/profile-list-item/profile-list-item";
 import ProfilePicture from "@/components/profile-picture/profile-picture";
-import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
 import { profileFields } from "@/utils/constants/profile-fields";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { FaUserEdit } from "react-icons/fa";
+import { ProfileProps } from "./profile.types";
 
-const Profile: FC = () => {
-  const { data, isLoading, error } = useGetCurrentUserQuery();
-
+const Profile: FC<ProfileProps> = (props) => {
+  const { data, isLoading, error } = props;
   let content = null;
   if (isLoading) {
     content = <Loader />;
@@ -50,4 +49,4 @@ const Profile: FC = () => {
     </div>
   );
 };
-export default Profile;
+export default memo(Profile);

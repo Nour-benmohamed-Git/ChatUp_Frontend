@@ -10,7 +10,6 @@ export const userApi = createApi({
     baseUrl: environment.baseUrl,
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["Users"],
   endpoints: (build) => ({
     getUsers: build.query<UsersResponse, void>({
       query() {
