@@ -15,6 +15,8 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     toggleHandlers,
     label,
     selectedChatItem,
+    handleSelectChatItem,
+    socket,
   } = props;
 
   return (
@@ -35,7 +37,11 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
         {children}
       </div>
       {hasChatControlPanel ? (
-        <ChatControlPanel selectedChatItem={selectedChatItem} />
+        <ChatControlPanel
+          selectedChatItem={selectedChatItem}
+          handleSelectChatItem={handleSelectChatItem}
+          socket={socket}
+        />
       ) : null}
     </>
   );

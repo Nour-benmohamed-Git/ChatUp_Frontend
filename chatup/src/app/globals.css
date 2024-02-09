@@ -8,26 +8,18 @@
   }
 }
 
-div {
-  --sb-track-color: #111827;
-  --sb-thumb-color: #ffc34d;
-  --sb-size: 3px;
-
-  scrollbar-color: var(--sb-thumb-color) 
-                   var(--sb-track-color);
-}
-
-div::-webkit-scrollbar {
-  width: var(--sb-size) 
+ div::-webkit-scrollbar {
+  width: 3px ;
+  background-color:#ffc34d
 }
 
 div::-webkit-scrollbar-track {
-  background: var(--sb-track-color);
+  background: #111827;
   border-radius: 1px;
 }
 
 div::-webkit-scrollbar-thumb {
-  background: var(--sb-thumb-color);
+  background: #ffc34d;
   border-radius: 1px;
   
   }

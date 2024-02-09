@@ -3,6 +3,7 @@ export interface ConversationLauncherProps {
   handleSelectChatItem: (data: {
     chatId: number;
     secondMemberId?: number;
-}) => void
+    deletedByCurrentUser?: boolean;
+  }) => void;
   togglePanel: (event?: React.MouseEvent) => void;
 }

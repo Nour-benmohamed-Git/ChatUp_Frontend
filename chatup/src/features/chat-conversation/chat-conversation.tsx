@@ -8,7 +8,7 @@ import MessageListView from "../message-list-view/message-list-view";
 import { ChatConversationProps } from "./chat-conversation.types";
 
 const ChatConversation: FC<ChatConversationProps> = (props) => {
-  const { selectedChatItem } = props;
+  const { selectedChatItem, handleSelectChatItem, socket } = props;
   const {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
@@ -59,12 +59,17 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
         actions={conversationActions}
         hasChatControlPanel
         height="calc(100% - 8rem)"
-        paddingClass="px-8 py-4"
         toggleHandlers={toggleHandlers}
         label="chat_conversation"
         selectedChatItem={selectedChatItem}
+        handleSelectChatItem={handleSelectChatItem}
+        socket={socket}
       >
-        <MessageListView selectedChatItem={selectedChatItem} />
+        <MessageListView
+          selectedChatItem={selectedChatItem}
+          handleSelectChatItem={handleSelectChatItem}
+          socket={socket}
+        />
       </BlocContainer>
     </main>
   );

@@ -84,7 +84,7 @@ const Popover: React.FC<PopoverProps> = (props) => {
   const { horizontal, vertical } = calculatePosition();
 
   return (
-    <div className="relative inline-block" ref={buttonRef}>
+    <div className="relative" ref={buttonRef}>
       <div
         role="button"
         onClick={togglePopover}
@@ -94,7 +94,7 @@ const Popover: React.FC<PopoverProps> = (props) => {
       </div>
       {isOpen && (
         <div
-          className="absolute z-10"
+          className="absolute"
           style={{
             right: position.includes("right") ? `${horizontal}px` : "auto",
             left: position.includes("left") ? `${horizontal}px` : "auto",
@@ -104,11 +104,19 @@ const Popover: React.FC<PopoverProps> = (props) => {
           ref={popoverRef}
         >
           <div className="origin-bottom-right mt-2 w-48 bg-gray-900 p-4 rounded-md shadow-lg">
-            <ul className="flex flex-col gap-4 ">
+            <ul className="flex flex-col gap-4">
               {actionList.map((item) => (
-                <li key={item.label} className="flex items-center gap-4 text-gold-900 rounded-full hover:text-gold-50">
-                  <div role="button">{item.icon}</div>
-                  <div role="button">{item.name}</div>
+                <li
+                  key={item.label}
+                  role="button"
+                  onClick={() => {
+                    togglePopover();
+                    item.onClick();
+                  }}
+                  className="flex items-center gap-4 text-gold-900 rounded-full hover:text-gold-50"
+                >
+                  <div>{item.icon}</div>
+                  <div>{item.name}</div>
                 </li>
               ))}
             </ul>

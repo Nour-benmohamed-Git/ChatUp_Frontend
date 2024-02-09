@@ -21,9 +21,11 @@ const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
     getChatSessionByParticipants({ secondMemberId: userId })
       .unwrap()
       .then((response) => {
+        console.log("response", response);
         handleSelectChatItem({
           chatId: response.data.id,
           secondMemberId: userId,
+          deletedByCurrentUser: response.data.deletedByCurrentUser,
         });
       })
       .catch((_error) => {

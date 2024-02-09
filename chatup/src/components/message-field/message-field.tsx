@@ -14,6 +14,7 @@ const MessageField: React.FC<MessageFieldProps> = ({
         <div className="flex flex-col justify-center w-full">
           <textarea
             {...field}
+            autoFocus
             id={id}
             name={name}
             rows={1}

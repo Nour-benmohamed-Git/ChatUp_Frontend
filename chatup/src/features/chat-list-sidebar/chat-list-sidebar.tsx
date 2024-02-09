@@ -6,45 +6,104 @@ import SlidingPanel from "@/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/components/sliding-panel/sliding-panel.types";
 import usePanel from "@/hooks/use-panel";
 import { useGetCurrentUserChatSessionsQuery } from "@/redux/apis/chat-sessions/chatSessionsApi";
+import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
+import { ChatSessionResponse } from "@/types/ChatSession";
 import { sideBarActions } from "@/utils/constants/action-lists/sidebar-actions";
-import { FC, memo } from "react";
+import { FC, memo, useEffect, useState } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
 import ConversationLauncher from "../conversation-launcher/conversation-launcher";
 import MultiConversationLauncher from "../multi-conversation-launcher/multi-conversation-launcher";
 import Profile from "../profile/profile";
 import { ChatListSidebarProps } from "./chat-list-sidebar.types";
-import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
+import { toast } from "sonner";
 
 const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
-  const { handleSelectChatItem } = props;
+  const { handleSelectChatItem, socket } = props;
   const { data, isLoading, error } = useGetCurrentUserChatSessionsQuery();
   const {
     data: currentUserInfo,
     isLoading: isLoadingCurrentUserInfo,
     error: currentUserInfoError,
   } = useGetCurrentUserQuery();
+
+  const [chatSessions, setChatSessions] = useState<ChatSessionResponse[]>();
+  useEffect(() => {
+    if (data?.data) {
+      setChatSessions(data.data);
+    }
+    // console.log("socket in sidebar", socket);
+    socket?.on("notification", (chatSessionData) => {
+      console.log("chatSessionData", chatSessionData);
+      switch (chatSessionData.type) {
+        case "updateChatListOnAddition":
+          setChatSessions((prevChatSessions) => {
+            return prevChatSessions?.map((chatSession) => {
+              if (chatSession.id === chatSessionData.data.id) {
+                return {
+                  ...chatSession,
+                  lastMessage: {
+                    content: chatSessionData.data.lastMessage.content,
+                    timestamp: chatSessionData.data.lastMessage.timestamp,
+                  },
+                  count: chatSessionData.count,
+                };
+              }
+              // If the id doesn't match, return the unchanged chatSession
+              return chatSession;
+            });
+          });
+          break;
+        case "updateChatListOnRemoval":
+          setChatSessions((prevChatSessions) => {
+            return prevChatSessions?.map((chatSession) => {
+              if (chatSession.id === chatSessionData.data.id) {
+                return {
+                  ...chatSession,
+                  lastMessage: {
+                    content: chatSessionData.data.lastMessage.content,
+                    timestamp: chatSessionData.data.lastMessage.timestamp,
+                  },
+                  count: chatSessionData.count,
+                };
+              }
+              // If the id doesn't match, return the unchanged chatSession
+              return chatSession;
+            });
+          });
+          toast.success("Message has been successfully removed.");
+          break;
+        // Add more cases for other types of notifications if needed
+        default:
+          // Handle unknown notification types
+          console.log("Unknown notification type:", chatSessionData.type);
+      }
+    });
+
+    socket?.on("disconnect", () => {
+      console.log("Disconnected from socket?.IO server");
+    });
+    // return () => {
+    //   socket?.disconnect();
+    //   socket?.off("notification");
+    // };
+  }, [data?.data]);
+
   let content = null;
   if (isLoading) {
     content = <Loader />;
-  }
-
-  if (error || currentUserInfoError) {
-    content = <ErrorBox error={error || currentUserInfoError} />;
-  }
-
-  if (data?.data?.length === 0) {
+  } else if (error) {
+    content = <ErrorBox error={error} />;
+  } else if (chatSessions?.length === 0) {
     content = <NoDataFound message="No data found" />;
-  }
-  content =
-    currentUserInfo &&
-    data?.data?.map?.((chatSession) => (
+  } else {
+    content = chatSessions?.map?.((chatSession) => (
       <ConversationListItem
         handleSelectChatItem={handleSelectChatItem}
         key={chatSession.id}
         chatSession={chatSession}
-        currentUserId={`${currentUserInfo.id}`}
       />
     ));
+  }
   const {
     isOpen: isOpenNewChatPanel,
     togglePanel: toggleNewChatPanel,

@@ -1,7 +1,8 @@
 export const globals = {
   tokenKey: "authToken",
   currentUserId: "currentUserId",
-  AUTHORIZATION_KEY: "Authorization",
+  authorizationKey: "Authorization",
+  unauthorizedCode: 401,
   algorithm: "HS256",
-  expireIn: 1,
+  expireIn: 24,
 };

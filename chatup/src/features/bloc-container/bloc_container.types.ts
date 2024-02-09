@@ -1,4 +1,5 @@
 import { ChatItem } from "@/types/ChatItem";
+import { Socket } from "socket.io-client";
 
 export interface BlocContainerProps {
   children: React.ReactNode;
@@ -15,5 +16,7 @@ export interface BlocContainerProps {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
   selectedChatItem?: ChatItem;
+  handleSelectChatItem?: (data: ChatItem) => void
   label: "chat_list_sidebar" | "chat_conversation";
+  socket?: Socket;
 }

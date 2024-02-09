@@ -7,5 +7,7 @@ export interface ChatSessionResponse {
   lastActiveDate: number;
   title: string;
   lastMessage?: MessageResponse;
+  deletedByCurrentUser?: boolean;
+  count?: number;
 }
 export type ChatSessionsResponse = { data: ChatSessionResponse[] };

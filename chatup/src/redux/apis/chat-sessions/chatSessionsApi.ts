@@ -1,4 +1,5 @@
 import { ChatSessionResponse, ChatSessionsResponse } from "@/types/ChatSession";
+import { MessagesResponse } from "@/types/Message";
 import environment from "@/utils/config/environment";
 import { prepareHeaders } from "@/utils/config/rtk-prepare-headers";
 import { endpoints } from "@/utils/constants/endpoints";
@@ -10,7 +11,7 @@ export const chatSessionsApi = createApi({
     baseUrl: environment.baseUrl,
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["ChatSessions"],
+  tagTypes: ["ChatSessions", "Messages"],
   endpoints: (build) => ({
     getCurrentUserChatSessions: build.query<ChatSessionsResponse, void>({
       query() {
@@ -29,6 +30,20 @@ export const chatSessionsApi = createApi({
             ]
           : [{ type: "ChatSessions", id: "LIST" }],
     }),
+    getMessageByChatSessionId: build.query<MessagesResponse, number>({
+      query: (chatSessionId) =>
+        endpoints.getMessagesByChatSession.replace("id", `${chatSessionId}`),
+      providesTags: (result, _error, _args) =>
+        result
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: "Messages" as const,
+                id,
+              })),
+              { type: "Messages", id: "LIST" },
+            ]
+          : [{ type: "Messages", id: "LIST" }],
+    }),
     getChatSessionByParticipants: build.mutation<
       { data: ChatSessionResponse },
       { secondMemberId: number }
@@ -42,7 +57,7 @@ export const chatSessionsApi = createApi({
       },
     }),
     addChatSession: build.mutation<
-      ChatSessionResponse,
+      { data: ChatSessionResponse },
       { secondMemberId: number }
     >({
       query: (data) => ({
@@ -52,18 +67,30 @@ export const chatSessionsApi = createApi({
       }),
       invalidatesTags: [{ type: "ChatSessions", id: "LIST" }],
     }),
-    UpdateChatSession: build.mutation<ChatSessionResponse, ChatSessionResponse>(
-      {
-        query: (data) => ({
-          url: endpoints.chatSession,
-          method: "PUT",
-          body: data,
-        }),
-        invalidatesTags: (result, error, arg) => [
-          { type: "ChatSessions", id: arg.id },
-        ],
-      }
-    ),
+    updateChatSession: build.mutation<
+      { data: ChatSessionResponse },
+      { id: number }
+    >({
+      query: (data) => ({
+        url: endpoints.removeOrUpdateChatSession.replace("id", `${data.id}`),
+        method: "PUT",
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "ChatSessions", id: arg.id },
+      ],
+    }),
+    deleteChatSession: build.mutation<
+      { data: ChatSessionResponse },
+      { id: number }
+    >({
+      query: (data) => ({
+        url: endpoints.removeOrUpdateChatSession.replace("id", `${data.id}`),
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "ChatSessions", id: arg.id },
+      ],
+    }),
   }),
 });
 
@@ -72,4 +99,6 @@ export const {
   useGetChatSessionByParticipantsMutation,
   useAddChatSessionMutation,
   useUpdateChatSessionMutation,
+  useGetMessageByChatSessionIdQuery,
+  useDeleteChatSessionMutation,
 } = chatSessionsApi;

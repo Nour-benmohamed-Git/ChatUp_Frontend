@@ -5,6 +5,8 @@ export const endpoints = {
   currentUser: "/api/current-user",
   getCurrentUserChatSessions: "/api/current-user-chat-sessions",
   getChatSessionByParticipants: "/api/chat-sessions/by-participants",
+  removeMessage: "/api/messages/id",
   getMessagesByChatSession: "/api/messages/id/chat-sessions",
   chatSession: "/api/chat-sessions",
+  removeOrUpdateChatSession: "/api/chat-sessions/id",
 };

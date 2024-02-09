@@ -9,6 +9,7 @@ export interface PopoverProps {
     label: string;
     name: string;
     icon: JSX.Element;
+    onClick: () => void;
   }[];
   position: PopoverPosition;
 }

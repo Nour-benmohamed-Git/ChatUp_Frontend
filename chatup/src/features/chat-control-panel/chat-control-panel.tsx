@@ -1,7 +1,12 @@
 import MessageField from "@/components/message-field/message-field";
-import { useAddChatSessionMutation } from "@/redux/apis/chat-sessions/chatSessionsApi";
-import { connectToSocket } from "@/utils/config/socket";
+import {
+  useAddChatSessionMutation,
+  useUpdateChatSessionMutation,
+} from "@/redux/apis/chat-sessions/chatSessionsApi";
 import { chatControlPanelActions } from "@/utils/constants/action-lists/chat-control-panel-actions";
+import { globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookies-helpers";
+import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -9,15 +14,14 @@ import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
 import { z } from "zod";
 import { ChatControlPanelProps } from "./chat-control-panel.types";
-import { getItem } from "@/utils/helpers/cookies-helpers";
-import { globals } from "@/utils/constants/globals";
 
 const schema = z.object({
   message: z.string().nonempty("message is required."),
 });
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
-  const { selectedChatItem } = props;
+  const { selectedChatItem, handleSelectChatItem, socket } = props;
   const [addChatSession] = useAddChatSessionMutation();
+  const [updateChatSession] = useUpdateChatSessionMutation();
   const methods = useForm({
     defaultValues: {
       message: "",
@@ -26,26 +30,73 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   });
 
   const handleSendMessage = () => {
+    if (!methods.watch("message")) {
+      return;
+    }
     const currentUserId = getItem(globals.currentUserId);
     if (!selectedChatItem?.chatId) {
       addChatSession({
         secondMemberId: selectedChatItem?.secondMemberId as number,
-      });
+      })
+        .unwrap()
+        .then((res) => {
+          handleSelectChatItem && handleSelectChatItem({ chatId: res.data.id });
+          socket &&
+            emitMessage(socket, {
+              action: "create",
+              data: {
+                content: methods.watch("message"),
+                senderId: currentUserId as string,
+                receiverId: selectedChatItem?.secondMemberId,
+                chatSessionId: res.data.id,
+              },
+              room: res.data.id,
+            });
+          methods.setValue("message", "");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      if (selectedChatItem?.deletedByCurrentUser === true) {
+        updateChatSession({
+          id: selectedChatItem?.chatId,
+        })
+          .unwrap()
+          .then((res) => {
+            handleSelectChatItem &&
+              handleSelectChatItem({ chatId: res.data.id });
+            socket &&
+              emitMessage(socket, {
+                action: "create",
+                data: {
+                  content: methods.watch("message"),
+                  senderId: currentUserId as string,
+                  receiverId: selectedChatItem?.secondMemberId,
+                  chatSessionId: res.data.id,
+                },
+                room: res.data.id,
+              });
+            methods.setValue("message", "");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        socket &&
+          emitMessage(socket, {
+            action: "create",
+            data: {
+              content: methods.watch("message"),
+              senderId: currentUserId as string,
+              receiverId: selectedChatItem?.secondMemberId,
+              chatSessionId: selectedChatItem?.chatId as number,
+            },
+            room: selectedChatItem?.chatId as number,
+          });
+        methods.setValue("message", "");
+      }
     }
-    if (!methods.watch("message")) {
-      return;
-    }
-    const socket = connectToSocket();
-    socket.emit("sendMessage", {
-      data: {
-        content: methods.watch("message"),
-        senderId: currentUserId,
-        chatSessionId: selectedChatItem?.chatId,
-      },
-      room: selectedChatItem?.chatId,
-    });
-
-    methods.setValue("message", "");
   };
   return (
     <FormProvider {...methods}>

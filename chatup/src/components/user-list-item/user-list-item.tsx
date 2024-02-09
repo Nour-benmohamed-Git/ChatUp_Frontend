@@ -5,7 +5,7 @@ import { UserListItemProps } from "./user-list-item.types";
 const UserListItem: FC<UserListItemProps> = (props) => {
   const { userData, handleCreateNewChat } = props;
   return (
-    <div
+    <div 
       role="button"
       onClick={() => handleCreateNewChat(userData.id)}
       className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"

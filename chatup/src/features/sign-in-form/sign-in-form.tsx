@@ -72,7 +72,7 @@ const SignInForm: FC = () => {
         disabled={isLoading}
         data-te-ripple-init
         data-te-ripple-color="light"
-        className="w-full flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-700"
+        className="w-full flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-600"
       >
         {isLoading ? (
           <ImSpinner9 size={20} className="animate-spin" />

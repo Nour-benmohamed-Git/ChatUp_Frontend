@@ -8,13 +8,13 @@ export const MessageActions = [
     icon: <MdEdit size={24} />,
   },
   {
-    label: "remove",
-    name: "Remove",
-    icon: <IoMdTrash size={24} />,
-  },
-  {
     label: "copy",
     name: "Copy",
     icon: <IoIosCopy size={24} />,
+  },
+  {
+    label: "remove",
+    name: "Remove",
+    icon: <IoMdTrash size={24} />,
   },
 ];
