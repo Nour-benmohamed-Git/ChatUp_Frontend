@@ -5,17 +5,27 @@ import {
   getChatSessionTitle,
   getOtherUserId,
 } from "@/utils/helpers/sharedHelpers";
-import { FC, memo, useState } from "react";
+import { FC, memo, useRef, useState } from "react";
+import { BiDotsVerticalRounded } from "react-icons/bi";
 import Avatar from "../avatar/avatar";
 import Dialog from "../dialog/dialog";
-import Popover from "../popover/popover";
-import { PopoverPosition } from "../popover/popover.types";
+import Menu from "../menu/menu";
+import UnreadMessagesCounter from "../unread-messages/unread-messages-counter";
 import { ConversationListItemProps } from "./conversation-list-item.types";
+import { MenuPosition } from "../menu/menu.types";
 
 const ConversationListItem: FC<ConversationListItemProps> = (props) => {
   const { handleSelectChatItem, chatSession } = props;
-  const [removeChatSession, { data }] = useDeleteChatSessionMutation();
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [removeChatSession] = useDeleteChatSessionMutation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const handleOpenMenu = () => {
+    setIsOpenMenu(true);
+  };
+  const handleCloseMenu = () => {
+    setIsOpenMenu(false);
+  };
   const openModal = () => {
     setIsOpen(true);
   };
@@ -30,11 +40,12 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
     ...action,
     onClick: onClickFunctions[action.label],
   }));
-
-  const handleRemoveMessage = () => {
+  const handleRemoveChatSession = () => {
     removeChatSession({ id: chatSession.id });
+    handleSelectChatItem({ chatId: -1 });
     closeModal();
   };
+
   return (
     <>
       {isOpen && (
@@ -44,7 +55,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
           actions={[
             {
               label: "remove",
-              onClick: handleRemoveMessage,
+              onClick: handleRemoveChatSession,
               category: "dismissal",
             },
           ]}
@@ -64,7 +75,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
           })
         }
       >
-        <Avatar additionalClasses="h-12 w-12" />
+        <Avatar additionalClasses="h-12 w-12" fileName={chatSession.image} />
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-gold-600 truncate">
@@ -78,15 +89,22 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
             <div className="text-xs text-white truncate">
               {chatSession.lastMessage?.content}
             </div>
-            <div className="flex items-center gap-2">
-              {chatSession.count ? (
-                <span className="flex items-center justify-center rounded-full bg-green-50 h-7 w-7 text-xs font-medium text-green-700 border-2 border-green-600/20">
-                  {chatSession.count}
-                </span>
-              ) : null}
-              <Popover
+            <div className="flex items-center gap-2 h-8">
+              <UnreadMessagesCounter chatSession={chatSession} />
+              <div
+                ref={buttonRef}
+                role="button"
+                onClick={handleOpenMenu}
+                className="flex justify-center items-center rounded-full h-8 w-8 bg-slate-900 text-gold-900"
+              >
+                <BiDotsVerticalRounded size={20} />
+              </div>
+              <Menu
                 actionList={updatedMessageActions}
-                position={PopoverPosition.BOTTOM_LEFT}
+                isOpen={isOpenMenu}
+                onClose={handleCloseMenu}
+                buttonRef={buttonRef}
+                position={MenuPosition.TOP_RIGHT}
               />
             </div>
           </div>

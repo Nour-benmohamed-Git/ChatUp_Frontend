@@ -1,22 +1,22 @@
-import ConversationMessage from "@/components/conversation-message/conversation-message";
+import Message from "@/components/message/message";
 import ErrorBox from "@/components/error-box/error-box";
 import Loader from "@/components/loader/loader";
 import {
-  chatSessionsApi,
-  useGetMessageByChatSessionIdQuery,
+  useGetMessagesByChatSessionIdQuery,
   useUpdateChatSessionMutation,
 } from "@/redux/apis/chat-sessions/chatSessionsApi";
 import { MessageResponse } from "@/types/Message";
+import { globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookies-helpers";
+import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { FC, memo, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { MessageListViewProps } from "./message-list-view.types";
 
 const MessageListView: FC<MessageListViewProps> = (props) => {
   const { selectedChatItem, handleSelectChatItem, socket } = props;
   const [updateChatSession] = useUpdateChatSessionMutation();
-  const dispatch = useDispatch();
-  const { data, isLoading, error } = useGetMessageByChatSessionIdQuery(
+  const { data, isLoading, error } = useGetMessagesByChatSessionIdQuery(
     selectedChatItem.chatId
   );
   const [messages, setMessages] = useState<MessageResponse[]>([]);
@@ -25,7 +25,7 @@ const MessageListView: FC<MessageListViewProps> = (props) => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages.length]);
   useEffect(() => {
     if (data?.data) {
       setMessages(data.data);
@@ -52,14 +52,18 @@ const MessageListView: FC<MessageListViewProps> = (props) => {
                   newMessage.data,
                 ]);
                 break;
+              case "markAsRead":
+                setMessages((prevMessages) =>
+                  prevMessages.map((message) => {
+                    if (newMessage.messageIds.includes(message.id)) {
+                      return { ...message, readStatus: true };
+                    }
+                    return message;
+                  })
+                );
               case "remove":
                 setMessages((prevMessages) =>
                   prevMessages.filter((item) => item.id !== newMessage.data.id)
-                );
-                dispatch(
-                  chatSessionsApi.util.invalidateTags([
-                    { type: "ChatSessions", id: res.data.id },
-                  ])
                 );
                 toast.success("Message has been successfully removed.");
                 break;
@@ -74,6 +78,16 @@ const MessageListView: FC<MessageListViewProps> = (props) => {
           case "create":
             setMessages((prevMessages) => [...prevMessages, newMessage.data]);
             break;
+          case "markAsRead":
+            setMessages((prevMessages) =>
+              prevMessages.map((message) => {
+                if (newMessage.messageIds?.includes(message.id)) {
+                  return { ...message, readStatus: true };
+                }
+                return message;
+              })
+            );
+            break;
           case "remove":
             setMessages((prevMessages) =>
               prevMessages.filter((item) => item.id !== newMessage.data.id)
@@ -83,10 +97,22 @@ const MessageListView: FC<MessageListViewProps> = (props) => {
         }
       }
     });
-
-    return () => {
-      socket.off("joinPrivateRoom");
-    };
+  }, []);
+  useEffect(() => {
+    const currentUserId = getItem(globals.currentUserId);
+    currentUserId &&
+      emitMessage(socket, {
+        action: "markAsRead",
+        data: {
+          senderId: selectedChatItem?.secondMemberId,
+          receiverId: +currentUserId,
+          chatSessionId: selectedChatItem.chatId,
+        },
+        room: selectedChatItem.chatId,
+        // messagesIds: messages
+        //   .filter((msg) => !msg.readStatus)
+        //   .map((el) => el.id),
+      });
   }, []);
 
   let content = null;
@@ -98,12 +124,13 @@ const MessageListView: FC<MessageListViewProps> = (props) => {
     content = <div>Today</div>;
   } else {
     content = (
-      <div className="flex flex-col min-h-full justify-end px-0 md:px-16">
+      <div className="flex flex-col min-h-full justify-end px-0 md:px-16 py-2">
         {messages?.map((message) => (
-          <ConversationMessage
+          <Message
             key={message.id}
             message={message}
             socket={socket}
+            selectedChatItem={selectedChatItem}
           />
         ))}
       </div>

@@ -8,8 +8,8 @@ export const authApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: environment.baseUrl,
   }),
-  endpoints: (builder) => ({
-    signIn: builder.mutation({
+  endpoints: (build) => ({
+    signIn: build.mutation({
       query(data: UserSignInRequest) {
         return {
           url: endpoints.signIn,

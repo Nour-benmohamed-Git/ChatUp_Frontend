@@ -1,3 +1,5 @@
+import { UserResponse } from "@/types/User";
+
 export interface HeaderProps {
   actions: {
     label?: string;
@@ -9,4 +11,5 @@ export interface HeaderProps {
   };
   conversationData?: string;
   label: "chat_list_sidebar" | "chat_conversation";
+  userData?: UserResponse;
 }

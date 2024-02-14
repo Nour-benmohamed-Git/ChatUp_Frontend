@@ -6,3 +6,10 @@ export const globals = {
   algorithm: "HS256",
   expireIn: 24,
 };
+export const maxFileSize = 5 * 1024 * 1024;
+export const acceptedImageTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];

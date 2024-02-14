@@ -24,7 +24,9 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
       isOpen: isOpenSearchMessagesPanel,
       togglePanel: toggleSearchMessagesPanel,
       panelRef: searchMessagesPanelRef,
-      children: <h2>Sliding Panel Content</h2>,
+      children: isOpenSearchMessagesPanel ? (
+        <h2>Sliding Panel Content</h2>
+      ) : null,
       fromSide: "right",
       title: "Search messages",
     },
@@ -32,7 +34,7 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
       isOpen: isOpenContactInfoPanel,
       togglePanel: toggleContactInfoPanel,
       panelRef: contactInfoPanelRef,
-      children: <h2>Sliding Panel Content</h2>,
+      children: isOpenContactInfoPanel ? <h2>Sliding Panel Content</h2> : null,
       fromSide: "right",
       title: "Contact info",
     },
@@ -64,6 +66,7 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
         selectedChatItem={selectedChatItem}
         handleSelectChatItem={handleSelectChatItem}
         socket={socket}
+        // userData={}
       >
         <MessageListView
           selectedChatItem={selectedChatItem}

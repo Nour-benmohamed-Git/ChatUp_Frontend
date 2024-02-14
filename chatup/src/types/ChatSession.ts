@@ -5,7 +5,7 @@ export interface ChatSessionResponse {
   participantsData: { [userId: string]: string };
   creationDate: number;
   lastActiveDate: number;
-  title: string;
+  image?: string;
   lastMessage?: MessageResponse;
   deletedByCurrentUser?: boolean;
   count?: number;

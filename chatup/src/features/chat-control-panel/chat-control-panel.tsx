@@ -42,11 +42,12 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         .then((res) => {
           handleSelectChatItem && handleSelectChatItem({ chatId: res.data.id });
           socket &&
+            currentUserId &&
             emitMessage(socket, {
               action: "create",
               data: {
                 content: methods.watch("message"),
-                senderId: currentUserId as string,
+                senderId: +currentUserId,
                 receiverId: selectedChatItem?.secondMemberId,
                 chatSessionId: res.data.id,
               },
@@ -67,11 +68,12 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             handleSelectChatItem &&
               handleSelectChatItem({ chatId: res.data.id });
             socket &&
+              currentUserId &&
               emitMessage(socket, {
                 action: "create",
                 data: {
                   content: methods.watch("message"),
-                  senderId: currentUserId as string,
+                  senderId: +currentUserId,
                   receiverId: selectedChatItem?.secondMemberId,
                   chatSessionId: res.data.id,
                 },
@@ -84,11 +86,12 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           });
       } else {
         socket &&
+          currentUserId &&
           emitMessage(socket, {
             action: "create",
             data: {
               content: methods.watch("message"),
-              senderId: currentUserId as string,
+              senderId: +currentUserId,
               receiverId: selectedChatItem?.secondMemberId,
               chatSessionId: selectedChatItem?.chatId as number,
             },
@@ -105,7 +108,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           <div className="flex gap-7 h-full">
             {chatControlPanelActions.map((action) => (
               <button key={action.label}>
-                <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-50">
+                <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                   {action.icon}
                 </div>
               </button>
@@ -119,13 +122,13 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
 
           {methods.watch("message") ? (
             <button onClick={handleSendMessage}>
-              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-50">
+              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                 <BsFillSendFill size={24} />
               </div>
             </button>
           ) : (
             <button>
-              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-50">
+              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                 <FaMicrophone size={24} />
               </div>
             </button>

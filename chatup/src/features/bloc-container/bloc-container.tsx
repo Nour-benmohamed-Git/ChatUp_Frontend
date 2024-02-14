@@ -17,11 +17,17 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     selectedChatItem,
     handleSelectChatItem,
     socket,
+    userData,
   } = props;
 
   return (
     <>
-      <Header actions={actions} toggleHandlers={toggleHandlers} label={label} />
+      <Header
+        actions={actions}
+        toggleHandlers={toggleHandlers}
+        label={label}
+        userData={userData}
+      />
       {hasSearchField ? (
         <SearchField
           id={"sidebar_search_field"}

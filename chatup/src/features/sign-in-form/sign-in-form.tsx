@@ -13,8 +13,8 @@ import { ImSpinner9 } from "react-icons/im";
 import { z } from "zod";
 
 const schema = z.object({
-  email: z.string().nonempty("Email is required.").email("Email is invalid."),
-  password: z.string().nonempty("Password is invalid."),
+  email: z.string().min(1,"Email is required.").email("Email is invalid."),
+  password: z.string().min(1,"Password is invalid."),
 });
 const SignInForm: FC = () => {
   const [signIn, { isLoading }] = useSignInMutation();

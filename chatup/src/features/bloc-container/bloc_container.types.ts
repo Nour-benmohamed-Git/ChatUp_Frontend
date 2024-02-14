@@ -1,4 +1,5 @@
 import { ChatItem } from "@/types/ChatItem";
+import { UserResponse } from "@/types/User";
 import { Socket } from "socket.io-client";
 
 export interface BlocContainerProps {
@@ -16,7 +17,8 @@ export interface BlocContainerProps {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
   selectedChatItem?: ChatItem;
-  handleSelectChatItem?: (data: ChatItem) => void
+  handleSelectChatItem?: (data: ChatItem) => void;
   label: "chat_list_sidebar" | "chat_conversation";
   socket?: Socket;
+  userData?: UserResponse;
 }

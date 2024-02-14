@@ -3,16 +3,26 @@ import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { FC, memo, useState } from "react";
+import { FC, memo, useRef, useState } from "react";
+import { BiDotsVerticalRounded } from "react-icons/bi";
 import Dialog from "../dialog/dialog";
-import Popover from "../popover/popover";
-import { PopoverPosition } from "../popover/popover.types";
-import { ConversationMessageProps } from "./conversation-message.types";
+import Menu from "../menu/menu";
+import { MenuPosition } from "../menu/menu.types";
+import MessageStatus from "../message-status/messages-status";
+import { MessageProps } from "./message.types";
 
-const ConversationMessage: FC<ConversationMessageProps> = (props) => {
-  const { message, socket } = props;
+const Message: FC<MessageProps> = (props) => {
+  const { message, socket, selectedChatItem } = props;
   const currentUserId = Number(getItem(globals.currentUserId));
+  const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const handleOpenMenu = () => {
+    setIsOpenMenu(true);
+  };
+  const handleCloseMenu = () => {
+    setIsOpenMenu(false);
+  };
   const openModal = () => {
     setIsOpen(true);
   };
@@ -36,11 +46,12 @@ const ConversationMessage: FC<ConversationMessageProps> = (props) => {
       emitMessage(socket, {
         action: "remove",
         data: {
-          content: message.id,
+          id: message.id,
           senderId: currentUserId,
-          chatSessionId: message.chatSessionId,
+          receiverId: selectedChatItem?.secondMemberId,
+          chatSessionId: selectedChatItem?.chatId,
         },
-        room: message.chatSessionId as number,
+        room: selectedChatItem?.chatId,
       });
       closeModal();
     }
@@ -85,23 +96,40 @@ const ConversationMessage: FC<ConversationMessageProps> = (props) => {
               }`}
             >
               <p className="text-sm">{message.content}</p>
-              <span
-                className={`flex flex-row-reverse text-xs mt-2 ${
-                  currentUserId && message.senderId != currentUserId
-                    ? "text-slate-400"
-                    : "text-gold-900"
-                }`}
-              >
-                {formatMessageDate(message.timestamp)}
-              </span>
+              <div className="flex items-center justify-end gap-2">
+                <span
+                  className={`flex flex-row-reverse text-xs mt-2 ${
+                    currentUserId && message.senderId != currentUserId
+                      ? "text-slate-400"
+                      : "text-gold-900"
+                  }`}
+                >
+                  {formatMessageDate(message.timestamp)}
+                </span>
+                <MessageStatus
+                  currentUserId={currentUserId}
+                  message={message}
+                />
+              </div>
             </div>
           </div>
-          <Popover
+          <div
+            ref={buttonRef}
+            role="button"
+            onClick={handleOpenMenu}
+            className="flex justify-center items-center rounded-full h-8 w-8 bg-slate-900 text-gold-900"
+          >
+            <BiDotsVerticalRounded size={20} />
+          </div>
+          <Menu
             actionList={updatedMessageActions}
+            isOpen={isOpenMenu}
+            onClose={handleCloseMenu}
+            buttonRef={buttonRef}
             position={
               currentUserId && message.senderId != currentUserId
-                ? PopoverPosition.BOTTOM_LEFT
-                : PopoverPosition.BOTTOM_RIGHT
+                ? MenuPosition.TOP_RIGHT
+                : MenuPosition.TOP_LEFT
             }
           />
         </div>
@@ -109,4 +137,4 @@ const ConversationMessage: FC<ConversationMessageProps> = (props) => {
     </>
   );
 };
-export default memo(ConversationMessage);
+export default memo(Message);

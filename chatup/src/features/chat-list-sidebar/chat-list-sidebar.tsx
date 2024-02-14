@@ -10,30 +10,27 @@ import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
 import { ChatSessionResponse } from "@/types/ChatSession";
 import { sideBarActions } from "@/utils/constants/action-lists/sidebar-actions";
 import { FC, memo, useEffect, useState } from "react";
+import { toast } from "sonner";
 import BlocContainer from "../bloc-container/bloc-container";
 import ConversationLauncher from "../conversation-launcher/conversation-launcher";
 import MultiConversationLauncher from "../multi-conversation-launcher/multi-conversation-launcher";
 import Profile from "../profile/profile";
 import { ChatListSidebarProps } from "./chat-list-sidebar.types";
-import { toast } from "sonner";
 
 const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
   const { handleSelectChatItem, socket } = props;
-  const { data, isLoading, error } = useGetCurrentUserChatSessionsQuery();
   const {
-    data: currentUserInfo,
-    isLoading: isLoadingCurrentUserInfo,
-    error: currentUserInfoError,
+    data: currentUser,
+    isLoading: isLoadingCurrentUser,
+    error: currentUserError,
   } = useGetCurrentUserQuery();
-
+  const { data, isLoading, error } = useGetCurrentUserChatSessionsQuery();
   const [chatSessions, setChatSessions] = useState<ChatSessionResponse[]>();
   useEffect(() => {
     if (data?.data) {
       setChatSessions(data.data);
     }
-    // console.log("socket in sidebar", socket);
     socket?.on("notification", (chatSessionData) => {
-      console.log("chatSessionData", chatSessionData);
       switch (chatSessionData.type) {
         case "updateChatListOnAddition":
           setChatSessions((prevChatSessions) => {
@@ -44,11 +41,24 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
                   lastMessage: {
                     content: chatSessionData.data.lastMessage.content,
                     timestamp: chatSessionData.data.lastMessage.timestamp,
+                    senderId: chatSessionData.data.lastMessage.senderId,
                   },
                   count: chatSessionData.count,
                 };
               }
-              // If the id doesn't match, return the unchanged chatSession
+              return chatSession;
+            });
+          });
+          break;
+        case "markAsRead":
+          setChatSessions((prevChatSessions) => {
+            return prevChatSessions?.map((chatSession) => {
+              if (chatSession.id === chatSessionData.data.id) {
+                return {
+                  ...chatSession,
+                  count: chatSessionData.count,
+                };
+              }
               return chatSession;
             });
           });
@@ -62,23 +72,22 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
                   lastMessage: {
                     content: chatSessionData.data.lastMessage.content,
                     timestamp: chatSessionData.data.lastMessage.timestamp,
+                    senderId: chatSessionData.removerId,
                   },
                   count: chatSessionData.count,
                 };
               }
-              // If the id doesn't match, return the unchanged chatSession
               return chatSession;
             });
           });
-          toast.success("Message has been successfully removed.");
+          if (chatSessionData.removerId === currentUser?.data?.id) {
+            toast.success("Message has been successfully removed.");
+          }
           break;
-        // Add more cases for other types of notifications if needed
         default:
-          // Handle unknown notification types
           console.log("Unknown notification type:", chatSessionData.type);
       }
     });
-
     socket?.on("disconnect", () => {
       console.log("Disconnected from socket?.IO server");
     });
@@ -124,13 +133,13 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenProfilePanel,
       togglePanel: toggleProfilePanel,
       panelRef: ProfilePanelRef,
-      children: (
+      children: isOpenProfilePanel ? (
         <Profile
-          data={currentUserInfo}
-          isLoading={isLoadingCurrentUserInfo}
-          error={currentUserInfoError}
+          data={currentUser?.data}
+          isLoading={isLoadingCurrentUser}
+          error={currentUserError}
         />
-      ),
+      ) : null,
       fromSide: "left",
       title: "Profile",
     },
@@ -138,13 +147,13 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenNewChatPanel,
       togglePanel: toggleNewChatPanel,
       panelRef: newChatPanelRef,
-      children: (
+      children: isOpenNewChatPanel ? (
         <ConversationLauncher
           label="new_chat"
           handleSelectChatItem={handleSelectChatItem}
           togglePanel={toggleNewChatPanel}
         />
-      ),
+      ) : null,
       fromSide: "left",
       title: "New chat",
     },
@@ -152,12 +161,12 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
       isOpen: isOpenNewGroupPanel,
       togglePanel: toggleNewGroupPanel,
       panelRef: newGroupPanelRef,
-      children: (
+      children: isOpenNewGroupPanel ? (
         <MultiConversationLauncher
           label="new_group"
           togglePanel={toggleNewGroupPanel}
         />
-      ),
+      ) : null,
       fromSide: "left",
       title: "New group",
     },
@@ -190,6 +199,7 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
         height="calc(100% - 7.5rem)"
         toggleHandlers={toggleHandlers}
         label="chat_list_sidebar"
+        userData={currentUser?.data}
       >
         {content}
       </BlocContainer>

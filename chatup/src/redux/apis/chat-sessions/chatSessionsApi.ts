@@ -30,7 +30,7 @@ export const chatSessionsApi = createApi({
             ]
           : [{ type: "ChatSessions", id: "LIST" }],
     }),
-    getMessageByChatSessionId: build.query<MessagesResponse, number>({
+    getMessagesByChatSessionId: build.query<MessagesResponse, number>({
       query: (chatSessionId) =>
         endpoints.getMessagesByChatSession.replace("id", `${chatSessionId}`),
       providesTags: (result, _error, _args) =>
@@ -99,6 +99,6 @@ export const {
   useGetChatSessionByParticipantsMutation,
   useAddChatSessionMutation,
   useUpdateChatSessionMutation,
-  useGetMessageByChatSessionIdQuery,
+  useGetMessagesByChatSessionIdQuery,
   useDeleteChatSessionMutation,
 } = chatSessionsApi;

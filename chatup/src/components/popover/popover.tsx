@@ -113,7 +113,7 @@ const Popover: React.FC<PopoverProps> = (props) => {
                     togglePopover();
                     item.onClick();
                   }}
-                  className="flex items-center gap-4 text-gold-900 rounded-full hover:text-gold-50"
+                  className="flex items-center gap-4 text-gold-900 rounded-full hover:text-gold-300"
                 >
                   <div>{item.icon}</div>
                   <div>{item.name}</div>

@@ -14,14 +14,16 @@ export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
 export const emitMessage = (
   socket: Socket,
   messageData: {
-    action: "create" | "remove" | "update";
+    action: "create" | "remove" | "markAsRead";
     data: {
-      content: string | number;
-      senderId?: string | number;
+      id?: number;
+      content?: string | number;
+      senderId?: number;
       receiverId?: number;
       chatSessionId?: number;
     };
     room: number;
+    messagesIds?: number[];
   }
 ) => {
   socket?.emit("sendMessage", messageData);

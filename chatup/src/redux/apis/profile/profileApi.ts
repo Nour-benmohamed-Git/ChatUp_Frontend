@@ -5,20 +5,27 @@ import { endpoints } from "@/utils/constants/endpoints";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const profileApi = createApi({
-    reducerPath: "profileApi",
+  reducerPath: "profileApi",
   baseQuery: fetchBaseQuery({
     baseUrl: environment.baseUrl,
     prepareHeaders: prepareHeaders,
   }),
+  tagTypes: ["Profile"],
   endpoints: (build) => ({
-    getCurrentUser: build.query<UserResponse, void>({
-      query() {
-        return {
-          url: endpoints.currentUser,
-        };
-      },
+    getCurrentUser: build.query<{ data: UserResponse }, void>({
+      query: () => endpoints.currentUser,
+      providesTags: ["Profile"],
+    }),
+    editCurrentUser: build.mutation({
+      query: (body: any) => ({
+        url: endpoints.currentUser,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: () => ["Profile"],
     }),
   }),
 });
 
-export const { useGetCurrentUserQuery } = profileApi;
+export const { useGetCurrentUserQuery, useEditCurrentUserMutation } =
+  profileApi;

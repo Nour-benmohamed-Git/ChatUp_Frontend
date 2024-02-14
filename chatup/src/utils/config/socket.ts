@@ -2,15 +2,14 @@ import io, { Socket } from "socket.io-client";
 import { globals } from "../constants/globals";
 import { getItem } from "../helpers/cookies-helpers";
 import environment from "./environment";
+let socket: Socket;
+const connectToSocket = (token: string) => {
+  //  const token = getItem(globals.tokenKey);
 
-export const connectToSocket = (): Socket => {
-  const token = getItem(globals.tokenKey);
-
-  const socket = io(`${environment.wsBaseUrl}`, {
+  socket = io(`${environment.wsBaseUrl}`, {
     auth: {
       token: token,
     },
   });
-
-  return socket;
 };
+export { socket, connectToSocket };

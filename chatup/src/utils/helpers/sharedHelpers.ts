@@ -14,9 +14,7 @@ export function getChatSessionTitle(participantsData: {
 }
 export function getOtherUserId(participantsData: { [userId: string]: string }) {
   const currentUserId = getItem(globals.currentUserId) as string;
-  for (const userId in participantsData) {
-    if (userId !== currentUserId) {
-      return parseInt(userId, 10);
-    }
-  }
+  const userIds = Object.keys(participantsData);
+  const otherUserId = userIds.find((userId) => userId !== currentUserId);
+  return userIds.length === 2 ? Number(otherUserId) : Number(currentUserId);
 }
