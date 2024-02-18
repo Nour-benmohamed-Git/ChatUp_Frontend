@@ -4,4 +4,5 @@ export interface PanelContentWrapperProps {
   hasSearchField?: boolean;
   paddingClass?: string;
   label: string;
+  setParamToSearch: (search: string) => void;
 }

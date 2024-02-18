@@ -2,5 +2,5 @@ export interface SearchFieldProps {
   id: string;
   name: string;
   placeholder: string;
-  autoComplete: string;
+  setParamToSearch?: (search: string) => void;
 }

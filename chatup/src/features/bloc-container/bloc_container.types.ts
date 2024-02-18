@@ -21,4 +21,10 @@ export interface BlocContainerProps {
   label: "chat_list_sidebar" | "chat_conversation";
   socket?: Socket;
   userData?: UserResponse;
+  menuActionList: {
+    onClick: () => void;
+    label: string;
+    name: string;
+    icon: JSX.Element;
+  }[];
 }

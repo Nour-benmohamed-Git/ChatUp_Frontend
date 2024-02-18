@@ -1,5 +1,5 @@
 import Logo from "@/components/logo/logo";
-import React, { FC } from "react";
+import { FC } from "react";
 
 const LandingPage: FC = () => {
   return (

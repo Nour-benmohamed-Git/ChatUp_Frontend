@@ -4,8 +4,7 @@ import Loader from "@/components/loader/loader";
 import ProfileListItem from "@/components/profile-list-item/profile-list-item";
 import ProfilePicture from "@/components/profile-picture/profile-picture";
 import {
-  useEditCurrentUserMutation,
-  useGetCurrentUserQuery,
+  useEditCurrentUserMutation
 } from "@/redux/apis/profile/profileApi";
 import { UserUpdateRequest } from "@/types/User";
 import { profileFields } from "@/utils/constants/profile-fields";

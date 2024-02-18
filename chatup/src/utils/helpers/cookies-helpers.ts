@@ -30,3 +30,9 @@ export function deleteItem(key: string): void {
     console.error("Error deleting cookie", error);
   }
 }
+export const clearCookies = () => {
+  const cookies = Cookies.get();
+  Object.keys(cookies).forEach((cookieName) => {
+    Cookies.remove(cookieName);
+  });
+};

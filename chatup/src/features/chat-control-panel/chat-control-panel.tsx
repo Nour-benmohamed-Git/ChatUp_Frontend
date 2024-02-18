@@ -1,4 +1,5 @@
 import MessageField from "@/components/message-field/message-field";
+import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
 import {
   useAddChatSessionMutation,
   useUpdateChatSessionMutation,
@@ -8,7 +9,7 @@ import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC } from "react";
+import { FC, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
@@ -16,10 +17,11 @@ import { z } from "zod";
 import { ChatControlPanelProps } from "./chat-control-panel.types";
 
 const schema = z.object({
-  message: z.string().nonempty("message is required."),
+  message: z.string().min(1, "message is required."),
 });
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { selectedChatItem, handleSelectChatItem, socket } = props;
+
   const [addChatSession] = useAddChatSessionMutation();
   const [updateChatSession] = useUpdateChatSessionMutation();
   const methods = useForm({
@@ -28,7 +30,8 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     },
     resolver: zodResolver(schema),
   });
-
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  useAutosizeTextArea(textAreaRef.current, methods.watch("message"));
   const handleSendMessage = () => {
     if (!methods.watch("message")) {
       return;
@@ -103,8 +106,8 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   };
   return (
     <FormProvider {...methods}>
-      <div className="sticky bottom-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5">
-        <div className="flex items-center justify-center h-full gap-5">
+      <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
+        <div className="flex items-center justify-center h-full w-full gap-5">
           <div className="flex gap-7 h-full">
             {chatControlPanelActions.map((action) => (
               <button key={action.label}>
@@ -118,6 +121,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             id="message"
             name="message"
             placeholder="Type your message"
+            messageFieldRef={textAreaRef}
           />
 
           {methods.watch("message") ? (

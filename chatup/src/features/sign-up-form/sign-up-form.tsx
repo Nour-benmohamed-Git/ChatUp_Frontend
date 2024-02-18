@@ -6,17 +6,17 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const schema = z.object({
-  firstName: z.string().nonempty("First Name is required."),
-  lastName: z.string().nonempty("Last Name is required."),
-  email: z.string().nonempty("Email is required.").email("Email is invalid."),
-  phone: z.string().nonempty("Phone number is required."),
+  firstName: z.string().min(1, "First Name is required."),
+  lastName: z.string().min(1, "Last Name is required."),
+  email: z.string().min(1, "Email is required.").email("Email is invalid."),
+  phone: z.string().min(1, "Phone number is required."),
   password: z.string().min(6, "Password must be at least 6 characters."),
   //   confirmPassword: z
   //     .string()
   //     .refine((data) => data === methods.watch("password"), {
   //       message: "Passwords do not match",
   //     }),
-  birthDate: z.string().nonempty("Birth Date is required."),
+  birthDate: z.string().min(1, "Birth Date is required."),
 });
 const SignUpForm: FC = () => {
   const methods = useForm({

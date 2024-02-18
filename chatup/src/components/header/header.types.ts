@@ -12,4 +12,10 @@ export interface HeaderProps {
   conversationData?: string;
   label: "chat_list_sidebar" | "chat_conversation";
   userData?: UserResponse;
+  menuActionList: {
+    onClick: () => void;
+    label: string;
+    name: string;
+    icon: JSX.Element;
+  }[];
 }

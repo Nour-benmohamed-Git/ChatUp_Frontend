@@ -1,5 +1,5 @@
 export interface MessageResponse {
-  id: number;
+  id?: number;
   content: string;
   senderId: number;
   timestamp?: number;

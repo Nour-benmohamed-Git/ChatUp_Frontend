@@ -6,22 +6,19 @@ import io from "socket.io-client";
 
 const useSocket = () => {
   const [socket, setSocket] = useState<any>();
-  const createAuthenticatedSocket = () => {
-    const token = getItem(globals.tokenKey);
-    const socket = io(`${environment.wsBaseUrl}`, {
-      // autoConnect: false,
-      auth: {
-        token: token,
-      },
-    });
-    return socket;
-  };
-
   useEffect(() => {
-    const socketInstance = createAuthenticatedSocket();
-    setSocket(socketInstance);
-  }, []);
-
+    const token = getItem(globals.tokenKey);
+    if (token && !socket) {
+      const socketInstance = io(`${environment.wsBaseUrl}`, {
+        autoConnect: false,
+        auth: {
+          token: token,
+        },
+      });
+      socketInstance.connect();
+      setSocket(socketInstance);
+    }
+  }, [socket]);
   return socket;
 };
 

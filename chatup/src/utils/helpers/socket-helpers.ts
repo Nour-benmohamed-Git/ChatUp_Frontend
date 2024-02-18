@@ -23,7 +23,6 @@ export const emitMessage = (
       chatSessionId?: number;
     };
     room: number;
-    messagesIds?: number[];
   }
 ) => {
   socket?.emit("sendMessage", messageData);

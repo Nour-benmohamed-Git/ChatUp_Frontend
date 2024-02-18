@@ -1,4 +1,4 @@
-import { MessageActions } from "@/utils/constants/action-lists/message-actions";
+import { messageActions } from "@/utils/constants/action-lists/message-actions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
@@ -36,7 +36,7 @@ const Message: FC<MessageProps> = (props) => {
     remove: openModal,
   };
 
-  const updatedMessageActions = MessageActions.map((action) => ({
+  const updatedmessageActions = messageActions.map((action) => ({
     ...action,
     onClick: onClickFunctions[action.label],
   }));
@@ -122,7 +122,7 @@ const Message: FC<MessageProps> = (props) => {
             <BiDotsVerticalRounded size={20} />
           </div>
           <Menu
-            actionList={updatedMessageActions}
+            actionList={updatedmessageActions}
             isOpen={isOpenMenu}
             onClose={handleCloseMenu}
             buttonRef={buttonRef}

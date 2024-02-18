@@ -18,6 +18,7 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     handleSelectChatItem,
     socket,
     userData,
+    menuActionList,
   } = props;
 
   return (
@@ -27,13 +28,13 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
         toggleHandlers={toggleHandlers}
         label={label}
         userData={userData}
+        menuActionList={menuActionList}
       />
       {hasSearchField ? (
         <SearchField
           id={"sidebar_search_field"}
           name={"search_field"}
           placeholder={"Search"}
-          autoComplete={"search..."}
         />
       ) : null}
       <div

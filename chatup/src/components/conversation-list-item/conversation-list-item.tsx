@@ -1,5 +1,5 @@
 import { useDeleteChatSessionMutation } from "@/redux/apis/chat-sessions/chatSessionsApi";
-import { ChatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
+import { chatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import {
   getChatSessionTitle,
@@ -15,7 +15,7 @@ import { ConversationListItemProps } from "./conversation-list-item.types";
 import { MenuPosition } from "../menu/menu.types";
 
 const ConversationListItem: FC<ConversationListItemProps> = (props) => {
-  const { handleSelectChatItem, chatSession } = props;
+  const { handleSelectChatItem, selectedChatItem, chatSession } = props;
   const buttonRef = useRef<HTMLDivElement>(null);
   const [removeChatSession] = useDeleteChatSessionMutation();
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +36,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
     rename: () => console.log("edit"),
     remove: openModal,
   };
-  const updatedMessageActions = ChatItemActions.map((action) => ({
+  const updatedmessageActions = chatItemActions.map((action) => ({
     ...action,
     onClick: onClickFunctions[action.label],
   }));
@@ -65,7 +65,11 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
       )}
       <div
         role="button"
-        className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"
+        className={`flex items-center rounded-md gap-4 m-2 px-2 py-3 ${
+          chatSession.id === selectedChatItem.chatId
+            ? "bg-gray-800"
+            : "bg-gray-900"
+        } hover:bg-gray-800`}
         onClick={() =>
           handleSelectChatItem({
             chatId: chatSession.id,
@@ -100,7 +104,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
                 <BiDotsVerticalRounded size={20} />
               </div>
               <Menu
-                actionList={updatedMessageActions}
+                actionList={updatedmessageActions}
                 isOpen={isOpenMenu}
                 onClose={handleCloseMenu}
                 buttonRef={buttonRef}

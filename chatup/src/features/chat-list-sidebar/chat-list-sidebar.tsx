@@ -8,7 +8,13 @@ import usePanel from "@/hooks/use-panel";
 import { useGetCurrentUserChatSessionsQuery } from "@/redux/apis/chat-sessions/chatSessionsApi";
 import { useGetCurrentUserQuery } from "@/redux/apis/profile/profileApi";
 import { ChatSessionResponse } from "@/types/ChatSession";
-import { sideBarActions } from "@/utils/constants/action-lists/sidebar-actions";
+import {
+  sideBarActions,
+  sideBarMenuActions,
+} from "@/utils/constants/action-lists/sidebar-actions";
+import { paths } from "@/utils/constants/paths";
+import { clearCookies } from "@/utils/helpers/cookies-helpers";
+import { useRouter } from "next/navigation";
 import { FC, memo, useEffect, useState } from "react";
 import { toast } from "sonner";
 import BlocContainer from "../bloc-container/bloc-container";
@@ -16,86 +22,115 @@ import ConversationLauncher from "../conversation-launcher/conversation-launcher
 import MultiConversationLauncher from "../multi-conversation-launcher/multi-conversation-launcher";
 import Profile from "../profile/profile";
 import { ChatListSidebarProps } from "./chat-list-sidebar.types";
-
 const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
-  const { handleSelectChatItem, socket } = props;
+  const { handleSelectChatItem, selectedChatItem, socket } = props;
+  const router = useRouter();
+  const logout = () => {
+    clearCookies();
+    router.replace(paths.authRoutes.signIn);
+  };
+  const onClickFunctions: { [key: string]: () => void } = {
+    logout: logout,
+  };
+
+  const updatedSideBarMenuActions = sideBarMenuActions.map((action) => ({
+    ...action,
+    onClick: onClickFunctions[action.label],
+  }));
   const {
     data: currentUser,
     isLoading: isLoadingCurrentUser,
     error: currentUserError,
   } = useGetCurrentUserQuery();
   const { data, isLoading, error } = useGetCurrentUserChatSessionsQuery();
-  const [chatSessions, setChatSessions] = useState<ChatSessionResponse[]>();
+  const [chatSessions, setChatSessions] = useState<ChatSessionResponse[]>([]);
+
   useEffect(() => {
     if (data?.data) {
-      setChatSessions(data.data);
+      setChatSessions(data?.data);
     }
-    socket?.on("notification", (chatSessionData) => {
-      switch (chatSessionData.type) {
-        case "updateChatListOnAddition":
-          setChatSessions((prevChatSessions) => {
-            return prevChatSessions?.map((chatSession) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  lastMessage: {
-                    content: chatSessionData.data.lastMessage.content,
-                    timestamp: chatSessionData.data.lastMessage.timestamp,
-                    senderId: chatSessionData.data.lastMessage.senderId,
-                  },
-                  count: chatSessionData.count,
-                };
-              }
-              return chatSession;
+  }, [data?.data]);
+
+  useEffect(() => {
+    socket &&
+      socket.on("notification", (chatSessionData) => {
+        switch (chatSessionData.type) {
+          case "updateChatListOnAddition":
+            setChatSessions((prevChatSessions) => {
+              return prevChatSessions.map((chatSession) => {
+                if (chatSession.id !== chatSessionData.data.id) {
+                  console.log("first");
+                  return {
+                    ...chatSessionData.data,
+                    participantsData: chatSessionData.participantsData,
+                    count: chatSessionData.count,
+                  };
+                } else if (chatSession.id === chatSessionData.data.id) {
+                  console.log("second");
+                  return {
+                    ...chatSession,
+                    lastMessage: {
+                      content: chatSessionData.data.lastMessage.content,
+                      timestamp: chatSessionData.data.lastMessage.timestamp,
+                      senderId: chatSessionData.data.lastMessage.senderId,
+                    },
+                    count: chatSessionData.count,
+                  };
+                } else {
+                  console.log("third");
+                  return chatSession;
+                }
+              });
             });
-          });
-          break;
-        case "markAsRead":
-          setChatSessions((prevChatSessions) => {
-            return prevChatSessions?.map((chatSession) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  count: chatSessionData.count,
-                };
-              }
-              return chatSession;
+
+            break;
+          case "markAsRead":
+            setChatSessions((prevChatSessions) => {
+              return prevChatSessions?.map((chatSession) => {
+                if (chatSession.id === chatSessionData.data.id) {
+                  return {
+                    ...chatSession,
+                    count: chatSessionData.count,
+                  };
+                }
+                return chatSession;
+              });
             });
-          });
-          break;
-        case "updateChatListOnRemoval":
-          setChatSessions((prevChatSessions) => {
-            return prevChatSessions?.map((chatSession) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  lastMessage: {
-                    content: chatSessionData.data.lastMessage.content,
-                    timestamp: chatSessionData.data.lastMessage.timestamp,
-                    senderId: chatSessionData.removerId,
-                  },
-                  count: chatSessionData.count,
-                };
-              }
-              return chatSession;
+            break;
+          case "updateChatListOnRemoval":
+            setChatSessions((prevChatSessions) => {
+              return prevChatSessions?.map((chatSession) => {
+                if (chatSession.id === chatSessionData.data.id) {
+                  return {
+                    ...chatSession,
+                    lastMessage: {
+                      content: chatSessionData.data.lastMessage.content,
+                      timestamp: chatSessionData.data.lastMessage.timestamp,
+                      senderId: chatSessionData.removerId,
+                    },
+                    count: chatSessionData.count,
+                  };
+                }
+                return chatSession;
+              });
             });
-          });
-          if (chatSessionData.removerId === currentUser?.data?.id) {
-            toast.success("Message has been successfully removed.");
-          }
-          break;
-        default:
-          console.log("Unknown notification type:", chatSessionData.type);
-      }
-    });
-    socket?.on("disconnect", () => {
-      console.log("Disconnected from socket?.IO server");
-    });
+            if (chatSessionData.removerId === currentUser?.data?.id) {
+              toast.success("Message has been successfully removed.");
+            }
+            break;
+          default:
+            console.log("Unknown notification type:", chatSessionData.type);
+        }
+      });
+
+    // socket?.on("disconnect", () => {
+    //   console.log("Disconnected from socket?.IO server");
+    // });
     // return () => {
     //   socket?.disconnect();
     //   socket?.off("notification");
     // };
-  }, [data?.data]);
+  }, [socket]);
 
   let content = null;
   if (isLoading) {
@@ -107,8 +142,9 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
   } else {
     content = chatSessions?.map?.((chatSession) => (
       <ConversationListItem
-        handleSelectChatItem={handleSelectChatItem}
         key={chatSession.id}
+        handleSelectChatItem={handleSelectChatItem}
+        selectedChatItem={selectedChatItem}
         chatSession={chatSession}
       />
     ));
@@ -200,6 +236,7 @@ const ChatListSidebar: FC<ChatListSidebarProps> = (props) => {
         toggleHandlers={toggleHandlers}
         label="chat_list_sidebar"
         userData={currentUser?.data}
+        menuActionList={updatedSideBarMenuActions}
       >
         {content}
       </BlocContainer>

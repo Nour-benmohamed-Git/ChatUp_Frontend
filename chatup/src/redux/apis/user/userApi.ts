@@ -1,4 +1,4 @@
-import { UsersResponse } from "@/types/User";
+import { UserResponse, UsersResponse } from "@/types/User";
 import environment from "@/utils/config/environment";
 import { prepareHeaders } from "@/utils/config/rtk-prepare-headers";
 import { endpoints } from "@/utils/constants/endpoints";
@@ -11,14 +11,35 @@ export const userApi = createApi({
     prepareHeaders: prepareHeaders,
   }),
   endpoints: (build) => ({
-    getUsers: build.query<UsersResponse, void>({
-      query() {
+    getUsers: build.query<
+      UsersResponse,
+      {
+        page: number;
+        offset: number;
+        search: string;
+        order?: string;
+      }
+    >({
+      query(params: {
+        page: number;
+        offset: number;
+        search: string;
+        order?: string;
+      }) {
         return {
           url: endpoints.getUsers,
+          params: { ...params },
+        };
+      },
+    }),
+    getUserById: build.query<{ data: UserResponse }, number>({
+      query(userId: number) {
+        return {
+          url: `${endpoints.getUsers}/${userId}`,
         };
       },
     }),
   }),
 });
 
-export const { useGetUsersQuery } = userApi;
+export const { useGetUsersQuery, useGetUserByIdQuery } = userApi;

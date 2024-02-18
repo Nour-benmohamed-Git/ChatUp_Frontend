@@ -1,14 +1,34 @@
 import SlidingPanel from "@/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/components/sliding-panel/sliding-panel.types";
 import usePanel from "@/hooks/use-panel";
-import { conversationActions } from "@/utils/constants/action-lists/conversation-actions";
+import {
+  conversationActions,
+  conversationMenuActions,
+} from "@/utils/constants/action-lists/conversation-actions";
 import { FC, memo } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
 import MessageListView from "../message-list-view/message-list-view";
 import { ChatConversationProps } from "./chat-conversation.types";
+import { useGetUserByIdQuery } from "@/redux/apis/user/userApi";
+import { useGetMessagesByChatSessionIdQuery } from "@/redux/apis/chat-sessions/chatSessionsApi";
 
 const ChatConversation: FC<ChatConversationProps> = (props) => {
   const { selectedChatItem, handleSelectChatItem, socket } = props;
+  const { data, isLoading, error } = useGetUserByIdQuery(
+    selectedChatItem.secondMemberId as number
+  );
+  const onClickFunctions: { [key: string]: () => void } = {
+    closeConversation: () => console.log("closeConversation"),
+    removeConversation: () => console.log("removeConversation"),
+    block: () => console.log("block"),
+  };
+
+  const updatedConversationMenuActions = conversationMenuActions.map(
+    (action) => ({
+      ...action,
+      onClick: onClickFunctions[action.label],
+    })
+  );
   const {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
@@ -66,7 +86,8 @@ const ChatConversation: FC<ChatConversationProps> = (props) => {
         selectedChatItem={selectedChatItem}
         handleSelectChatItem={handleSelectChatItem}
         socket={socket}
-        // userData={}
+        menuActionList={updatedConversationMenuActions}
+        userData={data?.data}
       >
         <MessageListView
           selectedChatItem={selectedChatItem}

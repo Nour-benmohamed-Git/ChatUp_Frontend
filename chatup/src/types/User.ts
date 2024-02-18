@@ -9,7 +9,7 @@ export interface UserResponse {
   profileInfo?: string;
   profilePicture?: string;
 }
-export type UsersResponse = { data: UserResponse[] };
+export type UsersResponse = { data: UserResponse[]; total: number };
 export interface UserUpdateResponse {
   id: number;
   email: string;

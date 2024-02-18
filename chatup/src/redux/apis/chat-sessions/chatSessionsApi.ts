@@ -11,7 +11,7 @@ export const chatSessionsApi = createApi({
     baseUrl: environment.baseUrl,
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["ChatSessions", "Messages"],
+  tagTypes: ["ChatSessions"],
   endpoints: (build) => ({
     getCurrentUserChatSessions: build.query<ChatSessionsResponse, void>({
       query() {
@@ -33,16 +33,6 @@ export const chatSessionsApi = createApi({
     getMessagesByChatSessionId: build.query<MessagesResponse, number>({
       query: (chatSessionId) =>
         endpoints.getMessagesByChatSession.replace("id", `${chatSessionId}`),
-      providesTags: (result, _error, _args) =>
-        result
-          ? [
-              ...result.data.map(({ id }) => ({
-                type: "Messages" as const,
-                id,
-              })),
-              { type: "Messages", id: "LIST" },
-            ]
-          : [{ type: "Messages", id: "LIST" }],
     }),
     getChatSessionByParticipants: build.mutation<
       { data: ChatSessionResponse },

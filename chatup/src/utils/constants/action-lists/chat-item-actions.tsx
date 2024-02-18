@@ -1,15 +1,15 @@
 import { FaSquarePen } from "react-icons/fa6";
 import { IoMdTrash } from "react-icons/io";
 
-export const ChatItemActions = [
+export const chatItemActions = [
   {
     label: "rename",
     name: "Rename",
-    icon: <FaSquarePen size={24} />,
+    icon: <FaSquarePen size={22} />,
   },
   {
     label: "remove",
     name: "Remove",
-    icon: <IoMdTrash size={24} />,
+    icon: <IoMdTrash size={22} />,
   },
 ];
