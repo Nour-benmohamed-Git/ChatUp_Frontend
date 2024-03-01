@@ -1,6 +1,6 @@
-import { MessageResponse } from "@/types/Message";
+import { Message } from "@/types/Message";
 
 export interface MessageStatusProps {
   currentUserId: number;
-  message: MessageResponse;
+  message: Message;
 }

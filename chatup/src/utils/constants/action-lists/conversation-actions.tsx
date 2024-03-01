@@ -1,6 +1,5 @@
-import { BiBlock } from "react-icons/bi";
 import { IoMdCloseCircle, IoMdTrash } from "react-icons/io";
-import { MdCall, MdSearch } from "react-icons/md";
+import { MdAppBlocking, MdCall, MdSearch } from "react-icons/md";
 
 export const conversationActions = [
   {
@@ -28,6 +27,6 @@ export const conversationMenuActions = [
   {
     label: "block",
     name: "Block",
-    icon: <BiBlock size={22} />,
+    icon: <MdAppBlocking size={22} />,
   },
 ];

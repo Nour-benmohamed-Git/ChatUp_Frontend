@@ -1,9 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { verifyToken } from "./app/_actions/verify-token";
 import { globals } from "./utils/constants/globals";
 import { paths } from "./utils/constants/paths";
-import { verifyToken } from "./utils/helpers/auth-helpers";
-import { deleteItem } from "./utils/helpers/cookies-helpers";
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get(globals.tokenKey);
@@ -12,7 +11,6 @@ export async function middleware(request: NextRequest) {
     Object.values(paths.protectedRoutes).includes(request.nextUrl.pathname) &&
     !isValidToken
   ) {
-    deleteItem(globals.tokenKey);
     return NextResponse.redirect(
       new URL(paths.authRoutes.signIn, request.nextUrl)
     );

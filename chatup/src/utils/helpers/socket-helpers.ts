@@ -1,10 +1,11 @@
+import { Message } from "@/types/Message";
 import { Socket } from "socket.io-client";
 
 export const handleJoinPrivateRoom = (
   socket: Socket,
-  chatSessionId: number
+  conversationId: number
 ): void => {
-  socket.emit("joinPrivateRoom", chatSessionId);
+  socket.emit("joinPrivateRoom", conversationId);
 };
 
 export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
@@ -14,16 +15,15 @@ export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
 export const emitMessage = (
   socket: Socket,
   messageData: {
-    action: "create" | "remove" | "markAsRead";
-    data: {
-      id?: number;
-      content?: string | number;
-      senderId?: number;
-      receiverId?: number;
-      chatSessionId?: number;
-    };
-    room: number;
+    action: "create" | "hardRemove" | "markAsRead";
+    message: Message;
+    participantsData?: { [userId: string]: string };
   }
 ) => {
-  socket?.emit("sendMessage", messageData);
+  const { participantsData, ...rest } = messageData;
+  if (participantsData) {
+    socket?.emit("sendMessage", messageData);
+  } else {
+    socket?.emit("sendMessage", rest);
+  }
 };

@@ -1,18 +1,22 @@
+import { addConversation } from "@/app/_actions/add-conversation";
+import { addMessage } from "@/app/_actions/add-message";
+import { updateConversation } from "@/app/_actions/update-conversation";
+import EmojiPicker from "@/components/emoji-picker/emoji-picker";
 import MessageField from "@/components/message-field/message-field";
-import useAutosizeTextArea from "@/hooks/useAutosizeTextArea";
-import {
-  useAddChatSessionMutation,
-  useUpdateChatSessionMutation,
-} from "@/redux/apis/chat-sessions/chatSessionsApi";
+import { useSocket } from "@/context/socket-context";
+import useAutoSizeTextArea from "@/hooks/use-autosize-text-area";
 import { chatControlPanelActions } from "@/utils/constants/action-lists/chat-control-panel-actions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useRef } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { FC, memo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
+import { toast } from "sonner";
 import { z } from "zod";
 import { ChatControlPanelProps } from "./chat-control-panel.types";
 
@@ -20,10 +24,11 @@ const schema = z.object({
   message: z.string().min(1, "message is required."),
 });
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
-  const { selectedChatItem, handleSelectChatItem, socket } = props;
-
-  const [addChatSession] = useAddChatSessionMutation();
-  const [updateChatSession] = useUpdateChatSessionMutation();
+  const { conversationRelatedData } = props;
+  const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { socket } = useSocket();
+  const router = useRouter();
   const methods = useForm({
     defaultValues: {
       message: "",
@@ -31,76 +36,77 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     resolver: zodResolver(schema),
   });
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  useAutosizeTextArea(textAreaRef.current, methods.watch("message"));
-  const handleSendMessage = () => {
+  useAutoSizeTextArea(textAreaRef.current, methods.watch("message"));
+  const openEmojiPicker = () => {
+    setShowEmojiPicker(true);
+  };
+  const closeEmojiPicker = () => {
+    setShowEmojiPicker(false);
+  };
+  const onClickFunctions: { [key: string]: () => void } = {
+    emojiPicker: () => openEmojiPicker(),
+    addFiles: () => console.log("add files"),
+  };
+
+  const updatedChatControlPanelActions = chatControlPanelActions.map(
+    (action) => ({
+      ...action,
+      onClick: onClickFunctions[action.label],
+    })
+  );
+  const createMessage = async (
+    chatSessionId: number,
+    participantsData?: { [userId: string]: string }
+  ) => {
+    await addMessage({
+      content: methods.watch("message"),
+      senderId: currentUserId,
+      receiverId: conversationRelatedData?.secondMemberId as number,
+      chatSessionId,
+    })
+      .then((res) => {
+        socket &&
+          emitMessage(socket, {
+            action: "create",
+            message: res?.data,
+            participantsData: participantsData,
+          });
+        methods.setValue("message", "");
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.success(error);
+      });
+  };
+  const handleSendMessage = async () => {
     if (!methods.watch("message")) {
       return;
     }
-    const currentUserId = getItem(globals.currentUserId);
-    if (!selectedChatItem?.chatId) {
-      addChatSession({
-        secondMemberId: selectedChatItem?.secondMemberId as number,
-      })
-        .unwrap()
-        .then((res) => {
-          handleSelectChatItem && handleSelectChatItem({ chatId: res.data.id });
-          socket &&
-            currentUserId &&
-            emitMessage(socket, {
-              action: "create",
-              data: {
-                content: methods.watch("message"),
-                senderId: +currentUserId,
-                receiverId: selectedChatItem?.secondMemberId,
-                chatSessionId: res.data.id,
-              },
-              room: res.data.id,
-            });
-          methods.setValue("message", "");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    if (!conversationRelatedData.conversationId) {
+      const conversation = await addConversation({
+        secondMemberId: conversationRelatedData.secondMemberId as number,
+      });
+      if (conversation && conversationRelatedData?.secondMemberId) {
+        createMessage(
+          conversation.data.id,
+          conversation?.data.participantsData
+        );
+        const queryParams = `deletedByCurrentUser=${
+          conversation.data.deletedByCurrentUser
+        }&secondMemberId=${conversationRelatedData?.secondMemberId as number}`;
+        router.replace(`/chat/${conversation.data.id}?${queryParams}`);
+      }
     } else {
-      if (selectedChatItem?.deletedByCurrentUser === true) {
-        updateChatSession({
-          id: selectedChatItem?.chatId,
-        })
-          .unwrap()
-          .then((res) => {
-            handleSelectChatItem &&
-              handleSelectChatItem({ chatId: res.data.id });
-            socket &&
-              currentUserId &&
-              emitMessage(socket, {
-                action: "create",
-                data: {
-                  content: methods.watch("message"),
-                  senderId: +currentUserId,
-                  receiverId: selectedChatItem?.secondMemberId,
-                  chatSessionId: res.data.id,
-                },
-                room: res.data.id,
-              });
-            methods.setValue("message", "");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      if (
+        conversationRelatedData?.conversationId &&
+        conversationRelatedData?.deletedByCurrentUser
+      ) {
+        const conversation = await updateConversation(
+          conversationRelatedData.conversationId as number
+        );
+        createMessage(conversation.data.id);
       } else {
-        socket &&
-          currentUserId &&
-          emitMessage(socket, {
-            action: "create",
-            data: {
-              content: methods.watch("message"),
-              senderId: +currentUserId,
-              receiverId: selectedChatItem?.secondMemberId,
-              chatSessionId: selectedChatItem?.chatId as number,
-            },
-            room: selectedChatItem?.chatId as number,
-          });
-        methods.setValue("message", "");
+        createMessage(conversationRelatedData.conversationId as number);
       }
     }
   };
@@ -108,9 +114,20 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     <FormProvider {...methods}>
       <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
         <div className="flex items-center justify-center h-full w-full gap-5">
+          {showEmojiPicker ? (
+            <motion.div
+              initial="closed"
+              animate={showEmojiPicker ? "open" : "closed"}
+              variants={{ open: { y: 0 }, closed: { y: "100%" } }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
+              className={"absolute bottom-full left-0"}
+            >
+              <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
+            </motion.div>
+          ) : null}
           <div className="flex gap-7 h-full">
-            {chatControlPanelActions.map((action) => (
-              <button key={action.label}>
+            {updatedChatControlPanelActions.map((action) => (
+              <button key={action.label} onClick={action.onClick}>
                 <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                   {action.icon}
                 </div>
@@ -123,7 +140,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             placeholder="Type your message"
             messageFieldRef={textAreaRef}
           />
-
           {methods.watch("message") ? (
             <button onClick={handleSendMessage}>
               <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
@@ -142,4 +158,4 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     </FormProvider>
   );
 };
-export default ChatControlPanel;
+export default memo(ChatControlPanel);

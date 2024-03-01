@@ -1,5 +1,6 @@
-import { ChatSessionResponse } from "@/types/ChatSession";
+import { ConversationResponse } from "@/types/ChatSession";
 
 export interface UnreadMessagesCounterProps {
-  chatSession: ChatSessionResponse;
+  conversation: ConversationResponse;
+  currentUserId: number;
 }

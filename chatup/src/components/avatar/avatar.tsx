@@ -31,7 +31,7 @@ const Avatar: FC<AvatarProps> = (props) => {
       <Image
         src={fileName ? `${environment.baseUrl}/uploads/${fileName}` : avatar}
         alt="User profile image"
-        // loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         style={{ objectFit: "cover" }}
         fill
         {...(imageBlur

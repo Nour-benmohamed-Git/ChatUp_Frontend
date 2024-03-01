@@ -29,7 +29,7 @@ const SearchField: FC<SearchFieldProps> = (props) => {
           name={name}
           placeholder={placeholder}
           onChange={debouncedResults}
-          className="bg-gray-900 text-sm outline-none text-slate-400"
+          className="bg-gray-900 text-sm outline-none text-slate-200"
         />
       </div>
     </div>

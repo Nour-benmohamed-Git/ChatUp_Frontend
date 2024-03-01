@@ -1,9 +1,8 @@
-import { ChatItem } from "@/types/ChatItem";
-import { MessageResponse } from "@/types/Message";
-import { Socket } from "socket.io-client";
+import { Message} from "@/types/Message";
 
 export interface MessageProps {
-  message: MessageResponse;
-  socket: Socket;
-  selectedChatItem: ChatItem;
+  message: Message;
+  conversationRelatedData: {
+    [key: string]: string | number | boolean | undefined;
+  };
 }

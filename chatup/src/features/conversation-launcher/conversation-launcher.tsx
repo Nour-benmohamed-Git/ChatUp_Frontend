@@ -1,90 +1,77 @@
+import { fetchUsers } from "@/app/_actions/fetch-users";
+import { getConversationByParticipants } from "@/app/_actions/get-conversation-by-participants";
 import EndMessage from "@/components/end-message/end-message";
-import ErrorBox from "@/components/error-box/error-box";
 import Loader from "@/components/loader/loader";
-import NoDataFound from "@/components/no-data-found/no-data-found";
 import UserListItem from "@/components/user-list-item/user-list-item";
-import { useGetChatSessionByParticipantsMutation } from "@/redux/apis/chat-sessions/chatSessionsApi";
-import { useGetUsersQuery } from "@/redux/apis/user/userApi";
 import { UserResponse } from "@/types/User";
+import { useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper";
 import { ConversationLauncherProps } from "./conversation-launcher.types";
 
 const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
-  const { label, handleSelectChatItem, togglePanel } = props;
-  const [dataSource, setDataSource] = useState<UserResponse[]>([]);
-  const [paginator, setPaginator] = useState({ page: 1, offset: 10, total: 0 });
-  const [paramToSearch, setParamToSearch] = useState<string>("");
-
-  const {
-    data: users,
-    isLoading: isLoadingUsers,
-    error: usersError,
-  } = useGetUsersQuery({
-    page: paginator.page,
-    offset: paginator.offset,
-    search: paramToSearch,
+  const { label, togglePanel, initialUsers } = props;
+  const router = useRouter();
+  const [dataSource, setDataSource] = useState<UserResponse[]>(
+    initialUsers.data
+  );
+  const [paginator, setPaginator] = useState({
+    page: 1,
+    offset: 10,
+    total: initialUsers.total,
   });
-  const fetchMoreData = () => {
+  const [paramToSearch, setParamToSearch] = useState<string>("");
+  const fetchMoreData = async () => {
+    const nextPage = paginator.page + 1;
+    const newUsers = await fetchUsers(
+      nextPage,
+      paginator.offset,
+      paramToSearch
+    );
+    setDataSource((prevItems) => [...prevItems, ...newUsers?.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
-      page: prevPaginator.page + 1,
+      page: nextPage,
     }));
   };
-  const [getChatSessionByParticipants] =
-    useGetChatSessionByParticipantsMutation();
-  const handleCreateNewChat = (userId: number) => {
-    getChatSessionByParticipants({ secondMemberId: userId })
-      .unwrap()
-      .then((response) => {
-        if (response.data) {
-          handleSelectChatItem({
-            chatId: response.data.id,
-            secondMemberId: userId,
-            deletedByCurrentUser: response.data.deletedByCurrentUser,
-          });
-        } else {
-          handleSelectChatItem({
-            chatId: 0,
-            secondMemberId: userId,
-          });
-        }
-      })
-      .catch((_error) => {
-        console.log("_error", _error);
-      });
-    togglePanel();
-  };
-
   useEffect(() => {
-    if (users?.total) {
+    const fetchNewUsers = async () => {
+      const newUsers = await fetchUsers(1, paginator.offset, paramToSearch);
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
-        total: users?.total,
+        page: 1,
+        total: newUsers.total,
       }));
-    }
-  }, [users?.total]);
+      setDataSource(newUsers?.data);
+    };
+    fetchNewUsers();
+  }, [paramToSearch, paginator.offset]);
 
-  // useEffect(() => {
-  //   if (users?.data) {
-  //     setDataSource(users?.data);
-  //   }
-  // }, [users?.data]);
-  useEffect(() => {
-    if (users?.data) {
-      setDataSource((prevItems) => [...prevItems, ...users?.data]);
+  const handleCreateNewChat = async (userId: number) => {
+    try {
+      const response = await getConversationByParticipants({
+        secondMemberId: userId.toString(),
+      });
+      const conversationId = response?.data?.id || 0;
+      const deletedByCurrentUser =
+        response?.data?.deletedByCurrentUser || false;
+      const queryParams = `deletedByCurrentUser=${deletedByCurrentUser}&secondMemberId=${userId}`;
+      router.replace(`/chat/${conversationId}?${queryParams}`, {
+        scroll: false,
+      });
+    } catch (error) {
+      console.log("Error occurred:", error);
     }
-  }, [users?.data]);
-  let content = null;
-  if (isLoadingUsers) {
-    content = <Loader />;
-  } else if (usersError) {
-    content = <ErrorBox error={usersError} />;
-  } else if (dataSource?.length === 0) {
-    content = <NoDataFound message="No data found" />;
-  } else
-    content = (
+    togglePanel();
+  };
+  return (
+    <PanelContentWrapper
+      hasSearchField
+      height="calc(100% - 7.5rem)"
+      label={label}
+      setParamToSearch={setParamToSearch}
+    >
       <InfiniteScroll
         dataLength={dataSource?.length}
         next={fetchMoreData}
@@ -101,16 +88,6 @@ const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
           />
         ))}
       </InfiniteScroll>
-    );
-
-  return (
-    <PanelContentWrapper
-      hasSearchField
-      height="calc(100% - 7.5rem)"
-      label={label}
-      setParamToSearch={setParamToSearch}
-    >
-      {content}
     </PanelContentWrapper>
   );
 };

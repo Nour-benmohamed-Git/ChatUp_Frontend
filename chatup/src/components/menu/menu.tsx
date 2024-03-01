@@ -24,11 +24,8 @@ const Menu: React.FC<MenuProps> = ({
         height: buttonHeight,
         width: buttonWidth,
       } = buttonRef.current.getBoundingClientRect();
-      const {
-        right: menuRight,
-        height: menuHeight,
-        width: menuWidth,
-      } = menuRef.current.getBoundingClientRect();
+      const { height: menuHeight, width: menuWidth } =
+        menuRef.current.getBoundingClientRect();
       switch (position) {
         case MenuPosition.TOP_LEFT:
           setMenuPosition({

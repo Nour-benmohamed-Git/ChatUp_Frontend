@@ -14,13 +14,10 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     paddingClass,
     toggleHandlers,
     label,
-    selectedChatItem,
-    handleSelectChatItem,
-    socket,
     userData,
     menuActionList,
+    conversationRelatedData,
   } = props;
-
   return (
     <>
       <Header
@@ -43,12 +40,8 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
       >
         {children}
       </div>
-      {hasChatControlPanel ? (
-        <ChatControlPanel
-          selectedChatItem={selectedChatItem}
-          handleSelectChatItem={handleSelectChatItem}
-          socket={socket}
-        />
+      {hasChatControlPanel && conversationRelatedData ? (
+        <ChatControlPanel conversationRelatedData={conversationRelatedData} />
       ) : null}
     </>
   );

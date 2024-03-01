@@ -1,13 +1,14 @@
-import { MessageResponse } from "./Message";
+import { Message } from "./Message";
 
-export interface ChatSessionResponse {
+export interface ConversationResponse {
   id: number;
   participantsData: { [userId: string]: string };
   creationDate?: number;
   lastActiveDate?: number;
   image?: string;
-  lastMessage?: MessageResponse;
+  lastMessage?: Message;
   deletedByCurrentUser?: boolean;
+  senderId?: number;
   count?: number;
 }
-export type ChatSessionsResponse = { data: ChatSessionResponse[] };
+export type ConversationsResponse = { data: ConversationResponse[] };

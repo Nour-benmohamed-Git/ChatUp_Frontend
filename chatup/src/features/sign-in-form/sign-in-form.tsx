@@ -1,33 +1,16 @@
 "use client";
 import { signIn } from "@/app/_actions/sign-in";
 import InputField from "@/components/input-field/input-field";
-import { globals } from "@/utils/constants/globals";
-import { paths } from "@/utils/constants/paths";
-import { storeItem } from "@/utils/helpers/cookies-helpers";
 import { schema } from "@/utils/schemas/sign-in-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 import { z } from "zod";
 
 const SignInForm: FC = () => {
-  const router = useRouter();
-  const { execute, status } = useAction(signIn, {
-    onSuccess: (data) => {
-      storeItem(
-        [
-          { key: globals.tokenKey, value: data?.data?.token },
-          { key: globals.currentUserId, value: data?.data?.id },
-        ],
-        globals.expireIn
-      );
-      router.replace(paths.protectedRoutes.home);
-    },
-  });
-
+  const { execute, status } = useAction(signIn);
   const methods = useForm<z.infer<typeof schema>>({
     defaultValues: {
       email: "",

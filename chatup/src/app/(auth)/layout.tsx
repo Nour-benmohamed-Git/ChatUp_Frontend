@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+import "../globals.css";
+export const metadata: Metadata = {
+  title: "ChatUp | Authentication",
+  description: "Authentication",
+};
+
 export default function AuthLayout({
   children,
 }: {

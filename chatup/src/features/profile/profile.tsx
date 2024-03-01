@@ -3,9 +3,7 @@ import InputField from "@/components/input-field/input-field";
 import Loader from "@/components/loader/loader";
 import ProfileListItem from "@/components/profile-list-item/profile-list-item";
 import ProfilePicture from "@/components/profile-picture/profile-picture";
-import {
-  useEditCurrentUserMutation
-} from "@/redux/apis/profile/profileApi";
+import { useEditCurrentUserMutation } from "@/redux/apis/profile/profileApi";
 import { UserUpdateRequest } from "@/types/User";
 import { profileFields } from "@/utils/constants/profile-fields";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,10 +17,10 @@ import { z } from "zod";
 import { ProfileProps } from "./profile.types";
 
 const Profile: FC<ProfileProps> = (props) => {
-  const { data, isLoading, error } = props;
+  const { data } = props;
   const [isEditing, setIsEditing] = useState(false);
-  const [EditCurrentUser, { isLoading: isLoadingEdit }] =
-    useEditCurrentUserMutation();
+  // const [EditCurrentUser, { isLoading: isLoadingEdit }] =
+  //   useEditCurrentUserMutation();
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
@@ -59,51 +57,26 @@ const Profile: FC<ProfileProps> = (props) => {
     mode: "onChange",
     resolver: zodResolver(schema),
   });
-  const handleUpdateProfile = (updateData: UserUpdateRequest) => {
-    const formData = new FormData();
-    for (const property in updateData) {
-      formData.append(property, updateData[property]);
-    }
-    EditCurrentUser(formData);
-  };
+  // const handleUpdateProfile = (updateData: UserUpdateRequest) => {
+  //   const formData = new FormData();
+  //   for (const property in updateData) {
+  //     formData.append(property, updateData[property]);
+  //   }
+  //   EditCurrentUser(formData);
+  // };
   // useEffect(() => {
   //   if (methods.formState?.errors?.profilePicture?.message) {
   //     toast.error(methods.formState?.errors?.profilePicture?.message);
   //   }
   // }, [methods.formState?.errors?.profilePicture?.message]);
-  let content = null;
-  if (isLoading) {
-    content = <Loader />;
-  } else if (error) {
-    content = <ErrorBox error={error} />;
-  } else {
-    content = profileFields.map((field, index) =>
-      isEditing ? (
-        <motion.div
-          key={field.name}
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.05 }}
-          className="w-full"
-        >
-          <InputField
-            id={field.name}
-            name={field.name}
-            type={field.type}
-            placeholder={methods.watch?.[field.name]}
-            autoComplete={field.autoComplete}
-            icon={field.icon}
-          />
-        </motion.div>
-      ) : (
-        <ProfileListItem
-          key={field.name}
-          icon={field.icon}
-          value={data?.[field.name]}
-        />
-      )
-    );
-  }
+  // let content = null;
+  // if (isLoading) {
+  //   content = <Loader />;
+  // } else if (error) {
+  //   content = <ErrorBox error={error} />;
+  // } else {
+  //   content =
+  // }
   return (
     <FormProvider {...methods}>
       <div
@@ -133,7 +106,32 @@ const Profile: FC<ProfileProps> = (props) => {
                 isEditing ? "gap-0" : "gap-6 md:gap-4"
               } w-full`}
             >
-              {content}
+              {profileFields.map((field, index) =>
+                isEditing ? (
+                  <motion.div
+                    key={field.name}
+                    initial={{ opacity: 0, y: 100 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    className="w-full"
+                  >
+                    <InputField
+                      id={field.name}
+                      name={field.name}
+                      type={field.type}
+                      placeholder={methods.watch?.[field.name]}
+                      autoComplete={field.autoComplete}
+                      icon={field.icon}
+                    />
+                  </motion.div>
+                ) : (
+                  <ProfileListItem
+                    key={field.name}
+                    icon={field.icon}
+                    value={data?.[field.name]}
+                  />
+                )
+              )}
               {isEditing ? (
                 <motion.div
                   initial={{ opacity: 0, y: 100 }}
@@ -142,15 +140,15 @@ const Profile: FC<ProfileProps> = (props) => {
                   className="w-full"
                 >
                   <button
-                    onClick={methods.handleSubmit(handleUpdateProfile)}
+                    // onClick={methods.handleSubmit(handleUpdateProfile)}
                     className="w-full flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-600 disabled:opacity-70 disabled:pointer-events-none"
-                    disabled={!methods.formState.isValid || isLoadingEdit}
+                    disabled={!methods.formState.isValid}
                   >
-                    {isLoadingEdit ? (
+                    {/* {isLoadingEdit ? (
                       <ImSpinner9 size={20} className="animate-spin" />
                     ) : (
                       "Save"
-                    )}
+                    )} */}
                   </button>
                 </motion.div>
               ) : null}

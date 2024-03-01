@@ -1,11 +1,13 @@
-export interface MessageResponse {
+export interface Message {
   id?: number;
-  content: string;
-  senderId: number;
+  content?: string;
+  senderId?: number;
+  receiverId?: number;
   timestamp?: number;
   edited?: boolean;
   readStatus?: boolean;
   chatSessionId?: number;
   groupId?: number;
 }
-export type MessagesResponse = { data: MessageResponse[] };
+
+export type Messages = { data: Message[] };
