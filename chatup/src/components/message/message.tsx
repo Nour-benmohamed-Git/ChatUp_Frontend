@@ -1,5 +1,5 @@
-import { hardRemoveMessage } from "@/app/_actions/hard-remove-message";
-import { softRemoveMessage } from "@/app/_actions/soft-remove-message";
+import { hardRemoveMessage } from "@/app/_actions/message-actions/hard-remove-message";
+import { softRemoveMessage } from "@/app/_actions/message-actions/soft-remove-message";
 import { useSocket } from "@/context/socket-context";
 import { messageActions } from "@/utils/constants/action-lists/message-actions";
 import { globals } from "@/utils/constants/globals";
@@ -7,6 +7,7 @@ import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { FC, memo, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { toast } from "sonner";
 import Dialog from "../dialog/dialog";
@@ -17,6 +18,7 @@ import { MessageProps } from "./message.types";
 
 const Message: FC<MessageProps> = (props) => {
   const { message, conversationRelatedData } = props;
+  const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -45,9 +47,12 @@ const Message: FC<MessageProps> = (props) => {
     navigator.clipboard.writeText(message.content as string);
     toast.success("Copied to Clipboard.");
   };
+  const handleEditMessage = () => {
+    setValue("message", message.content);
+  };
 
   const onClickFunctions: { [key: string]: () => void } = {
-    edit: () => console.log("edit"),
+    edit: handleEditMessage,
     copy: handleCopyToClipboard,
     softRemove: openSoftRemoveModal,
     hardRemove: openHardRemoveModal,

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export const action = createSafeActionClient();
 export const signIn = action(schema, async (values) => {
-  const oneDay = 24 * 60 * 60 * 1000;
+  // const oneDay = 24 * 60 * 60 * 1000;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/sign-in`,
     {

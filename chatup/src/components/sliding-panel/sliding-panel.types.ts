@@ -4,5 +4,5 @@ export interface SlidingPanelProps {
   panelRef: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   fromSide: "right" | "left";
-  title: string;
+  title?: string;
 }

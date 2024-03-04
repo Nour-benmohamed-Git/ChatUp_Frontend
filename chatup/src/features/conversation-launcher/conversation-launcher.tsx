@@ -1,5 +1,5 @@
-import { fetchUsers } from "@/app/_actions/fetch-users";
-import { getConversationByParticipants } from "@/app/_actions/get-conversation-by-participants";
+
+import { getConversationByParticipants } from "@/app/_actions/conversation-actions/get-conversation-by-participants";
 import EndMessage from "@/components/end-message/end-message";
 import Loader from "@/components/loader/loader";
 import UserListItem from "@/components/user-list-item/user-list-item";
@@ -9,6 +9,7 @@ import { FC, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper";
 import { ConversationLauncherProps } from "./conversation-launcher.types";
+import { fetchUsers } from "@/app/_actions/user-actions/fetch-users";
 
 const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
   const { label, togglePanel, initialUsers } = props;

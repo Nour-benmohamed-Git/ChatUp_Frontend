@@ -1,6 +1,6 @@
 "use client";
 
-import { logout } from "@/app/_actions/logout";
+import { logout } from "@/app/_actions/auth-actions/logout";
 import Skeleton from "@/components/skeleton/skeleton";
 import SlidingPanel from "@/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/components/sliding-panel/sliding-panel.types";
@@ -12,7 +12,7 @@ import {
   sideBarMenuActions,
 } from "@/utils/constants/action-lists/sidebar-actions";
 import dynamic from "next/dynamic";
-import { FC, memo, useEffect, useState } from "react";
+import { FC, Fragment, memo, useEffect, useState } from "react";
 import BlocContainer from "../bloc-container/bloc-container";
 import ConversationLauncher from "../conversation-launcher/conversation-launcher";
 import MultiConversationLauncher from "../multi-conversation-launcher/multi-conversation-launcher";
@@ -175,39 +175,41 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   }, {} as Record<string, { togglePanel: () => void }>);
 
   return (
-    <aside
-      id="sidebar"
-      className="col-span-1 h-screen bg-slate-700 md:border-r md:border-slate-500"
-    >
-      {Object.entries(panels).map(([key, panel]) => (
-        <SlidingPanel
-          key={key}
-          isOpen={panel.isOpen}
-          togglePanel={panel.togglePanel}
-          panelRef={panel.panelRef}
-          fromSide={panel.fromSide}
-          title={panel.title}
-        >
-          {panel.children}
-        </SlidingPanel>
-      ))}
-      <BlocContainer
-        actions={sideBarActions}
-        hasSearchField
-        height="calc(100% - 7.5rem)"
-        toggleHandlers={toggleHandlers}
-        label="chat_list_sidebar"
-        userData={currentUser}
-        menuActionList={updatedSideBarMenuActions}
+    <Fragment>
+      <aside
+        id="sidebar"
+        className="col-span-1 h-full bg-slate-700 md:border-r md:border-slate-500"
       >
-        {conversations?.map?.((conversation) => (
-          <ConversationListItem
-            key={conversation.id}
-            conversation={conversation}
-          />
+        {Object.entries(panels).map(([key, panel]) => (
+          <SlidingPanel
+            key={key}
+            isOpen={panel.isOpen}
+            togglePanel={panel.togglePanel}
+            panelRef={panel.panelRef}
+            fromSide={panel.fromSide}
+            title={panel.title}
+          >
+            {panel.children}
+          </SlidingPanel>
         ))}
-      </BlocContainer>
-    </aside>
+        <BlocContainer
+          actions={sideBarActions}
+          hasSearchField
+          height="calc(100% - 7.5rem)"
+          toggleHandlers={toggleHandlers}
+          label="chat_list_sidebar"
+          userData={currentUser}
+          menuActionList={updatedSideBarMenuActions}
+        >
+          {conversations?.map?.((conversation) => (
+            <ConversationListItem
+              key={conversation.id}
+              conversation={conversation}
+            />
+          ))}
+        </BlocContainer>
+      </aside>
+    </Fragment>
   );
 };
 export default memo(ConversationList);

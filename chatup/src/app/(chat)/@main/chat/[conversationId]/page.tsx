@@ -1,5 +1,6 @@
-import { fetchConversationMessages } from "@/app/_actions/fetch-conversation-messages";
-import { getUserById } from "@/app/_actions/get-user-by-id";
+import { fetchConversationMessages } from "@/app/_actions/message-actions/fetch-conversation-messages";
+import { getUserById } from "@/app/_actions/user-actions/get-user-by-id";
+import LandingPage from "@/features/landing-page/landing-page";
 import SelectedConversation from "@/features/selected-conversation/selected-conversation";
 import { convertSearchParams } from "@/utils/helpers/sharedHelpers";
 const Main = async ({
@@ -16,6 +17,7 @@ const Main = async ({
     messagesPromise,
     userDataPromise,
   ]);
+
   return (
     <SelectedConversation
       conversationRelatedData={convertSearchParams({

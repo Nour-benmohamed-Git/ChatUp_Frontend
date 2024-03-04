@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { verifyToken } from "./app/_actions/verify-token";
+import { verifyToken } from "./app/_actions/auth-actions/verify-token";
 import { globals } from "./utils/constants/globals";
 import { paths } from "./utils/constants/paths";
 

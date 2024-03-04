@@ -1,4 +1,4 @@
-import { removeConversation } from "@/app/_actions/remove-conversation";
+import { removeConversation } from "@/app/_actions/conversation-actions/remove-conversation";
 import { chatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import {

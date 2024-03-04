@@ -6,10 +6,17 @@ import {
   conversationActions,
   conversationMenuActions,
 } from "@/utils/constants/action-lists/conversation-actions";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, memo } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
 import BlocContainer from "../bloc-container/bloc-container";
 import MessageWrapper from "../message-wrapper/message-wrapper";
 import { SelectedConversationProps } from "./selected-conversation.types";
+
+const schema = z.object({
+  message: z.string().min(1, "message is required."),
+});
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const { conversationRelatedData, initialMessages, userData } = props;
   const onClickFunctions: { [key: string]: () => void } = {
@@ -57,8 +64,17 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     acc[key] = { togglePanel: panels[key].togglePanel };
     return acc;
   }, {} as Record<string, { togglePanel: () => void }>);
+  const methods = useForm({
+    defaultValues: {
+      message: "",
+    },
+    resolver: zodResolver(schema),
+  });
   return (
-    <main id="main_content" className="col-span-2 h-screen bg-slate-700">
+    <main
+      id="main_content"
+      className="md:flex flex-col col-span-2 h-full bg-slate-700"
+    >
       {Object.entries(panels).map(([key, panel]) => (
         <SlidingPanel
           key={key}
@@ -71,21 +87,23 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
           {panel.children}
         </SlidingPanel>
       ))}
-      <BlocContainer
-        actions={conversationActions}
-        hasChatControlPanel
-        height="calc(100% - 8rem)"
-        toggleHandlers={toggleHandlers}
-        label="chat_conversation"
-        menuActionList={updatedConversationMenuActions}
-        conversationRelatedData={conversationRelatedData}
-        userData={userData}
-      >
-        <MessageWrapper
+      <FormProvider {...methods}>
+        <BlocContainer
+          actions={conversationActions}
+          hasChatControlPanel
+          height="calc(100% - 8rem)"
+          toggleHandlers={toggleHandlers}
+          label="chat_conversation"
+          menuActionList={updatedConversationMenuActions}
           conversationRelatedData={conversationRelatedData}
-          initialMessages={initialMessages}
-        />
-      </BlocContainer>
+          userData={userData}
+        >
+          <MessageWrapper
+            conversationRelatedData={conversationRelatedData}
+            initialMessages={initialMessages}
+          />
+        </BlocContainer>
+      </FormProvider>
     </main>
   );
 };

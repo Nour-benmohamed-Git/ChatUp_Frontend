@@ -1,5 +1,5 @@
 "use client";
-import { signIn } from "@/app/_actions/sign-in";
+import { signIn } from "@/app/_actions/auth-actions/sign-in";
 import InputField from "@/components/input-field/input-field";
 import { schema } from "@/utils/schemas/sign-in-schema";
 import { zodResolver } from "@hookform/resolvers/zod";

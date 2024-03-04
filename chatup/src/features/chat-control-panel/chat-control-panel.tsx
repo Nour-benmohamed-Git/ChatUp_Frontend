@@ -1,6 +1,6 @@
-import { addConversation } from "@/app/_actions/add-conversation";
-import { addMessage } from "@/app/_actions/add-message";
-import { updateConversation } from "@/app/_actions/update-conversation";
+import { addConversation } from "@/app/_actions/conversation-actions/add-conversation";
+import { updateConversation } from "@/app/_actions/conversation-actions/update-conversation";
+import { addMessage } from "@/app/_actions/message-actions/add-message";
 import EmojiPicker from "@/components/emoji-picker/emoji-picker";
 import MessageField from "@/components/message-field/message-field";
 import { useSocket } from "@/context/socket-context";
@@ -9,34 +9,24 @@ import { chatControlPanelActions } from "@/utils/constants/action-lists/chat-con
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
 import { toast } from "sonner";
-import { z } from "zod";
 import { ChatControlPanelProps } from "./chat-control-panel.types";
 
-const schema = z.object({
-  message: z.string().min(1, "message is required."),
-});
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { conversationRelatedData } = props;
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { socket } = useSocket();
   const router = useRouter();
-  const methods = useForm({
-    defaultValues: {
-      message: "",
-    },
-    resolver: zodResolver(schema),
-  });
+  const { watch, setValue } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  useAutoSizeTextArea(textAreaRef.current, methods.watch("message"));
+  useAutoSizeTextArea(textAreaRef.current, watch("message"));
   const openEmojiPicker = () => {
     setShowEmojiPicker(true);
   };
@@ -59,7 +49,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     participantsData?: { [userId: string]: string }
   ) => {
     await addMessage({
-      content: methods.watch("message"),
+      content: watch("message"),
       senderId: currentUserId,
       receiverId: conversationRelatedData?.secondMemberId as number,
       chatSessionId,
@@ -71,15 +61,14 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             message: res?.data,
             participantsData: participantsData,
           });
-        methods.setValue("message", "");
+        setValue("message", "");
       })
       .catch((error) => {
-        console.log(error);
-        toast.success(error);
+        toast.error(error);
       });
   };
   const handleSendMessage = async () => {
-    if (!methods.watch("message")) {
+    if (!watch("message")) {
       return;
     }
     if (!conversationRelatedData.conversationId) {
@@ -111,51 +100,60 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     }
   };
   return (
-    <FormProvider {...methods}>
-      <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
-        <div className="flex items-center justify-center h-full w-full gap-5">
-          {showEmojiPicker ? (
-            <motion.div
-              initial="closed"
-              animate={showEmojiPicker ? "open" : "closed"}
-              variants={{ open: { y: 0 }, closed: { y: "100%" } }}
-              transition={{ type: "spring", stiffness: 120, damping: 20 }}
-              className={"absolute bottom-full left-0"}
-            >
-              <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
-            </motion.div>
-          ) : null}
-          <div className="flex gap-7 h-full">
-            {updatedChatControlPanelActions.map((action) => (
-              <button key={action.label} onClick={action.onClick}>
-                <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
-                  {action.icon}
-                </div>
-              </button>
-            ))}
-          </div>
-          <MessageField
-            id="message"
-            name="message"
-            placeholder="Type your message"
-            messageFieldRef={textAreaRef}
-          />
-          {methods.watch("message") ? (
-            <button onClick={handleSendMessage}>
-              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
-                <BsFillSendFill size={24} />
-              </div>
+    <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
+      <div className="flex items-center justify-center h-full w-full gap-5">
+        {showEmojiPicker ? (
+          <motion.div
+            initial="closed"
+            animate={showEmojiPicker ? "open" : "closed"}
+            variants={{ open: { y: 0 }, closed: { y: "100%" } }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            className={"absolute bottom-full left-0"}
+          >
+            <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
+          </motion.div>
+        ) : null}
+        <div className="flex gap-7 h-full">
+          {updatedChatControlPanelActions.map((action) => (
+            <button key={action.label} onClick={action.onClick}>
+              <motion.div
+                transition={{
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 20,
+                }}
+                whileHover={{
+                  scale: 1.5,
+                  rotate: 360,
+                }}
+                className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
+              >
+                {action.icon}
+              </motion.div>
             </button>
-          ) : (
-            <button>
-              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
-                <FaMicrophone size={24} />
-              </div>
-            </button>
-          )}
+          ))}
         </div>
+        <MessageField
+          id="message"
+          name="message"
+          placeholder="Type your message"
+          messageFieldRef={textAreaRef}
+        />
+        {watch("message") ? (
+          <button onClick={handleSendMessage}>
+            <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
+              <BsFillSendFill size={24} />
+            </div>
+          </button>
+        ) : (
+          <button>
+            <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
+              <FaMicrophone size={24} />
+            </div>
+          </button>
+        )}
       </div>
-    </FormProvider>
+    </div>
   );
 };
 export default memo(ChatControlPanel);
