@@ -1,6 +1,6 @@
-import { addConversation } from "@/app/_actions/conversation-actions/add-conversation";
 import { updateConversation } from "@/app/_actions/conversation-actions/update-conversation";
 import { addMessage } from "@/app/_actions/message-actions/add-message";
+import { updateMessage } from "@/app/_actions/message-actions/update-message";
 import EmojiPicker from "@/components/emoji-picker/emoji-picker";
 import MessageField from "@/components/message-field/message-field";
 import { useSocket } from "@/context/socket-context";
@@ -17,6 +17,7 @@ import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
 import { toast } from "sonner";
 import { ChatControlPanelProps } from "./chat-control-panel.types";
+import { addConversation } from "@/app/_actions/conversation-actions/add-conversation";
 
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { conversationRelatedData } = props;
@@ -71,32 +72,38 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     if (!watch("message")) {
       return;
     }
-    if (!conversationRelatedData.conversationId) {
-      const conversation = await addConversation({
-        secondMemberId: conversationRelatedData.secondMemberId as number,
-      });
-      if (conversation && conversationRelatedData?.secondMemberId) {
-        createMessage(
-          conversation.data.id,
-          conversation?.data.participantsData
-        );
-        const queryParams = `deletedByCurrentUser=${
-          conversation.data.deletedByCurrentUser
-        }&secondMemberId=${conversationRelatedData?.secondMemberId as number}`;
-        router.replace(`/chat/${conversation.data.id}?${queryParams}`);
+    if (!watch("id")) {
+      if (conversationRelatedData.conversationId === -1) {
+        const conversation = await addConversation({
+          secondMemberId: conversationRelatedData.secondMemberId as number,
+        });
+        if (conversation && conversationRelatedData?.secondMemberId) {
+          createMessage(
+            conversation.data.id,
+            conversation?.data.participantsData
+          );
+          const queryParams = `deletedByCurrentUser=${
+            conversation.data.deletedByCurrentUser
+          }&secondMemberId=${
+            conversationRelatedData?.secondMemberId as number
+          }`;
+          router.push(`/conversation/${conversation.data.id}?${queryParams}`);
+        }
+      } else {
+        if (
+          conversationRelatedData?.conversationId &&
+          conversationRelatedData?.deletedByCurrentUser
+        ) {
+          const conversation = await updateConversation(
+            conversationRelatedData.conversationId as number
+          );
+          createMessage(conversation.data.id);
+        } else {
+          createMessage(conversationRelatedData.conversationId as number);
+        }
       }
     } else {
-      if (
-        conversationRelatedData?.conversationId &&
-        conversationRelatedData?.deletedByCurrentUser
-      ) {
-        const conversation = await updateConversation(
-          conversationRelatedData.conversationId as number
-        );
-        createMessage(conversation.data.id);
-      } else {
-        createMessage(conversationRelatedData.conversationId as number);
-      }
+      updateMessage(watch("id"), watch("message"));
     }
   };
   return (

@@ -8,10 +8,9 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
   const {
     children,
     actions,
-    height,
     hasChatControlPanel,
     hasSearchField,
-    paddingClass,
+    cssClass,
     toggleHandlers,
     label,
     userData,
@@ -34,12 +33,7 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
           placeholder={"Search"}
         />
       ) : null}
-      <div
-        className={`overflow-y-auto ${paddingClass}`}
-        style={{ height: height }}
-      >
-        {children}
-      </div>
+      <div className={`${cssClass}`}>{children}</div>
       {hasChatControlPanel && conversationRelatedData ? (
         <ChatControlPanel conversationRelatedData={conversationRelatedData} />
       ) : null}

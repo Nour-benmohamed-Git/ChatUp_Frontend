@@ -7,8 +7,9 @@ import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import dynamic from "next/dynamic";
-import { FC, memo, useEffect, useRef, useState } from "react";
+import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
 import { MessageWrapperProps } from "./message-wrapper.types";
+import { renderDateChip } from "@/utils/helpers/dateHelpers";
 const Message = dynamic(() => import("@/components/message/message"), {
   ssr: false,
 });
@@ -18,10 +19,6 @@ const MessageWrapper: FC<MessageWrapperProps> = (props) => {
   const { socket } = useSocket();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const messageListRef = useRef<HTMLDivElement>(null);
-  console.log(
-    "conversationRelatedData?.conversationId",
-    conversationRelatedData?.conversationId
-  );
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -125,12 +122,14 @@ const MessageWrapper: FC<MessageWrapperProps> = (props) => {
   } else {
     content = (
       <div className="flex flex-col min-h-full justify-end px-2 md:px-16 py-2">
-        {messages?.map((message) => (
-          <Message
-            key={message.id}
-            message={message}
-            conversationRelatedData={conversationRelatedData}
-          />
+        {messages?.map((message, index) => (
+          <Fragment key={message.id}>
+            {renderDateChip(message.timestamp as number, index, messages)}
+            <Message
+              message={message}
+              conversationRelatedData={conversationRelatedData}
+            />
+          </Fragment>
         ))}
       </div>
     );

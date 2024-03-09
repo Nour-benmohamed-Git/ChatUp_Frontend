@@ -6,8 +6,10 @@ const ConversationHeaderUserInfo: FC<ConversationHeaderUserInfoProps> = (
   const { username, lastSeen } = props;
   return (
     <div className="flex flex-col">
-      <div className="text-sm text-gold-600">{username}</div>
-      <div className="text-sm text-slate-400">last seen{lastSeen}</div>
+      <div className="text-sm text-gold-600 w-32  md:w-44 truncate">
+        {username}
+      </div>
+      <div className="text-sm text-slate-200">last seen {lastSeen}</div>
     </div>
   );
 };

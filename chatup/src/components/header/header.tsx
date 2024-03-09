@@ -6,16 +6,12 @@ import ConversationHeaderUserInfo from "../conversation-header-user-info/convers
 import Menu from "../menu/menu";
 import { MenuPosition } from "../menu/menu.types";
 import { HeaderProps } from "./header.types";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { useRouter } from "next/navigation";
 
 const Header: FC<HeaderProps> = (props) => {
-  const {
-    actions,
-    toggleHandlers,
-    conversationData,
-    label,
-    userData,
-    menuActionList,
-  } = props;
+  const { actions, toggleHandlers, label, userData, menuActionList } = props;
+  const router = useRouter();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const handleOpenMenu = () => {
@@ -26,7 +22,15 @@ const Header: FC<HeaderProps> = (props) => {
   };
   return (
     <header className="sticky top-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5">
-      <div className="flex items-center justify-between h-full">
+      <div className="flex items-center justify-between h-full gap-2">
+        {label === "conversation" ? (
+          <button
+            onClick={() => router.back()}
+            className="text-gold-900 rounded-full hover:text-gold-300 md:hidden"
+          >
+            <IoMdArrowRoundBack className="text-2xl" />
+          </button>
+        ) : null}
         <div
           role="button"
           onClick={toggleHandlers?.[avatarActions[label]]?.togglePanel}
@@ -36,9 +40,9 @@ const Header: FC<HeaderProps> = (props) => {
             additionalClasses="h-10 w-10"
             fileName={userData?.profilePicture}
           />
-          {conversationData ? (
+          {label === "conversation" && userData?.username ? (
             <ConversationHeaderUserInfo
-              username="Nour elhak benmohamed"
+              username={userData?.username}
               lastSeen="today"
             />
           ) : null}

@@ -1,45 +1,26 @@
-import ErrorBox from "@/components/error-box/error-box";
+import { updateCurrentUser } from "@/app/_actions/user-actions/update-current-user";
 import InputField from "@/components/input-field/input-field";
-import Loader from "@/components/loader/loader";
 import ProfileListItem from "@/components/profile-list-item/profile-list-item";
 import ProfilePicture from "@/components/profile-picture/profile-picture";
-import { useEditCurrentUserMutation } from "@/redux/apis/profile/profileApi";
-import { UserUpdateRequest } from "@/types/User";
 import { profileFields } from "@/utils/constants/profile-fields";
+import { updateProfileSchema } from "@/utils/schemas/update-profile-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { FC, memo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaEdit } from "react-icons/fa";
-import { ImSpinner9 } from "react-icons/im";
 import { z } from "zod";
 import { ProfileProps } from "./profile.types";
 
 const Profile: FC<ProfileProps> = (props) => {
   const { data } = props;
   const [isEditing, setIsEditing] = useState(false);
-  // const [EditCurrentUser, { isLoading: isLoadingEdit }] =
-  //   useEditCurrentUserMutation();
+
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
-  const schema = z.object({
-    email: z.string().min(1, "Email is required.").email("Email is invalid."),
-    username: z.string().min(1, "Username is required."),
-    phone: z.string().min(1, "Phone number is required."),
-    profileInfo: z.string().min(1, "Profile info is required."),
-    profilePicture: z.any().optional(),
-    // .any()
-    // .refine((file) => file !== null, { message: "Image is required." })
-    // .refine(
-    //   (file) => acceptedImageTypes.includes(file?.type),
-    //   "Supported formats: .jpg, .jpeg, .png, .webp ."
-    // )
-    // .refine((file) => file?.size <= maxFileSize, `Max image size is 5MB.`),
-  });
-
-  const methods = useForm<UserUpdateRequest>({
+  const methods = useForm<z.infer<typeof updateProfileSchema>>({
     defaultValues: {
       email: "",
       username: "",
@@ -48,22 +29,22 @@ const Profile: FC<ProfileProps> = (props) => {
       profilePicture: null,
     },
     values: {
-      email: data?.email,
-      username: data?.username,
-      phone: data?.phone,
-      profileInfo: data?.profileInfo,
-      profilePicture: data?.profilePicture,
+      email: data.email,
+      username: data.username,
+      phone: data.phone,
+      profileInfo: data.profileInfo,
+      profilePicture: data.profilePicture,
     },
     mode: "onChange",
-    resolver: zodResolver(schema),
+    resolver: zodResolver(updateProfileSchema),
   });
-  // const handleUpdateProfile = (updateData: UserUpdateRequest) => {
-  //   const formData = new FormData();
-  //   for (const property in updateData) {
-  //     formData.append(property, updateData[property]);
-  //   }
-  //   EditCurrentUser(formData);
-  // };
+  const handleUpdateProfile = (updateData: any) => {
+    const formData = new FormData();
+    for (const property in updateData) {
+      formData.append(property, updateData[property]);
+    }
+    updateCurrentUser(formData);
+  };
   // useEffect(() => {
   //   if (methods.formState?.errors?.profilePicture?.message) {
   //     toast.error(methods.formState?.errors?.profilePicture?.message);
@@ -140,15 +121,11 @@ const Profile: FC<ProfileProps> = (props) => {
                   className="w-full"
                 >
                   <button
-                    // onClick={methods.handleSubmit(handleUpdateProfile)}
+                    onClick={methods.handleSubmit(handleUpdateProfile)}
                     className="w-full flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-600 disabled:opacity-70 disabled:pointer-events-none"
                     disabled={!methods.formState.isValid}
                   >
-                    {/* {isLoadingEdit ? (
-                      <ImSpinner9 size={20} className="animate-spin" />
-                    ) : (
-                      "Save"
-                    )} */}
+                    Save
                   </button>
                 </motion.div>
               ) : null}

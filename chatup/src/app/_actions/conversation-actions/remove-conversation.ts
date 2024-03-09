@@ -1,7 +1,7 @@
 "use server";
 
 import { ConversationResponse } from "@/types/ChatSession";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -20,6 +20,6 @@ export async function removeConversation(data: {
   if (!res.ok) {
     throw new Error("Failed to remove the conversation.");
   }
-  revalidateTag("conversations");
+  revalidatePath("/");
   redirect("/");
 }

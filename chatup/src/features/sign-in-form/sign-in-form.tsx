@@ -1,7 +1,7 @@
 "use client";
 import { signIn } from "@/app/_actions/auth-actions/sign-in";
 import InputField from "@/components/input-field/input-field";
-import { schema } from "@/utils/schemas/sign-in-schema";
+import { signInSchema } from "@/utils/schemas/sign-in-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { FC } from "react";
@@ -11,16 +11,16 @@ import { z } from "zod";
 
 const SignInForm: FC = () => {
   const { execute, status } = useAction(signIn);
-  const methods = useForm<z.infer<typeof schema>>({
+  const methods = useForm<z.infer<typeof signInSchema>>({
     defaultValues: {
       email: "",
       password: "",
     },
     mode: "all",
     shouldFocusError: true,
-    resolver: zodResolver(schema),
+    resolver: zodResolver(signInSchema),
   });
-  const onSubmit = async (data: z.infer<typeof schema>) => {
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     execute(data);
   };
   return (

@@ -1,10 +1,11 @@
 import environment from "@/utils/config/environment";
 import Image from "next/image";
 import { FC, memo, useEffect, useState } from "react";
-import { AvatarProps } from "./avatar.types";
 import avatar from "../../../public/avatar.svg";
+import { AvatarProps } from "./avatar.types";
 const Avatar: FC<AvatarProps> = (props) => {
   const { additionalClasses, fileName } = props;
+
   const [imageBlur, setImageBlur] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,16 +21,17 @@ const Avatar: FC<AvatarProps> = (props) => {
         console.error("Error fetching image blur:", error);
       }
     };
-    if (fileName) {
+    if (typeof fileName ==='string') {
       fetchImageBlur();
     }
   }, [fileName]);
+
   return (
     <div
       className={`${additionalClasses} rounded-full overflow-hidden relative`}
     >
       <Image
-        src={fileName ? `${environment.baseUrl}/uploads/${fileName}` : avatar}
+        src={typeof fileName ==='string' ? `${environment.baseUrl}/uploads/${fileName}` : avatar}
         alt="User profile image"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         style={{ objectFit: "cover" }}

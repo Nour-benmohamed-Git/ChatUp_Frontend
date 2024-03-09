@@ -3,6 +3,6 @@ export interface PanelContentWrapperProps {
   height: string;
   hasSearchField?: boolean;
   paddingClass?: string;
-  label: string;
-  setParamToSearch: (search: string) => void;
+  label?: string;
+  setParamToSearch?: (search: string) => void;
 }

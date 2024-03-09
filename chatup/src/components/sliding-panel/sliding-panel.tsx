@@ -18,7 +18,7 @@ const SlidingPanel: FC<SlidingPanelProps> = (props) => {
         variants={variants}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
         className={`fixed top-0 ${fromSide}-0 bottom-0 w-full ${
-          fromSide === "right" ? "md:w-2/3" : "md:w-1/3"
+          fromSide === "right" ? "md:w-3/5 lg:w-2/3" : "md:w-2/5 lg:w-1/3"
         } bg-gradient-to-b from-slate-800 to-slate-600  shadow-md z-50`}
       >
         <header className="sticky top-0 bg-gray-900 shadow-md h-16 z-40 px-4 py-2.5">

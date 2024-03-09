@@ -1,10 +1,9 @@
 import { removeConversation } from "@/app/_actions/conversation-actions/remove-conversation";
 import { chatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
+import { globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
-import {
-  getChatSessionTitle,
-  getOtherUserId,
-} from "@/utils/helpers/sharedHelpers";
+import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
@@ -15,8 +14,6 @@ import Menu from "../menu/menu";
 import { MenuPosition } from "../menu/menu.types";
 import UnreadMessagesCounter from "../unread-messages/unread-messages-counter";
 import { ConversationListItemProps } from "./conversation-list-item.types";
-import { getItem } from "@/utils/helpers/cookies-helpers";
-import { globals } from "@/utils/constants/globals";
 
 const ConversationListItem: FC<ConversationListItemProps> = (props) => {
   const { conversation } = props;
@@ -71,7 +68,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
       )}
       <Link
         href={{
-          pathname: `/chat/${conversation.id}`,
+          pathname: `/conversation/${conversation.id}`,
           query: {
             deletedByCurrentUser: conversation.deletedByCurrentUser,
             secondMemberId: getOtherUserId(
@@ -81,10 +78,8 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
           },
         }}
         scroll={false}
-        prefetch={false}
-        replace
         className={`flex items-center rounded-md gap-4 m-2 px-2 py-3 ${
-          pathname === `/chat/${conversation.id}`
+          pathname === `/conversation/${conversation.id}`
             ? "bg-gray-800"
             : "bg-gray-900"
         } hover:bg-gray-800`}
@@ -93,10 +88,7 @@ const ConversationListItem: FC<ConversationListItemProps> = (props) => {
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-gold-600 truncate">
-              {getChatSessionTitle(
-                conversation.participantsData,
-                currentUserId
-              )}
+              {conversation.title}
             </div>
             <div className="text-xs text-gold-400 ml-2">
               {formatChatSessionDate(conversation.lastMessage?.timestamp)}

@@ -1,52 +1,54 @@
-
 import { getConversationByParticipants } from "@/app/_actions/conversation-actions/get-conversation-by-participants";
-import EndMessage from "@/components/end-message/end-message";
+import { fetchOwnFriends } from "@/app/_actions/user-actions/fetch-own-friends";
 import Loader from "@/components/loader/loader";
 import UserListItem from "@/components/user-list-item/user-list-item";
 import { UserResponse } from "@/types/User";
 import { useRouter } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { FC, memo, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PanelContentWrapper from "../panel-content-wrapper/panel-content-wrapper";
-import { ConversationLauncherProps } from "./conversation-launcher.types";
-import { fetchUsers } from "@/app/_actions/user-actions/fetch-users";
+import { FriendListProps } from "./friend-list.types";
 
-const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
-  const { label, togglePanel, initialUsers } = props;
+const FriendList: FC<FriendListProps> = (props) => {
+  const { label, initialFriends } = props;
   const router = useRouter();
   const [dataSource, setDataSource] = useState<UserResponse[]>(
-    initialUsers.data
+    initialFriends.data
   );
   const [paginator, setPaginator] = useState({
     page: 1,
     offset: 10,
-    total: initialUsers.total,
+    total: initialFriends.total,
   });
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newUsers = await fetchUsers(
+    const newFriends = await fetchOwnFriends(
       nextPage,
       paginator.offset,
       paramToSearch
     );
-    setDataSource((prevItems) => [...prevItems, ...newUsers?.data]);
+    setDataSource((prevItems) => [...prevItems, ...newFriends?.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       page: nextPage,
     }));
   };
   useEffect(() => {
-    const fetchNewUsers = async () => {
-      const newUsers = await fetchUsers(1, paginator.offset, paramToSearch);
+    const fetchNewFriends = async () => {
+      const newFriends = await fetchOwnFriends(
+        1,
+        paginator.offset,
+        paramToSearch
+      );
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
-        total: newUsers.total,
+        total: newFriends.total,
       }));
-      setDataSource(newUsers?.data);
+      setDataSource(newFriends?.data);
     };
-    fetchNewUsers();
+    fetchNewFriends();
   }, [paramToSearch, paginator.offset]);
 
   const handleCreateNewChat = async (userId: number) => {
@@ -54,17 +56,16 @@ const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
       const response = await getConversationByParticipants({
         secondMemberId: userId.toString(),
       });
-      const conversationId = response?.data?.id || 0;
+      const conversationId = response?.data?.id || -1;
       const deletedByCurrentUser =
         response?.data?.deletedByCurrentUser || false;
       const queryParams = `deletedByCurrentUser=${deletedByCurrentUser}&secondMemberId=${userId}`;
-      router.replace(`/chat/${conversationId}?${queryParams}`, {
+      router.push(`/conversation/${conversationId}?${queryParams}`, {
         scroll: false,
       });
     } catch (error) {
       console.log("Error occurred:", error);
     }
-    togglePanel();
   };
   return (
     <PanelContentWrapper
@@ -78,8 +79,7 @@ const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
         next={fetchMoreData}
         hasMore={dataSource?.length < paginator.total}
         loader={<Loader />}
-        endMessage={<EndMessage />}
-        height="calc(100vh - 8.8rem)"
+        height="calc(100vh - 12.5rem)"
       >
         {dataSource?.map?.((user) => (
           <UserListItem
@@ -92,4 +92,4 @@ const ConversationLauncher: FC<ConversationLauncherProps> = (props) => {
     </PanelContentWrapper>
   );
 };
-export default ConversationLauncher;
+export default memo(FriendList);

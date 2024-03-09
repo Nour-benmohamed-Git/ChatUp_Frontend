@@ -7,14 +7,13 @@ export interface BlocContainerProps {
     name: string;
     icon: JSX.Element;
   }[];
-  height: string;
   hasSearchField?: boolean;
   hasChatControlPanel?: boolean;
-  paddingClass?: string;
+  cssClass?: string;
   toggleHandlers: {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
-  label: "chat_list_sidebar" | "chat_conversation";
+  label: "conversation_list_sidebar" | "conversation";
   userData?: UserResponse;
   menuActionList: {
     onClick: () => void;
@@ -22,5 +21,7 @@ export interface BlocContainerProps {
     name: string;
     icon: JSX.Element;
   }[];
-  conversationRelatedData?: { [key: string]: number | boolean | string | undefined };
+  conversationRelatedData?: {
+    [key: string]: number | boolean | string | undefined;
+  };
 }

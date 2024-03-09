@@ -1,8 +1,8 @@
-import { ConversationResponse } from "@/types/ChatSession";
-import { UserResponse, UsersResponse } from "@/types/User";
+import { ConversationsResponse } from "@/types/ChatSession";
+import { UserResponse } from "@/types/User";
 
 export interface ConversationListProps {
-  initialConversations: ConversationResponse[];
-  initialUsers: UsersResponse;
-  currentUser: UserResponse;
+  label: string;
+  initialConversations: ConversationsResponse;
+  currentUser: UserResponse
 }

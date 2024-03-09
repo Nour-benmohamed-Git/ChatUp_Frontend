@@ -5,10 +5,14 @@ export interface ConversationResponse {
   participantsData: { [userId: string]: string };
   creationDate?: number;
   lastActiveDate?: number;
+  title?: string;
   image?: string;
   lastMessage?: Message;
   deletedByCurrentUser?: boolean;
   senderId?: number;
   count?: number;
 }
-export type ConversationsResponse = { data: ConversationResponse[] };
+export type ConversationsResponse = {
+  data: ConversationResponse[];
+  total: number;
+};

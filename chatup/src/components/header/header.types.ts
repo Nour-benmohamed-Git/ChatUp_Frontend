@@ -9,8 +9,7 @@ export interface HeaderProps {
   toggleHandlers: {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
-  conversationData?: string;
-  label: "chat_list_sidebar" | "chat_conversation";
+  label: "conversation_list_sidebar" | "conversation";
   userData?: UserResponse;
   menuActionList: {
     onClick: () => void;

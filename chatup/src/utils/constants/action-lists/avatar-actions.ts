@@ -1,4 +1,4 @@
 export const avatarActions = {
-  chat_list_sidebar: "profile",
-  chat_conversation: "contactInfo",
+  conversation_list_sidebar: "profile",
+  conversation: "contactInfo",
 };

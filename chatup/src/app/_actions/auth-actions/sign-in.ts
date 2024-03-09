@@ -1,11 +1,11 @@
 "use server";
-import { schema } from "@/utils/schemas/sign-in-schema";
+import { signInSchema } from "@/utils/schemas/sign-in-schema";
 import { createSafeActionClient } from "next-safe-action";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const action = createSafeActionClient();
-export const signIn = action(schema, async (values) => {
+export const signIn = action(signInSchema, async (values) => {
   // const oneDay = 24 * 60 * 60 * 1000;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/sign-in`,

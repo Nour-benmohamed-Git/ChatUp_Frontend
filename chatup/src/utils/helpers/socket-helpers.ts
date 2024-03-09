@@ -1,4 +1,5 @@
 import { Message } from "@/types/Message";
+import { NotificationResponse } from "@/types/Notification";
 import { Socket } from "socket.io-client";
 
 export const handleJoinPrivateRoom = (
@@ -26,4 +27,14 @@ export const emitMessage = (
   } else {
     socket?.emit("sendMessage", rest);
   }
+};
+
+export const emitFriendRequest = (
+  socket: Socket,
+  friendRequestData: {
+    action: "send" | "accept" | "decline";
+    friendRequest: NotificationResponse;
+  }
+) => {
+  socket?.emit("send-friend-request", friendRequestData);
 };

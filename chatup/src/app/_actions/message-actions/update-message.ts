@@ -14,7 +14,11 @@ export async function updateMessage(
   headers.append("Content-Type", "application/json");
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/messages/${messageId}`,
-    { method: "PATCH", body: JSON.stringify(content), headers: headers }
+    {
+      method: "PATCH",
+      body: JSON.stringify({ content: content }),
+      headers: headers,
+    }
   );
   try {
     revalidateTag("messages");

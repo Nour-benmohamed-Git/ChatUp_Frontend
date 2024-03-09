@@ -1,4 +1,5 @@
 import SocketProvider from "@/context/socket-context";
+import SideBar from "@/features/sidebar/sidebar";
 import { globals } from "@/utils/constants/globals";
 import type { Metadata } from "next";
 import { getCookie } from "../_actions/shared-actions/get-cookie";
@@ -8,19 +9,18 @@ export const metadata: Metadata = {
   description: "Chat box",
 };
 
-export default async function RootLayout({
+export default async function ChatLayout({
   children,
-  main,
 }: Readonly<{
   children: React.ReactNode;
-  main: React.ReactNode;
 }>) {
   const token = await getCookie(globals.tokenKey);
+
   return (
-    <div className="h-screen grid grid-cols-1 md:grid-cols-3">
+    <div className="h-screen grid grid-cols-1 md:grid-cols-5 lg:grid-cols-3">
       <SocketProvider token={token}>
+        <SideBar />
         {children}
-        {main}
       </SocketProvider>
     </div>
   );

@@ -1,9 +1,8 @@
 import { fetchConversationMessages } from "@/app/_actions/message-actions/fetch-conversation-messages";
 import { getUserById } from "@/app/_actions/user-actions/get-user-by-id";
-import LandingPage from "@/features/landing-page/landing-page";
 import SelectedConversation from "@/features/selected-conversation/selected-conversation";
 import { convertSearchParams } from "@/utils/helpers/sharedHelpers";
-const Main = async ({
+const Conversation = async ({
   params,
   searchParams,
 }: {
@@ -29,4 +28,4 @@ const Main = async ({
     />
   );
 };
-export default Main;
+export default Conversation;

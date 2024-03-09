@@ -48,6 +48,7 @@ const Message: FC<MessageProps> = (props) => {
     toast.success("Copied to Clipboard.");
   };
   const handleEditMessage = () => {
+    setValue("id", message.id);
     setValue("message", message.content);
   };
 
@@ -58,10 +59,17 @@ const Message: FC<MessageProps> = (props) => {
     hardRemove: openHardRemoveModal,
   };
 
-  const updatedMessageActions = messageActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedMessageActions = messageActions
+    .filter((action) => {
+      if (message.senderId === conversationRelatedData.secondMemberId) {
+        return action.label !== "softRemove";
+      }
+      return true;
+    })
+    .map((action) => ({
+      ...action,
+      onClick: onClickFunctions[action.label],
+    }));
   const handleSoftRemoveMessage = async () => {
     if (message.id && socket) {
       await softRemoveMessage(message.id);

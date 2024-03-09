@@ -13,12 +13,15 @@ import { z } from "zod";
 import BlocContainer from "../bloc-container/bloc-container";
 import MessageWrapper from "../message-wrapper/message-wrapper";
 import { SelectedConversationProps } from "./selected-conversation.types";
+import useConversation from "@/hooks/use-conversation";
 
 const schema = z.object({
   message: z.string().min(1, "message is required."),
 });
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const { conversationRelatedData, initialMessages, userData } = props;
+  const { isOpen } = useConversation();
+
   const onClickFunctions: { [key: string]: () => void } = {
     closeConversation: () => console.log("closeConversation"),
     removeConversation: () => console.log("removeConversation"),
@@ -64,7 +67,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     acc[key] = { togglePanel: panels[key].togglePanel };
     return acc;
   }, {} as Record<string, { togglePanel: () => void }>);
-  const methods = useForm({
+  const methods = useForm<{ id?: number; message: string }>({
     defaultValues: {
       message: "",
     },
@@ -73,7 +76,9 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   return (
     <main
       id="main_content"
-      className="md:flex flex-col col-span-2 h-full bg-slate-700"
+      className={`${
+        isOpen ? "flex flex-col" : "hidden"
+      } md:flex md:flex-col md:col-span-3 lg:col-span-2 h-full bg-slate-700`}
     >
       {Object.entries(panels).map(([key, panel]) => (
         <SlidingPanel
@@ -91,12 +96,12 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
         <BlocContainer
           actions={conversationActions}
           hasChatControlPanel
-          height="calc(100% - 8rem)"
           toggleHandlers={toggleHandlers}
-          label="chat_conversation"
+          label="conversation"
           menuActionList={updatedConversationMenuActions}
           conversationRelatedData={conversationRelatedData}
           userData={userData}
+          cssClass="h-[calc(100vh-8rem)]"
         >
           <MessageWrapper
             conversationRelatedData={conversationRelatedData}
