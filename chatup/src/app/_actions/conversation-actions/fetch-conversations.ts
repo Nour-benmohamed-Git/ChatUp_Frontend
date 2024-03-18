@@ -1,7 +1,6 @@
 "use server";
 
 import { ConversationsResponse } from "@/types/ChatSession";
-import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export async function fetchConversations(

@@ -2,7 +2,7 @@ import { UserResponse } from "@/types/User";
 
 export interface BlocContainerProps {
   children: React.ReactNode;
-  actions: {
+  actions?: {
     label?: string;
     name: string;
     icon: JSX.Element;
@@ -10,10 +10,10 @@ export interface BlocContainerProps {
   hasSearchField?: boolean;
   hasChatControlPanel?: boolean;
   cssClass?: string;
-  toggleHandlers: {
+  toggleHandlers?: {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
-  label: "conversation_list_sidebar" | "conversation";
+  label: "left_container" | "right_container";
   userData?: UserResponse;
   menuActionList: {
     onClick: () => void;
@@ -24,4 +24,5 @@ export interface BlocContainerProps {
   conversationRelatedData?: {
     [key: string]: number | boolean | string | undefined;
   };
+  title?: string;
 }

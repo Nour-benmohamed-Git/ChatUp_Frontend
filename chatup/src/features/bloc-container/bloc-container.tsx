@@ -1,7 +1,7 @@
-import Header from "@/components/header/header";
-import SearchField from "@/components/search-field/search-field";
+import Header from "@/app/components/header/header";
+import SearchField from "@/app/components/search-field/search-field";
 import { FC, memo } from "react";
-import ChatControlPanel from "../chat-control-panel/chat-control-panel";
+import ChatControlPanel from "../conversationsSectionFeatures/chatControlPanel/ChatControlPanel";
 import { BlocContainerProps } from "./bloc_container.types";
 
 const BlocContainer: FC<BlocContainerProps> = (props) => {
@@ -16,6 +16,7 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     userData,
     menuActionList,
     conversationRelatedData,
+    title,
   } = props;
   return (
     <>
@@ -25,6 +26,7 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
         label={label}
         userData={userData}
         menuActionList={menuActionList}
+        title={title}
       />
       {hasSearchField ? (
         <SearchField

@@ -20,6 +20,6 @@ export async function removeConversation(data: {
   if (!res.ok) {
     throw new Error("Failed to remove the conversation.");
   }
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/conversations");
+  redirect("/conversations");
 }

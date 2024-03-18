@@ -11,7 +11,7 @@ export const addFriendRequest = action(addFriendRequestSchema, async (data) => {
   headers.append("Authorization", `Bearer ${token}`);
   headers.append("Content-Type", "application/json");
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/notifications`,
+    `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/friendRequests`,
     { method: "POST", body: JSON.stringify(data), headers: headers }
   );
   try {

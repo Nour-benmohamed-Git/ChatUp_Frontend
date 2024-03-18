@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     isValidToken
   ) {
     return NextResponse.redirect(
-      new URL(paths.protectedRoutes.home, request.nextUrl)
+      new URL(paths.protectedRoutes.conversations, request.nextUrl)
     );
   }
 }

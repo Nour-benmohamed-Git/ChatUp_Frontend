@@ -23,5 +23,5 @@ export const signIn = action(signInSchema, async (values) => {
   const data = await res.json();
   cookies().set("authToken", data?.data?.token);
   cookies().set("currentUserId", data?.data?.id);
-  redirect("/");
+  redirect("/conversations");
 });

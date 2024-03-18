@@ -1,6 +1,6 @@
-import Logo from "@/components/logo/logo";
+import Logo from "@/app/components/logo/logo";
 import AuthPrompt from "@/features/auth-prompt/auth-prompt";
-import SignUpForm from "@/features/sign-up-form/sign-up-form";
+import SignUpForm from "@/features/signUpForm/SignUpForm";
 import { paths } from "@/utils/constants/paths";
 import { FC } from "react";
 

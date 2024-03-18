@@ -10,7 +10,9 @@ export interface ConversationResponse {
   lastMessage?: Message;
   deletedByCurrentUser?: boolean;
   senderId?: number;
-  count?: number;
+  unreadMessages?: { [userId: number]: number[] };
+  seen?: boolean;
+
 }
 export type ConversationsResponse = {
   data: ConversationResponse[];

@@ -1,7 +1,7 @@
 import ToasterContext from "@/context/toaster-context";
 import "./globals.css";
 
-export default function AuthLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;

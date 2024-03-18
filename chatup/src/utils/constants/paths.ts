@@ -1,6 +1,9 @@
 export const paths = {
   protectedRoutes: {
-    home: "/",
+    conversations: "/conversations",
+    friends: "/friends",
+    friend: "/add-friend",
+    profile: "/profile",
   },
   authRoutes: { signIn: "/sign-in", signUp: "/sign-up" },
 };

@@ -1,6 +1,6 @@
-import SearchField from "@/components/search-field/search-field";
 import { FC, memo } from "react";
 import { PanelContentWrapperProps } from "./panel-content-wrapper.types";
+import SearchField from "@/app/components/search-field/search-field";
 
 const PanelContentWrapper: FC<PanelContentWrapperProps> = (props) => {
   const {

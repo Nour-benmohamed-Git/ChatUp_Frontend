@@ -2,8 +2,8 @@ import { Tab } from "@/types/Tab";
 
 export const tabsActions: Tab[] = [
   {
-    key: "conversations",
-    title: "Conversations",
+    key: "FiendRequests",
+    title: "Fiend Requests",
   },
   { key: "friends", title: "Friends" },
 ];

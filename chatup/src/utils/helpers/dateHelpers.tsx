@@ -1,8 +1,10 @@
-import Chip from "@/components/chip/Chip";
 import { Message } from "@/types/Message";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
+import dynamic from "next/dynamic";
+const Chip = dynamic(() => import("@/app/components/chip/Chip"), {
+  ssr: false,
+});
 export const formatChatSessionDate = (day?: number) => {
   if (!day) return "";
   const currentTime = dayjs();
