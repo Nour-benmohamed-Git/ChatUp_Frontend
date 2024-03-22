@@ -1,7 +1,7 @@
 "use client";
 import { logout } from "@/app/_actions/auth-actions/logout";
 import useConversation from "@/hooks/useConversation";
-import { sideBarMenuActions } from "@/utils/constants/action-lists/sidebar-actions";
+import { sideBarMenuActions } from "@/utils/constants/action-lists/sideBarActions";
 import Link from "next/link";
 import { FC, memo } from "react";
 import { BsPersonFillAdd } from "react-icons/bs";
@@ -35,7 +35,7 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
         title="Chat"
         label="left_container"
         menuActionList={updatedSideBarMenuActions}
-        cssClass="p-2 h-[calc(100vh-3.5rem)]"
+        cssClass="p-2 h-[calc(100vh-4rem)]"
       >
         <ConversationList
           label="Friends"

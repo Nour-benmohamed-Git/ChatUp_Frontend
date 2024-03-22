@@ -1,5 +1,5 @@
-import { updateFriendRequestStatusToAccepted } from "@/app/_actions/friend-request-actions/accept-friend-request";
-import { updateFriendRequestStatusToDeclined } from "@/app/_actions/friend-request-actions/decline-friend-request";
+import { updateFriendRequestStatusToAccepted } from "@/app/_actions/friendRequestActions/updateFriendRequestStatusToAccepted";
+import { updateFriendRequestStatusToDeclined } from "@/app/_actions/friendRequestActions/updateFriendRequestStatusToDeclined";
 import Avatar from "@/app/components/avatar/avatar";
 import { useSocket } from "@/context/socket-context";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";

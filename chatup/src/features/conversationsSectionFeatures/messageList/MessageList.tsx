@@ -1,6 +1,5 @@
-import { updateConversation } from "@/app/_actions/conversation-actions/update-conversation";
-import { fetchConversationMessages } from "@/app/_actions/message-actions/fetch-conversation-messages";
-
+import { updateConversation } from "@/app/_actions/conversationActions/updateConversation";
+import { fetchConversationMessages } from "@/app/_actions/messageActions/fetchConversationMessages";
 import Chip from "@/app/components/chip/Chip";
 import { useSocket } from "@/context/socket-context";
 import { Message } from "@/types/Message";
@@ -30,7 +29,7 @@ const MessageList: FC<MessageListProps> = (props) => {
 
   const getMessages = async (conversationId: string) => {
     const res = await fetchConversationMessages(conversationId);
-    res && setMessages(res?.data);
+    setMessages(res.data);
   };
 
   useEffect(() => {

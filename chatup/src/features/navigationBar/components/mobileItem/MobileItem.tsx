@@ -20,6 +20,7 @@ const MobileItem: React.FC<MobileItemProps> = ({
       className={`
       flex
       justify-center
+      w-full
       p-5
       text-sm 
       font-semibold 

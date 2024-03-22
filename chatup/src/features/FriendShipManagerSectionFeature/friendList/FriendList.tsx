@@ -1,5 +1,5 @@
-import { getConversationByParticipants } from "@/app/_actions/conversation-actions/get-conversation-by-participants";
-import { fetchOwnFriends } from "@/app/_actions/user-actions/fetch-own-friends";
+import { getConversationByParticipants } from "@/app/_actions/conversationActions/getConversationByParticipants";
+import { fetchOwnFriends } from "@/app/_actions/userActions/fetchOwnFriends";
 
 import Loader from "@/app/components/loader/loader";
 import { UserResponse } from "@/types/User";
@@ -72,7 +72,7 @@ const FriendList: FC<FriendListProps> = (props) => {
   return (
     <PanelContentWrapper
       hasSearchField
-      height="calc(100% - 7.5rem)"
+      height="calc(100vh - 12.25rem)"
       label={label}
       setParamToSearch={setParamToSearch}
     >

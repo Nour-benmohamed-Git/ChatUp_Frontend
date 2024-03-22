@@ -1,4 +1,4 @@
-import { avatarActions } from "@/utils/constants/action-lists/avatar-actions";
+import { avatarActions } from "@/utils/constants/action-lists/avatarActions";
 import { useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";

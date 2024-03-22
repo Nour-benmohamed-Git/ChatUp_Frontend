@@ -1,10 +1,10 @@
 "use client";
 import { logout } from "@/app/_actions/auth-actions/logout";
-import { updateCurrentUser } from "@/app/_actions/user-actions/update-current-user";
+import { updateCurrentUser } from "@/app/_actions/userActions/updateCurrentUser";
 import InputField from "@/app/components/input-field/input-field";
 import ProfilePicture from "@/app/components/profile-picture/profile-picture";
 import ProfileListItem from "@/app/components/profileItem/ProfileItem";
-import { sideBarMenuActions } from "@/utils/constants/action-lists/sidebar-actions";
+import { sideBarMenuActions } from "@/utils/constants/action-lists/sideBarActions";
 import { profileFields } from "@/utils/constants/profile-fields";
 import { updateProfileSchema } from "@/utils/schemas/update-profile-schema";
 import { zodResolver } from "@hookform/resolvers/zod";

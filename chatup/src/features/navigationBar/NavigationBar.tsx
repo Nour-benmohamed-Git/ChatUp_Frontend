@@ -37,6 +37,7 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
       socket.on("friendRequestCount", handleFriendRequestCount);
     }
     const handleFriendRequestNotification = (friendRequestData: any) => {
+      console.log("friendRequestData", friendRequestData);
       switch (friendRequestData.action) {
         // case "send":
 

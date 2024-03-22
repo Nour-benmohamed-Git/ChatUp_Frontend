@@ -1,4 +1,4 @@
-import { removeConversation } from "@/app/_actions/conversation-actions/remove-conversation";
+import { removeConversation } from "@/app/_actions/conversationActions/removeConversation";
 import { chatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
@@ -53,7 +53,7 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
     <>
       {isOpen && (
         <Dialog
-          title="Remove message"
+          title="Remove Conversation"
           onClose={closeModal}
           actions={[
             {

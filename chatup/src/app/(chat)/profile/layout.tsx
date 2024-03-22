@@ -1,4 +1,4 @@
-import { fetchCurrentUser } from "@/app/_actions/user-actions/fetch-current-user";
+import { fetchCurrentUser } from "@/app/_actions/userActions/fetchCurrentUser";
 import Profile from "@/features/profile/profile";
 import type { Metadata } from "next";
 import "../../globals.css";

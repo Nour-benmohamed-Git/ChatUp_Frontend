@@ -1,4 +1,4 @@
-import { fetchConversations } from "@/app/_actions/conversation-actions/fetch-conversations";
+import { fetchConversations } from "@/app/_actions/conversationActions/fetchConversations";
 import Loader from "@/app/components/loader/loader";
 import Skeleton from "@/app/components/skeleton/skeleton";
 import { useSocket } from "@/context/socket-context";
@@ -26,12 +26,12 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newUsers = await fetchConversations(
+    const newConversations = await fetchConversations(
       nextPage,
       paginator.offset,
       paramToSearch
     );
-    setDataSource((prevItems) => [...prevItems, ...newUsers?.data]);
+    setDataSource((prevItems) => [...prevItems, ...newConversations?.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       page: nextPage,
@@ -39,7 +39,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   };
   useEffect(() => {
     const fetchNewUsers = async () => {
-      const newUsers = await fetchConversations(
+      const newConversations = await fetchConversations(
         1,
         paginator.offset,
         paramToSearch
@@ -47,9 +47,9 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
-        total: newUsers.total,
+        total: newConversations.total,
       }));
-      setDataSource(newUsers?.data);
+      setDataSource(newConversations?.data);
     };
     fetchNewUsers();
   }, [paramToSearch, paginator.offset]);
@@ -82,6 +82,8 @@ const ConversationList: FC<ConversationListProps> = (props) => {
                 ...prevChatSessions,
                 {
                   id: chatSessionData.data.id,
+                  title: chatSessionData.data.title,
+                  image: chatSessionData.data.image,
                   lastMessage: {
                     content: chatSessionData.data.lastMessage.content,
                     timestamp: chatSessionData.data.lastMessage.timestamp,
@@ -141,7 +143,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   return (
     <PanelContentWrapper
       hasSearchField
-      height="calc(100% - 7.5rem)"
+      height="calc(100vh - 8.5rem)"
       label={label}
       setParamToSearch={setParamToSearch}
     >
@@ -150,7 +152,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
         next={fetchMoreData}
         hasMore={dataSource?.length < paginator.total}
         loader={<Loader />}
-        height="calc(100vh - 12.5rem)"
+        height="calc(100vh - 8.5rem)"
       >
         {dataSource?.map?.((conversation) => (
           <ConversationItem key={conversation.id} conversation={conversation} />

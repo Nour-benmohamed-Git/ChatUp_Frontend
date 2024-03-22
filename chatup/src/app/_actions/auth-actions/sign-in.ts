@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 export const action = createSafeActionClient();
 export const signIn = action(signInSchema, async (values) => {
   // const oneDay = 24 * 60 * 60 * 1000;
-  const res = await fetch(
+  const response = await fetch(
     `${process.env.NEXT_PUBLIC_CHAT_UP_BASE_URL}/api/sign-in`,
     {
       method: "POST",
@@ -17,10 +17,11 @@ export const signIn = action(signInSchema, async (values) => {
       body: JSON.stringify({ email: values.email, password: values.password }),
     }
   );
-  if (!res.ok) {
-    throw new Error("Failed to sign in.");
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error?.error);
   }
-  const data = await res.json();
+  const data = await response.json();
   cookies().set("authToken", data?.data?.token);
   cookies().set("currentUserId", data?.data?.id);
   redirect("/conversations");

@@ -1,5 +1,7 @@
 "use client";
 
+import { removeConversation } from "@/app/_actions/conversationActions/removeConversation";
+import Dialog from "@/app/components/dialog/dialog";
 import MessagesLoader from "@/app/components/messagesLoader/MessagesLoader";
 import SlidingPanel from "@/app/components/sliding-panel/sliding-panel";
 import { SlidingPanelProps } from "@/app/components/sliding-panel/sliding-panel.types";
@@ -9,10 +11,11 @@ import usePanel from "@/hooks/usePanel";
 import {
   conversationActions,
   conversationMenuActions,
-} from "@/utils/constants/action-lists/conversation-actions";
+} from "@/utils/constants/action-lists/conversationActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
-import { FC, memo } from "react";
+import { useRouter } from "next/navigation";
+import { FC, memo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { SelectedConversationProps } from "./SelectedConversation.types";
@@ -27,11 +30,27 @@ const schema = z.object({
 });
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const { conversationRelatedData, initialMessages, userData } = props;
+  const [openDialog, setOpenDialog] = useState(false);
   const { isOpen } = useConversation();
-
+  const router = useRouter();
+  const handleCloseConversation = () => {
+    router.push("/conversations");
+  };
+  const openModal = () => {
+    setOpenDialog(true);
+  };
+  const closeModal = () => {
+    setOpenDialog(false);
+  };
+  const handleRemoveConversation = async () => {
+    await removeConversation({
+      conversationId: conversationRelatedData.conversationId as number,
+    });
+    closeModal();
+  };
   const onClickFunctions: { [key: string]: () => void } = {
-    closeConversation: () => console.log("closeConversation"),
-    removeConversation: () => console.log("removeConversation"),
+    closeConversation: handleCloseConversation,
+    removeConversation: openModal,
     block: () => console.log("block"),
   };
   const updatedConversationMenuActions = conversationMenuActions.map(
@@ -81,6 +100,21 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     resolver: zodResolver(schema),
   });
   return (
+    <>{openDialog && (
+      <Dialog
+        title="Remove Conversation"
+        onClose={closeModal}
+        actions={[
+          {
+            label: "remove",
+            onClick: handleRemoveConversation,
+            category: "dismissal",
+          },
+        ]}
+      >
+        Are you sure you want to remove this chat session?
+      </Dialog>
+    )}
     <main
       id="main_content"
       className={`${
@@ -116,7 +150,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
           />
         </BlocContainer>
       </FormProvider>
-    </main>
+    </main></>
   );
 };
 export default memo(SelectedConversation);

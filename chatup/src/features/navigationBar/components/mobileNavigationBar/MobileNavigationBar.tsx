@@ -4,6 +4,7 @@ import { labelsWithBadge } from "@/hooks/useRoutes";
 import { FC } from "react";
 import { NavigationBarProps } from "../desktopNavigationBar/NavigationBar.types";
 import MobileItem from "../mobileItem/MobileItem";
+import MobileProfileItem from "../mobileProfileItem/MobileProfileItem";
 
 const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
   const { currentUser, routesWithBadge, routes } = props;
@@ -29,7 +30,7 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
     >
       {routesWithBadge.map((route) => (
         <div key={route.href} className="flex-grow">
-          <Badge key={route.label} content={route.count}>
+          <Badge content={route.count}>
             <MobileItem
               href={route.href}
               active={route.active}
@@ -39,6 +40,9 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
           </Badge>
         </div>
       ))}
+      <div className="flex justify-center relative">
+        <MobileProfileItem profilePicture={currentUser?.profilePicture} />
+      </div>
       {routes
         .filter((item) => !labelsWithBadge.includes(item.label))
         .map((route) => (

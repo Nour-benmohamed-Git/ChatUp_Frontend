@@ -1,9 +1,9 @@
 "use client";
 import { logout } from "@/app/_actions/auth-actions/logout";
-import { addFriendRequest } from "@/app/_actions/friend-request-actions/add-friend-request";
+import { addFriendRequest } from "@/app/_actions/friendRequestActions/addFriendRequest";
 import InputField from "@/app/components/input-field/input-field";
 import { useSocket } from "@/context/socket-context";
-import { sideBarMenuActions } from "@/utils/constants/action-lists/sidebar-actions";
+import { sideBarMenuActions } from "@/utils/constants/action-lists/sideBarActions";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
 import { addFriendRequestSchema } from "@/utils/schemas/add-friend-request-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,14 +19,14 @@ const SendFriendRequest: FC = () => {
   const { socket } = useSocket();
   const { execute, result, status } = useAction(addFriendRequest);
   useEffect(() => {
-    if (socket && result.data) {
+    if (socket && result?.data) {
       emitFriendRequest(socket, {
         action: "send",
-        friendRequest: result.data.data,
+        friendRequest: result.data,
       });
       toast.success("Friend request has been successfully sent.");
     }
-  }, [socket, result.data]);
+  }, [socket, result?.data]);
 
   const methods = useForm<z.infer<typeof addFriendRequestSchema>>({
     defaultValues: {

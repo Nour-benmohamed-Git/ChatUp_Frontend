@@ -56,7 +56,7 @@ const FriendRequestList: FC<FriendRequestListProps> = (props) => {
   }, [socket]);
 
   return (
-    <PanelContentWrapper hasSearchField height="calc(100% - 7.5rem)">
+    <PanelContentWrapper hasSearchField height="calc(100vh - 12.25rem)">
       {/* <InfiniteScroll
           dataLength={dataSource?.length}
         //   next={fetchMoreData}

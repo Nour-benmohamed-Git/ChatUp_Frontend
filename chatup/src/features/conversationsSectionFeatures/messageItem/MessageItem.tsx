@@ -1,11 +1,11 @@
-import { hardRemoveMessage } from "@/app/_actions/message-actions/hard-remove-message";
-import { softRemoveMessage } from "@/app/_actions/message-actions/soft-remove-message";
+import { hardRemoveMessage } from "@/app/_actions/messageActions/hardRemoveMessage";
+import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
 import Dialog from "@/app/components/dialog/dialog";
 import Menu from "@/app/components/menu/menu";
 import { MenuPosition } from "@/app/components/menu/menu.types";
 import MessagesStatus from "@/app/components/message-status/messages-status";
 import { useSocket } from "@/context/socket-context";
-import { messageActions } from "@/utils/constants/action-lists/message-actions";
+import { messageActions } from "@/utils/constants/action-lists/messageActions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
@@ -18,6 +18,7 @@ import { MessageItemProps } from "./MessageItem.types";
 
 const MessageItem: FC<MessageItemProps> = (props) => {
   const { message, conversationRelatedData } = props;
+  console.log(message);
   const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();

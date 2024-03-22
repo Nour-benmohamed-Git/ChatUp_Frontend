@@ -1,9 +1,9 @@
-import { fetchFriendRequests } from "@/app/_actions/friend-request-actions/fetch-friend-requests";
-import { fetchOwnFriends } from "@/app/_actions/user-actions/fetch-own-friends";
+import { fetchFriendRequests } from "@/app/_actions/friendRequestActions/fetchFriendRequests";
+import { fetchCurrentUser } from "@/app/_actions/userActions/fetchCurrentUser";
+import { fetchOwnFriends } from "@/app/_actions/userActions/fetchOwnFriends";
 import FriendShipManagerContainer from "@/features/FriendShipManagerSectionFeature/friendsContainer/FriendsContainer";
 import type { Metadata } from "next";
 import "../../globals.css";
-import { fetchCurrentUser } from "@/app/_actions/user-actions/fetch-current-user";
 export const metadata: Metadata = {
   title: "ChatUp | Friend Ship Manager",
   description: "Friend Ship Manager",

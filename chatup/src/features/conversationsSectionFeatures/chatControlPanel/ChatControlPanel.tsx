@@ -1,17 +1,16 @@
-import { addConversation } from "@/app/_actions/conversation-actions/add-conversation";
-import { updateConversation } from "@/app/_actions/conversation-actions/update-conversation";
-import { addMessage } from "@/app/_actions/message-actions/add-message";
-import { updateMessage } from "@/app/_actions/message-actions/update-message";
+import { addConversation } from "@/app/_actions/conversationActions/addConversation";
+import { updateConversation } from "@/app/_actions/conversationActions/updateConversation";
+import { addMessage } from "@/app/_actions/messageActions/addMessage";
+import { updateMessage } from "@/app/_actions/messageActions/updateMessage";
 import EmojiPicker from "@/app/components/emoji-picker/emoji-picker";
 import MessageField from "@/app/components/message-field/message-field";
 import { useSocket } from "@/context/socket-context";
 import useAutoSizeTextArea from "@/hooks/useAutoSizeTextArea";
-import { chatControlPanelActions } from "@/utils/constants/action-lists/chat-control-panel-actions";
+import { chatControlPanelActions } from "@/utils/constants/action-lists/chatControlPanelActions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
@@ -24,7 +23,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { socket } = useSocket();
-  const router = useRouter();
   const { watch, setValue } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea(textAreaRef.current, watch("message"));
@@ -77,6 +75,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         const conversation = await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
         });
+        console.log("conversation", conversation);
         if (conversation && conversationRelatedData?.secondMemberId) {
           createMessage(
             conversation.data.id,
