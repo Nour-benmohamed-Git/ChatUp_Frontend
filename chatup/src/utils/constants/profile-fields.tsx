@@ -2,8 +2,9 @@ import { FaMobileAlt } from "react-icons/fa";
 import { FaRegAddressCard } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
 import { MdOutlineDescription } from "react-icons/md";
+import { ProfileField } from "../schemas/update-profile-schema";
 
-export const profileFields = [
+export const profileFields: ProfileField[] = [
   {
     name: "username",
     icon: <FaRegAddressCard size={18} />,

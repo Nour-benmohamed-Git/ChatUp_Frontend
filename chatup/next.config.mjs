@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
+  webpack: (config) => {
+    config.externals = [...config.externals, "canvas", "jsdom"];
+    return config;
+  },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/conversations',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {

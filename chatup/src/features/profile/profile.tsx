@@ -78,15 +78,12 @@ const Profile: FC<ProfileProps> = (props) => {
     >
       <FormProvider {...methods}>
         <BlocContainer
-        title="Profile"
+          title="Profile"
           label="left_container"
           menuActionList={updatedSideBarMenuActions}
           cssClass="p-2 h-[calc(100vh-3.5rem)]"
         >
-          <div
-            className="flex flex-col justify-center h-full"
-
-          >
+          <div className="flex flex-col justify-center h-full">
             <div className="flex flex-col items-center justify-center gap-10 md:gap-6 rounded-md p-2 w-full">
               <ProfilePicture id="profilePicture" name="profilePicture" />
               <div className="flex flex-col gap-2 w-full">
@@ -123,7 +120,7 @@ const Profile: FC<ProfileProps> = (props) => {
                           id={field.name}
                           name={field.name}
                           type={field.type}
-                          placeholder={methods.watch?.[field.name]}
+                          placeholder={methods.getValues(field.name)}
                           autoComplete={field.autoComplete}
                           icon={field.icon}
                         />
@@ -132,7 +129,13 @@ const Profile: FC<ProfileProps> = (props) => {
                       <ProfileListItem
                         key={field.name}
                         icon={field.icon}
-                        value={data?.[field.name]}
+                        value={
+                          data?.[
+                            field.name as keyof z.infer<
+                              typeof updateProfileSchema
+                            >
+                          ]
+                        }
                       />
                     )
                   )}

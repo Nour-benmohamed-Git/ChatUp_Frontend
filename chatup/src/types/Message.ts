@@ -1,6 +1,7 @@
 export interface Message {
   id?: number;
   content?: string;
+  files?: File[];
   senderId?: number;
   receiverId?: number;
   timestamp?: number;

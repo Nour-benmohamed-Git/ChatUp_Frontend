@@ -7,6 +7,7 @@ export const globals = {
   expireIn: 24,
 };
 export const maxFileSize = 5 * 1024 * 1024;
+export const units = ['B', 'KB', 'MB', 'GB', 'TB'];
 export const acceptedImageTypes = [
   "image/jpeg",
   "image/jpg",

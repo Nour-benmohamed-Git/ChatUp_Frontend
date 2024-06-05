@@ -80,9 +80,9 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         scroll={false}
         className={`flex items-center rounded-md gap-4 m-2 px-2 py-3 ${
           pathname === `/conversations/${conversation.id}`
-            ? "bg-gray-600"
+            ? "bg-gray-800"
             : "bg-gray-900"
-        } hover:bg-gray-600`}
+        } hover:bg-gray-800`}
       >
         <Avatar
           additionalClasses="h-12 w-12 rounded-full"

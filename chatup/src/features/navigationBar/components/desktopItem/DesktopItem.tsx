@@ -9,9 +9,9 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   active,
   onClick,
 }) => {
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
-      return onClick();
+      onClick(e);
     }
   };
 
@@ -25,12 +25,12 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
             p-3 
             text-sm 
             font-semibold 
-            text-gold-600 hover:bg-gray-800 shadow-2xl
-            ${active && "bg-gray-800"}
-            transition-all duration-300 ease-in-out
+            text-gold-600 
+            shadow-2xl
+            ${active ? "bg-gray-800" : "hover:bg-gray-800"}
           `}
       >
-        <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+        <Icon className="h-6 w-6 shrink-0  z-50" aria-hidden="true" />
       </Link>
     </li>
   );

@@ -3,15 +3,20 @@ import { updateConversation } from "@/app/_actions/conversationActions/updateCon
 import { addMessage } from "@/app/_actions/messageActions/addMessage";
 import { updateMessage } from "@/app/_actions/messageActions/updateMessage";
 import EmojiPicker from "@/app/components/emoji-picker/emoji-picker";
+import FileDropArea from "@/app/components/fileDropArea/FileDropArea";
+import Menu from "@/app/components/menu/menu";
+import { MenuPosition } from "@/app/components/menu/menu.types";
 import MessageField from "@/app/components/message-field/message-field";
 import { useSocket } from "@/context/socket-context";
 import useAutoSizeTextArea from "@/hooks/useAutoSizeTextArea";
+import { Message } from "@/types/Message";
 import { chatControlPanelActions } from "@/utils/constants/action-lists/chatControlPanelActions";
+import { fileMenuActions } from "@/utils/constants/action-lists/fileMenuActions";
 import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { motion } from "framer-motion";
-import { FC, memo, useRef, useState } from "react";
+import { FC, RefObject, memo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
@@ -20,39 +25,88 @@ import { ChatControlPanelProps } from "./ChatControlPanel.types";
 
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { conversationRelatedData } = props;
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showDocumentsUploadPanel, setShowDocumentsUploadPanel] =
+    useState(false);
   const { socket } = useSocket();
-  const { watch, setValue } = useFormContext();
+  const { watch, reset, getValues, setValue } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  useAutoSizeTextArea(textAreaRef.current, watch("message"));
+  useAutoSizeTextArea(textAreaRef.current, getValues("message"));
   const openEmojiPicker = () => {
     setShowEmojiPicker(true);
   };
   const closeEmojiPicker = () => {
     setShowEmojiPicker(false);
   };
-  const onClickFunctions: { [key: string]: () => void } = {
-    emojiPicker: () => openEmojiPicker(),
-    addFiles: () => console.log("add files"),
+  const handleOpenMenu = () => {
+    setIsOpenMenu(true);
+  };
+  const handleCloseMenu = () => {
+    setIsOpenMenu(false);
+  };
+  const additionalParams: {
+    [key: string]: { onClick: () => void; ref?: RefObject<HTMLDivElement> };
+  } = {
+    emojiPicker: { onClick: () => openEmojiPicker() },
+    addFiles: { onClick: handleOpenMenu, ref: buttonRef },
   };
 
   const updatedChatControlPanelActions = chatControlPanelActions.map(
     (action) => ({
       ...action,
-      onClick: onClickFunctions[action.label],
+      onClick: additionalParams[action.label].onClick,
+      ref: additionalParams[action.label].ref,
     })
   );
+  const handleSendLocation = () => {
+    console.log("location");
+  };
+  const handleUploadDocuments = () => {
+    console.log("second");
+    setShowDocumentsUploadPanel(true);
+  };
+  const handleClosePhotosAndVideosUpload = () => {
+    setShowDocumentsUploadPanel(false);
+    setValue("files", []);
+  };
+  const handleCameraUpload = () => {
+    console.log("second");
+  };
+  const onClickFunctions: { [key: string]: () => void } = {
+    location: handleSendLocation,
+    documents: handleUploadDocuments,
+    camera: handleCameraUpload,
+  };
+
+  const updatedFileMenuActions = fileMenuActions.map((action) => ({
+    ...action,
+    onClick: onClickFunctions[action.label],
+  }));
   const createMessage = async (
     chatSessionId: number,
     participantsData?: { [userId: string]: string }
   ) => {
-    await addMessage({
-      content: watch("message"),
+    const messageToCreate: Message = {
+      content: getValues("message"),
+      files: getValues("files"),
       senderId: currentUserId,
       receiverId: conversationRelatedData?.secondMemberId as number,
       chatSessionId,
-    })
+    };
+
+    const formData = new FormData();
+    Object.entries(messageToCreate).forEach(([key, value]) => {
+      if (key !== "files") {
+        formData.append(key, value);
+      }
+    });
+    messageToCreate.files?.forEach((file) => {
+      formData.append("files", file);
+    });
+    await addMessage(formData)
       .then((res) => {
         socket &&
           emitMessage(socket, {
@@ -60,22 +114,21 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             message: res?.data,
             participantsData: participantsData,
           });
-        setValue("message", "");
+        reset();
       })
       .catch((error) => {
         toast.error(error);
       });
   };
   const handleSendMessage = async () => {
-    if (!watch("message")) {
+    if (!getValues("message") && !getValues("files")) {
       return;
     }
-    if (!watch("id")) {
+    if (!getValues("id")) {
       if (!conversationRelatedData.conversationId) {
         const conversation = await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
         });
-        console.log("conversation", conversation);
         if (conversation && conversationRelatedData?.secondMemberId) {
           createMessage(
             conversation.data.id,
@@ -93,10 +146,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           );
         }
       } else {
-        if (
-          conversationRelatedData?.conversationId &&
-          conversationRelatedData?.deletedByCurrentUser
-        ) {
+        if (conversationRelatedData?.deletedByCurrentUser) {
           const conversation = await updateConversation(
             conversationRelatedData.conversationId as number
           );
@@ -106,11 +156,11 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         }
       }
     } else {
-      updateMessage(watch("id"), watch("message"));
+      updateMessage(getValues("id"), getValues("message"));
     }
   };
   return (
-    <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5 rounded-t-md ">
+    <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
       <div className="flex items-center justify-center h-full w-full gap-5">
         {showEmojiPicker ? (
           <motion.div
@@ -123,10 +173,28 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
           </motion.div>
         ) : null}
+
+        {showDocumentsUploadPanel ? (
+          <motion.div
+            initial="closed"
+            animate={showDocumentsUploadPanel ? "open" : "closed"}
+            variants={{ open: { y: 0 }, closed: { y: "100%" } }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            className={
+              "z-50 absolute bottom-0 left-0 w-full h-[calc(100vh-4rem)] bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
+            }
+          >
+            <FileDropArea
+              onClose={handleClosePhotosAndVideosUpload}
+              handleSendMessage={handleSendMessage}
+            />
+          </motion.div>
+        ) : null}
         <div className="flex gap-7 h-full">
           {updatedChatControlPanelActions.map((action) => (
             <button key={action.label} onClick={action.onClick}>
               <motion.div
+                ref={action.ref}
                 transition={{
                   type: "spring",
                   stiffness: 120,
@@ -163,6 +231,14 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           </button>
         )}
       </div>
+
+      <Menu
+        actionList={updatedFileMenuActions}
+        isOpen={isOpenMenu}
+        onClose={handleCloseMenu}
+        buttonRef={buttonRef}
+        position={MenuPosition.TOP_RIGHT}
+      />
     </div>
   );
 };

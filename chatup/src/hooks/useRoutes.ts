@@ -4,17 +4,18 @@ import { useMemo } from "react";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { IoChatboxEllipses, IoPeople } from "react-icons/io5";
 import { TbLogout2 } from "react-icons/tb";
+import useConversation from "./useConversation";
 export const labelsWithBadge = ["chat", "friends"];
 const useRoutes = () => {
   const pathname = usePathname();
-
+  const { isOpen } = useConversation();
   const routes = useMemo(
     () => [
       {
         label: "chat",
         href: "/conversations",
         icon: IoChatboxEllipses,
-        active: pathname === "/conversations",
+        active: pathname === "/conversations" || isOpen,
       },
       {
         label: "friends",
@@ -35,7 +36,7 @@ const useRoutes = () => {
         icon: TbLogout2,
       },
     ],
-    [pathname]
+    [pathname, isOpen]
   );
 
   return routes;

@@ -2,6 +2,6 @@ export interface DesktopItemProps {
   label: string;
   icon: any;
   href: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   active?: boolean;
 }

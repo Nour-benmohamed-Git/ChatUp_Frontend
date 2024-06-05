@@ -10,7 +10,8 @@ import { MenuPosition } from "../menu/menu.types";
 import { HeaderProps } from "./header.types";
 
 const Header: FC<HeaderProps> = (props) => {
-  const { actions, toggleHandlers, label, userData, menuActionList,title } = props;
+  const { actions, toggleHandlers, label, userData, menuActionList, title } =
+    props;
   const router = useRouter();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
@@ -21,7 +22,7 @@ const Header: FC<HeaderProps> = (props) => {
     setIsOpenMenu(false);
   };
   return (
-    <header className="sticky top-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5 rounded-b-md">
+    <header className="sticky top-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5">
       <div className="flex items-center justify-between h-full gap-2">
         {label === "right_container" ? (
           <button
@@ -41,7 +42,6 @@ const Header: FC<HeaderProps> = (props) => {
               additionalClasses="h-10 w-10 rounded-full"
               fileName={userData?.profilePicture}
             />
-
             <ConversationHeaderUserInfo
               username={userData?.username}
               lastSeen="today"

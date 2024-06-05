@@ -1,6 +1,7 @@
 import { hardRemoveMessage } from "@/app/_actions/messageActions/hardRemoveMessage";
 import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
 import Dialog from "@/app/components/dialog/dialog";
+import FileDisplay from "@/app/components/fileDisplay/FileDisplay";
 import Menu from "@/app/components/menu/menu";
 import { MenuPosition } from "@/app/components/menu/menu.types";
 import MessagesStatus from "@/app/components/message-status/messages-status";
@@ -10,15 +11,16 @@ import { globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookies-helpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { FC, memo, useRef, useState } from "react";
+import { FC, memo, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { toast } from "sonner";
 import { MessageItemProps } from "./MessageItem.types";
+import { getUserById } from "@/app/_actions/userActions/getUserById";
+import { UserResponse } from "@/types/User";
 
 const MessageItem: FC<MessageItemProps> = (props) => {
   const { message, conversationRelatedData } = props;
-  console.log(message);
   const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
@@ -26,6 +28,8 @@ const MessageItem: FC<MessageItemProps> = (props) => {
   const [isOpenSoftRemove, setIsOpenSoftRemove] = useState(false);
   const [isOpenHardRemove, setIsOpenHardRemove] = useState(false);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const [senderData, setSenderData] = useState<UserResponse>();
+
   const handleOpenMenu = () => {
     setIsOpenMenu(true);
   };
@@ -94,6 +98,15 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       closeHardRemoveModal();
     }
   };
+
+  const getSenderData = async (senderId: string) => {
+    const res = await getUserById(`${message.senderId}`);
+    setSenderData(res.data);
+  };
+
+  useEffect(() => {
+    getSenderData(`${message.senderId}`);
+  }, [message.senderId]);
   return (
     <>
       {isOpenSoftRemove && (
@@ -140,30 +153,33 @@ const MessageItem: FC<MessageItemProps> = (props) => {
               : "flex-row-reverse"
           } gap-2`}
         >
-          <div className="flex flex-col">
-            <div
-              className={`rounded-xl p-4 max-w-xs md:max-w-sm break-words shadow-md ${
-                currentUserId && message.senderId != currentUserId
-                  ? "bg-gold-400 text-gray-950 rounded-tl-none"
-                  : "bg-slate-900 text-white rounded-tr-none"
-              }`}
-            >
-              <p className="text-sm">{message.content}</p>
-              <div className="flex items-center justify-end gap-2">
-                <span
-                  className={`flex flex-row-reverse text-xs mt-2 ${
-                    currentUserId && message.senderId != currentUserId
-                      ? "text-slate-500"
-                      : "text-gold-900"
-                  }`}
-                >
-                  {formatMessageDate(message.timestamp)}
-                </span>
-                <MessagesStatus
-                  currentUserId={currentUserId}
-                  message={message}
-                />
-              </div>
+          <div
+            className={`rounded-xl p-4 max-w-xs md:max-w-sm break-words shadow-md ${
+              currentUserId && message.senderId != currentUserId
+                ? "bg-gold-400 text-gray-950 rounded-tl-none"
+                : "bg-slate-900 text-white rounded-tr-none"
+            }`}
+          >
+            <FileDisplay
+              files={message?.files}
+              messageDetails={{
+                senderPicture: senderData?.profilePicture,
+                senderName: senderData?.username as string,
+                timestamp: message.timestamp,
+              }}
+            />
+            <p className="text-sm">{message?.content}</p>
+            <div className="flex items-center justify-end gap-2">
+              <span
+                className={`flex flex-row-reverse text-xs mt-2 ${
+                  currentUserId && message.senderId != currentUserId
+                    ? "text-slate-500"
+                    : "text-gold-900"
+                }`}
+              >
+                {formatMessageDate(message.timestamp)}
+              </span>
+              <MessagesStatus currentUserId={currentUserId} message={message} />
             </div>
           </div>
           <div

@@ -9,7 +9,7 @@ const FriendItem: FC<FriendItemProps> = (props) => {
     <div
       role="button"
       onClick={() => handleCreateNewChat(userData.id)}
-      className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-600"
+      className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"
     >
       <Avatar
         additionalClasses="h-12 w-12 rounded-full"

@@ -93,64 +93,67 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     acc[key] = { togglePanel: panels[key].togglePanel };
     return acc;
   }, {} as Record<string, { togglePanel: () => void }>);
-  const methods = useForm<{ id?: number; message: string }>({
+  const methods = useForm<{ id?: number; message: string; files?: File[] }>({
     defaultValues: {
       message: "",
+      files: [],
     },
     resolver: zodResolver(schema),
   });
   return (
-    <>{openDialog && (
-      <Dialog
-        title="Remove Conversation"
-        onClose={closeModal}
-        actions={[
-          {
-            label: "remove",
-            onClick: handleRemoveConversation,
-            category: "dismissal",
-          },
-        ]}
+    <>
+      {openDialog && (
+        <Dialog
+          title="Remove Conversation"
+          onClose={closeModal}
+          actions={[
+            {
+              label: "remove",
+              onClick: handleRemoveConversation,
+              category: "dismissal",
+            },
+          ]}
+        >
+          Are you sure you want to remove this chat session?
+        </Dialog>
+      )}
+      <main
+        id="main_content"
+        className={`${
+          isOpen ? "flex flex-col" : "hidden"
+        } md:flex md:flex-col md:col-span-7 lg:col-span-8 h-full`}
       >
-        Are you sure you want to remove this chat session?
-      </Dialog>
-    )}
-    <main
-      id="main_content"
-      className={`${
-        isOpen ? "flex flex-col" : "hidden"
-      } md:flex md:flex-col md:col-span-7 lg:col-span-8 h-full`}
-    >
-      {Object.entries(panels).map(([key, panel]) => (
-        <SlidingPanel
-          key={key}
-          isOpen={panel.isOpen}
-          togglePanel={panel.togglePanel}
-          panelRef={panel.panelRef}
-          fromSide={panel.fromSide}
-          title={panel.title}
-        >
-          {panel.children}
-        </SlidingPanel>
-      ))}
-      <FormProvider {...methods}>
-        <BlocContainer
-          actions={conversationActions}
-          hasChatControlPanel
-          toggleHandlers={toggleHandlers}
-          label="right_container"
-          menuActionList={updatedConversationMenuActions}
-          conversationRelatedData={conversationRelatedData}
-          userData={userData}
-          cssClass="h-[calc(100vh-8rem)]"
-        >
-          <MessageList
+        {Object.entries(panels).map(([key, panel]) => (
+          <SlidingPanel
+            key={key}
+            isOpen={panel.isOpen}
+            togglePanel={panel.togglePanel}
+            panelRef={panel.panelRef}
+            fromSide={panel.fromSide}
+            title={panel.title}
+          >
+            {panel.children}
+          </SlidingPanel>
+        ))}
+        <FormProvider {...methods}>
+          <BlocContainer
+            actions={conversationActions}
+            hasChatControlPanel
+            toggleHandlers={toggleHandlers}
+            label="right_container"
+            menuActionList={updatedConversationMenuActions}
             conversationRelatedData={conversationRelatedData}
-            initialMessages={initialMessages}
-          />
-        </BlocContainer>
-      </FormProvider>
-    </main></>
+            userData={userData}
+            cssClass="h-[calc(100vh-8rem)]"
+          >
+            <MessageList
+              conversationRelatedData={conversationRelatedData}
+              initialMessages={initialMessages}
+            />
+          </BlocContainer>
+        </FormProvider>
+      </main>
+    </>
   );
 };
 export default memo(SelectedConversation);

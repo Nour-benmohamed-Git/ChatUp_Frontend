@@ -3,9 +3,9 @@
 import { Message } from "@/types/Message";
 import { fetchFromServer } from "../fetchFromServer";
 
-export async function addMessage(data: Message) {
-  return fetchFromServer<{ data: Message }, Message>("/api/messages", {
+export async function addMessage(formData: FormData) {
+  return fetchFromServer<{ data: Message }, FormData>("/api/messages", {
     method: "POST",
-    body: data,
+    body: formData,
   });
 }

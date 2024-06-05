@@ -61,3 +61,7 @@ export const renderDateChip = (
   // For older messages, just display the date
   return <Chip content={messageDay.format("MMM D, YYYY")} />;
 };
+
+export const compactDateAndTimeFormatter = (timestamp: number) => {
+  return dayjs(timestamp * 1000).format("MMMM D, YYYY [at] hh:mm A");
+};

@@ -14,3 +14,9 @@ export const updateProfileSchema = z.object({
     // )
     // .refine((file) => file?.size <= maxFileSize, `Max image size is 5MB.`),
   });
+  export type ProfileField = {
+    name: keyof z.infer<typeof updateProfileSchema>;
+    icon: JSX.Element;
+    type: string;
+    autoComplete: string;
+  };

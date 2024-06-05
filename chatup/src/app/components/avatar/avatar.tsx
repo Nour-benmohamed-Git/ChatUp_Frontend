@@ -5,9 +5,7 @@ import avatar from "../../../../public/avatar.svg";
 import { AvatarProps } from "./avatar.types";
 const Avatar: FC<AvatarProps> = (props) => {
   const { additionalClasses, fileName } = props;
-
   const [imageBlur, setImageBlur] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchImageBlur = async () => {
       try {
@@ -34,7 +32,7 @@ const Avatar: FC<AvatarProps> = (props) => {
             ? `${environment.baseUrl}/uploads/${fileName}`
             : avatar
         }
-        alt="User profile image"
+        alt="image"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         style={{ objectFit: "cover" }}
         fill

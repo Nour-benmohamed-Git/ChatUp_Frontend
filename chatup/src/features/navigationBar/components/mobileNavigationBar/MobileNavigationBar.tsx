@@ -1,7 +1,7 @@
 import Badge from "@/app/components/badge/Badge";
 import useConversation from "@/hooks/useConversation";
 import { labelsWithBadge } from "@/hooks/useRoutes";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { NavigationBarProps } from "../desktopNavigationBar/NavigationBar.types";
 import MobileItem from "../mobileItem/MobileItem";
 import MobileProfileItem from "../mobileProfileItem/MobileProfileItem";
@@ -59,4 +59,4 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
   );
 };
 
-export default MobileNavigationBar;
+export default memo(MobileNavigationBar);

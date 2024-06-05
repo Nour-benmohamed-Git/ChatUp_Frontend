@@ -16,7 +16,7 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext);
 
 import environment from "@/utils/config/environment";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SocketProvider: React.FC<SocketProviderProps> = (props) => {
   const { children, token } = props;
