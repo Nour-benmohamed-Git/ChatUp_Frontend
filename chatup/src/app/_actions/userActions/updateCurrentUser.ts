@@ -1,12 +1,23 @@
 "use server";
 
 import { UserResponse } from "@/types/User";
-import { fetchFromServer } from "../fetchFromServer";
+import { updateProfileSchema } from "@/utils/schemas/updateProfileSchema";
+import { FetchError, fetchFromServer } from "../fetchFromServer";
 
-export async function updateCurrentUser(formData: FormData) {
-  return fetchFromServer<{ data: UserResponse }, FormData>(
-    `/api/current-user`,
-    { method: "PATCH", body: formData },
-    { tag: "currentUser" }
-  );
-}
+export const updateCurrentUser = async (
+  currentState: { error: FetchError } | null = null,
+  data: FormData
+) => {
+  const values = Object.fromEntries(data);
+  const parsedData = updateProfileSchema.safeParse(values);
+
+  if (parsedData.success) {
+    return fetchFromServer<{ data: UserResponse }, FormData>(
+      `/api/current-user`,
+      {
+        method: "PATCH",
+        body: data,
+      }
+    );
+  }
+};

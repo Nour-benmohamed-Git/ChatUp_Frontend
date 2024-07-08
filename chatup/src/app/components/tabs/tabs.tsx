@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { TabsProps } from "./tabs.types";
+import { TabsProps } from "./Tabs.types";
 
 const Tabs: React.FC<TabsProps> = ({ tabs }) => {
   const [activeTab, setActiveTab] = useState(tabs[0].key);

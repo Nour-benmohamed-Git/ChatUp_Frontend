@@ -1,4 +1,4 @@
-import { logout } from "@/app/_actions/auth-actions/logout";
+import { logout } from "@/app/_actions/authActions/logout";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { BsPersonFillAdd } from "react-icons/bs";

@@ -8,7 +8,12 @@ export interface Message {
   edited?: boolean;
   readStatus?: boolean;
   chatSessionId?: number;
-  groupId?: number;
 }
 
-export type Messages = { data: Message[] };
+export type Messages = {
+  data: Message[];
+  total: number;
+  newCursor: { earliest?: number; latest?: number };
+  hasMoreBefore: boolean;
+  hasMoreAfter: boolean;
+};

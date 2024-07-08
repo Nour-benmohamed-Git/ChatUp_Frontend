@@ -1,4 +1,5 @@
 import { compactDateAndTimeFormatter } from "@/utils/helpers/dateHelpers";
+import { downloadFile } from "@/utils/helpers/sharedHelpers";
 import { motion } from "framer-motion";
 import { FC, memo, useEffect, useRef, useState } from "react";
 import {
@@ -8,18 +9,20 @@ import {
   IoMdDownload,
 } from "react-icons/io";
 import { RiShareForwardFill } from "react-icons/ri";
-import Avatar from "../avatar/avatar";
+import Avatar from "../avatar/Avatar";
 import FileIcon from "../fileIcon/FileIcon";
 import FileViewerHeaderInfo from "../fileViewerHeaderInfo/FileViewerHeaderInfo";
 import { FileViewerProps } from "./FileViewer.types";
-import { downloadFile } from "@/utils/helpers/sharedHelpers";
 
 const FileViewer: FC<FileViewerProps> = ({
   files,
   onClose,
   messageDetails,
+  initialSelectedFileIndex,
 }) => {
-  const [selectedFileIndex, setSelectedFileIndex] = useState<number>(0);
+  const [selectedFileIndex, setSelectedFileIndex] = useState<number>(
+    initialSelectedFileIndex || 0
+  );
   const fileListRef = useRef<HTMLUListElement>(null);
 
   const slideLeft = () => {
@@ -105,7 +108,7 @@ const FileViewer: FC<FileViewerProps> = ({
           </button>
         </div>
       </div>
-      <div className="h-[calc(100%-2.75rem)] rounded-lg shadow-lg  p-4 flex flex-col items-center justify-center">
+      <div className="h-[calc(100%-2.75rem)] rounded-md shadow-lg  p-4 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center justify-between h-full w-full">
           <div className="relative flex items-center justify-center w-full">
             <motion.button

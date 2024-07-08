@@ -1,13 +1,14 @@
-import { avatarActions } from "@/utils/constants/action-lists/avatarActions";
+import { avatarActions } from "@/utils/constants/actionLists/avatarActions";
 import { useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import Avatar from "../avatar/avatar";
-import ConversationHeaderUserInfo from "../conversation-header-user-info/conversation-header-user-info";
-import Menu from "../menu/menu";
-import { MenuPosition } from "../menu/menu.types";
-import { HeaderProps } from "./header.types";
+import Avatar from "../avatar/Avatar";
+import ConversationHeaderUserInfo from "../conversationHeaderUserInfo/ConversationHeaderUserInfo";
+import Menu from "../menu/Menu";
+
+import { HeaderProps } from "./Header.types";
+import { MenuPosition } from "@/utils/constants/globals";
 
 const Header: FC<HeaderProps> = (props) => {
   const { actions, toggleHandlers, label, userData, menuActionList, title } =

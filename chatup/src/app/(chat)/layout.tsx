@@ -1,10 +1,9 @@
-import SocketProvider from "@/context/socket-context";
+import SocketProvider from "@/context/SocketContext";
 import NavigationBar from "@/features/navigationBar/NavigationBar";
-import { globals } from "@/utils/constants/globals";
+import { ConversationsResponse } from "@/types/ChatSession";
+import { UserResponse } from "@/types/User";
 import type { Metadata } from "next";
-import { getUnseenConversationsCount } from "../_actions/conversationActions/getUnseenConversationsCount";
-import { getUnseenFriendRequestsCount } from "../_actions/friendRequestActions/getUnseenFriendRequestsCount";
-import { getCookie } from "../_actions/sharedActions/getCookie";
+import { fetchConversations } from "../_actions/conversationActions/fetchConversations";
 import { fetchCurrentUser } from "../_actions/userActions/fetchCurrentUser";
 import "../globals.css";
 export const metadata: Metadata = {
@@ -17,26 +16,23 @@ export default async function ConversationsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const token = await getCookie(globals.tokenKey);
   const currentUserPromise = await fetchCurrentUser();
-  const unseenConversationsCountPromise = await getUnseenConversationsCount();
-  const unseenFriendRequestsCountPromise = await getUnseenFriendRequestsCount();
+  const conversationsPromise = await fetchConversations();
 
-  const [currentUser, unseenConversationsCount, unseenFriendRequestsCount] =
-    await Promise.all([
-      currentUserPromise,
-      unseenConversationsCountPromise,
-      unseenFriendRequestsCountPromise,
-    ]);
+  const [currentUser, conversations] = await Promise.all([
+    currentUserPromise,
+    conversationsPromise,
+    ,
+  ]);
   return (
     <div className="h-screen grid grid-cols-1 md:grid-cols-12">
-      <SocketProvider token={token}>
+      <SocketProvider>
         <NavigationBar
-          currentUser={currentUser?.data}
+          currentUser={(currentUser as { data: UserResponse })?.data}
           initialUnseenConversationsCount={
-            (unseenConversationsCount as { data: number }).data
+            (conversations as ConversationsResponse).unseenCount
           }
-          initialUnseenFriendRequestsCount={unseenFriendRequestsCount.data}
+          initialUnseenFriendRequestsCount={6}
         />
         {children}
       </SocketProvider>

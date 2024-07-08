@@ -2,19 +2,23 @@ import { Message } from "./Message";
 
 export interface ConversationResponse {
   id: number;
-  participantsData: { [userId: string]: string };
-  creationDate?: number;
-  lastActiveDate?: number;
+  type: 0 | 1;
   title?: string;
   image?: string;
-  lastMessage?: Message;
+  participantsData: { [userId: string]: string };
+  creationDate: number;
+  lastActiveDate: number;
+  lastMessage?: {
+    content: string;
+    timestamp: number;
+  };
   deletedByCurrentUser?: boolean;
   senderId?: number;
-  unreadMessages?: { [userId: number]: number[] };
+  unreadMessagesCount?: number;
   seen?: boolean;
-
 }
 export type ConversationsResponse = {
   data: ConversationResponse[];
   total: number;
+  unseenCount: number;
 };

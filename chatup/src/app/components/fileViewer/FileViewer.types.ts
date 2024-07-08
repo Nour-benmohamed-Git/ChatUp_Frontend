@@ -6,4 +6,5 @@ export interface FileViewerProps {
     senderName: string;
     timestamp?: number;
   };
+  initialSelectedFileIndex?: number;
 }

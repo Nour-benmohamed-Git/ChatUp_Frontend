@@ -14,7 +14,7 @@ import { MdCloudUpload, MdOutlineAdd } from "react-icons/md";
 import { RiCloseLine, RiSendPlaneFill } from "react-icons/ri";
 import FilePicker from "../filePicker/FilePicker";
 import ImagePicker from "../imagePicker/ImagePicker";
-import MessageField from "../message-field/message-field";
+import MessageField from "../messageField/MessageField";
 import VideoPicker from "../videoPicker/VideoPicker";
 import { FileDropAreaProps } from "./FileDropArea.types";
 
@@ -135,7 +135,7 @@ const FileDropArea: FC<FileDropAreaProps> = ({
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="h-[calc(100%-2.75rem)] rounded-lg shadow-lg border border-dashed border-gray-400 hover:border-gold-700 p-4 flex flex-col items-center justify-center"
+        className="h-[calc(100%-2.75rem)] rounded-md shadow-lg border border-dashed border-gray-400 hover:border-gold-700 p-4 flex flex-col items-center justify-center"
       >
         {watch("files").length === 0 ? (
           <div className="flex flex-col items-center space-y-4 max-w-full">

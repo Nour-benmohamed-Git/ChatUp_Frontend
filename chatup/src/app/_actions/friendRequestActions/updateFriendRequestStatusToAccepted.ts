@@ -6,7 +6,7 @@ import { fetchFromServer } from "../fetchFromServer";
 export async function updateFriendRequestStatusToAccepted(
   friendRequestId: number
 ) {
-  return fetchFromServer<{ data: FriendRequestResponse }>(
+  return fetchFromServer<{ data: FriendRequestResponse }, FormData>(
     `/api/friendRequests/${friendRequestId}/accept`,
     { method: "PATCH" },
     { tag: "requests" }

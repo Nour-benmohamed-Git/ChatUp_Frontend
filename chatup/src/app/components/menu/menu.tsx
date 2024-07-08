@@ -1,6 +1,7 @@
+import { MenuPosition } from "@/utils/constants/globals";
 import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { MenuPosition, MenuProps } from "./menu.types";
+import { MenuProps } from "./Menu.types";
 
 const Menu: React.FC<MenuProps> = ({
   actionList,

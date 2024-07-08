@@ -2,7 +2,8 @@ import environment from "@/utils/config/environment";
 import Image from "next/image";
 import { FC, memo, useEffect, useState } from "react";
 import avatar from "../../../../public/avatar.svg";
-import { AvatarProps } from "./avatar.types";
+import { AvatarProps } from "./Avatar.types";
+
 const Avatar: FC<AvatarProps> = (props) => {
   const { additionalClasses, fileName } = props;
   const [imageBlur, setImageBlur] = useState<string | null>(null);

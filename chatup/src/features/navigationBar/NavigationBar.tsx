@@ -1,5 +1,5 @@
 "use client";
-import { useSocket } from "@/context/socket-context";
+import { useSocket } from "@/context/SocketContext";
 import useRoutes, { labelsWithBadge } from "@/hooks/useRoutes";
 import { FC, memo, useEffect, useState } from "react";
 import { toast } from "sonner";

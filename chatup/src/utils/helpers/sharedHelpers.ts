@@ -67,3 +67,4 @@ export const downloadFile = async (fileName: string) => {
     toast.error("An error occurred while downloading the file.");
   }
 };
+

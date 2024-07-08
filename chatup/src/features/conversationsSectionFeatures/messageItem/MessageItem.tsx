@@ -1,26 +1,24 @@
 import { hardRemoveMessage } from "@/app/_actions/messageActions/hardRemoveMessage";
 import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
-import Dialog from "@/app/components/dialog/dialog";
+import Dialog from "@/app/components/dialog/Dialog";
 import FileDisplay from "@/app/components/fileDisplay/FileDisplay";
-import Menu from "@/app/components/menu/menu";
-import { MenuPosition } from "@/app/components/menu/menu.types";
-import MessagesStatus from "@/app/components/message-status/messages-status";
-import { useSocket } from "@/context/socket-context";
-import { messageActions } from "@/utils/constants/action-lists/messageActions";
-import { globals } from "@/utils/constants/globals";
-import { getItem } from "@/utils/helpers/cookies-helpers";
+import Menu from "@/app/components/menu/Menu";
+import MessageStatus from "@/app/components/messageStatus/MessageStatus";
+import { useSocket } from "@/context/SocketContext";
+import { messageActions } from "@/utils/constants/actionLists/messageActions";
+import { MenuPosition, globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { FC, memo, useEffect, useRef, useState } from "react";
+import { FC, memo, useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { BiDotsVerticalRounded } from "react-icons/bi";
+import { BiDotsVerticalRounded, BiPencil } from "react-icons/bi";
 import { toast } from "sonner";
+import styles from "./MessageItem.module.css";
 import { MessageItemProps } from "./MessageItem.types";
-import { getUserById } from "@/app/_actions/userActions/getUserById";
-import { UserResponse } from "@/types/User";
 
 const MessageItem: FC<MessageItemProps> = (props) => {
-  const { message, conversationRelatedData } = props;
+  const { message, conversationRelatedData, highlight, isHighlighted } = props;
   const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
@@ -28,7 +26,6 @@ const MessageItem: FC<MessageItemProps> = (props) => {
   const [isOpenSoftRemove, setIsOpenSoftRemove] = useState(false);
   const [isOpenHardRemove, setIsOpenHardRemove] = useState(false);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
-  const [senderData, setSenderData] = useState<UserResponse>();
 
   const handleOpenMenu = () => {
     setIsOpenMenu(true);
@@ -65,12 +62,12 @@ const MessageItem: FC<MessageItemProps> = (props) => {
   };
 
   const updatedMessageActions = messageActions
-    // .filter((action) => {
-    //   if (message.senderId === conversationRelatedData.secondMemberId) {
-    //     return action.label !== "softRemove";
-    //   }
-    //   return true;
-    // })
+    .filter((action) => {
+      if (currentUserId && message.senderId !== currentUserId) {
+        return !["edit", "hardRemove"].includes(action.label);
+      }
+      return true;
+    })
     .map((action) => ({
       ...action,
       onClick: onClickFunctions[action.label],
@@ -98,15 +95,30 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       closeHardRemoveModal();
     }
   };
+  const getHighlightedText = (text: string, highlight: string) => {
+    if (!highlight) return [text]; // Return the entire text if no highlight is provided
 
-  const getSenderData = async (senderId: string) => {
-    const res = await getUserById(`${message.senderId}`);
-    setSenderData(res.data);
+    const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
+    const regex = new RegExp(`(${escapedHighlight})`, "gi"); // Remove word boundary to match partial words
+
+    // Split text into parts based on the regex
+    const parts = text.split(regex);
+
+    // Map through parts to apply highlighting
+    return parts.map((part, index) =>
+      regex.test(part.toLowerCase()) ? (
+        <span key={index} className="bg-indigo-500">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
   };
-
-  useEffect(() => {
-    getSenderData(`${message.senderId}`);
-  }, [message.senderId]);
+  const messageContent = useMemo(
+    () => getHighlightedText(message.content || "", highlight || ""),
+    [message.content, highlight]
+  );
   return (
     <>
       {isOpenSoftRemove && (
@@ -158,17 +170,16 @@ const MessageItem: FC<MessageItemProps> = (props) => {
               currentUserId && message.senderId != currentUserId
                 ? "bg-gold-400 text-gray-950 rounded-tl-none"
                 : "bg-slate-900 text-white rounded-tr-none"
-            }`}
+            } ${isHighlighted ? styles.animatePulseOnce : ""}`}
           >
             <FileDisplay
               files={message?.files}
               messageDetails={{
-                senderPicture: senderData?.profilePicture,
-                senderName: senderData?.username as string,
+                senderId: message?.senderId,
                 timestamp: message.timestamp,
               }}
             />
-            <p className="text-sm">{message?.content}</p>
+            <p className="text-sm">{messageContent}</p>
             <div className="flex items-center justify-end gap-2">
               <span
                 className={`flex flex-row-reverse text-xs mt-2 ${
@@ -179,7 +190,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
               >
                 {formatMessageDate(message.timestamp)}
               </span>
-              <MessagesStatus currentUserId={currentUserId} message={message} />
+              <MessageStatus currentUserId={currentUserId} message={message} />
             </div>
           </div>
           <div
@@ -190,6 +201,11 @@ const MessageItem: FC<MessageItemProps> = (props) => {
           >
             <BiDotsVerticalRounded size={20} />
           </div>
+          {message.edited && (
+            <div className="flex justify-center items-center rounded-full h-8 w-8 text-gold-900">
+              <BiPencil size={20} />
+            </div>
+          )}
         </div>
       </div>
       <Menu

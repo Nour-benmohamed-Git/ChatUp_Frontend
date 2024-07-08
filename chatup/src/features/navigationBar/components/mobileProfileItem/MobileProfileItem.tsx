@@ -1,4 +1,4 @@
-import Avatar from "@/app/components/avatar/avatar";
+import Avatar from "@/app/components/avatar/Avatar";
 import Link from "next/link";
 import { FC, memo } from "react";
 import { MobileProfileItemProps } from "./MobileProfileItem.types";

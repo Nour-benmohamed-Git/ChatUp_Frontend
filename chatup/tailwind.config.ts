@@ -1,5 +1,10 @@
 import type { Config } from "tailwindcss";
-import colors from "tailwindcss/colors";
+const colors = require("tailwindcss/colors");
+delete colors["lightBlue"];
+delete colors["warmGray"];
+delete colors["trueGray"];
+delete colors["coolGray"];
+delete colors["blueGray"];
 
 const config: Config = {
   content: [

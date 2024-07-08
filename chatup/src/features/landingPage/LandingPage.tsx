@@ -1,4 +1,4 @@
-import Logo from "@/app/components/logo/logo";
+import Logo from "@/app/components/logo/Logo";
 import { FC } from "react";
 
 const LandingPage: FC = () => {

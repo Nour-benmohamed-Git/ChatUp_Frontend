@@ -1,7 +1,7 @@
 import { updateFriendRequestStatusToAccepted } from "@/app/_actions/friendRequestActions/updateFriendRequestStatusToAccepted";
 import { updateFriendRequestStatusToDeclined } from "@/app/_actions/friendRequestActions/updateFriendRequestStatusToDeclined";
-import Avatar from "@/app/components/avatar/avatar";
-import { useSocket } from "@/context/socket-context";
+import Avatar from "@/app/components/avatar/Avatar";
+import { useSocket } from "@/context/SocketContext";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
 import { FC, memo } from "react";
@@ -17,10 +17,10 @@ const FriendRequestItem: FC<FriendRequestItemProps> = (props) => {
     updateFriendRequestStatusToAccepted(friendRequestData.id as number)
       .then(() => {
         socket &&
-        emitFriendRequest(socket, {
-          action: "accept",
-          friendRequest: friendRequestData,
-        });
+          emitFriendRequest(socket, {
+            action: "accept",
+            friendRequest: friendRequestData,
+          });
         toast.success("Friend request accepted.");
       })
       .catch((error) => {
@@ -32,10 +32,10 @@ const FriendRequestItem: FC<FriendRequestItemProps> = (props) => {
     updateFriendRequestStatusToDeclined(friendRequestData.id as number)
       .then(() => {
         socket &&
-        emitFriendRequest(socket, {
-          action: "decline",
-          friendRequest: friendRequestData,
-        });
+          emitFriendRequest(socket, {
+            action: "decline",
+            friendRequest: friendRequestData,
+          });
         toast.success("Friend request declined.");
       })
       .catch((error) => {

@@ -1,5 +1,5 @@
 import { fetchCurrentUser } from "@/app/_actions/userActions/fetchCurrentUser";
-import Profile from "@/features/profile/profile";
+import Profile from "@/features/profile/Profile";
 import type { Metadata } from "next";
 import "../../globals.css";
 export const metadata: Metadata = {

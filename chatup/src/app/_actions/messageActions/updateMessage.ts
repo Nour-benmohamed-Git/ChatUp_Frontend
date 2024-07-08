@@ -9,7 +9,6 @@ export async function updateMessage(messageId: number, content: string) {
     {
       method: "PATCH",
       body: { content: content },
-    },
-    { tag: "messages" }
+    }
   );
 }

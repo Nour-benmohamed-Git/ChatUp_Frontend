@@ -12,6 +12,6 @@ export async function addConversation(data: { secondMemberId: number }) {
   >(
     `/api/chat-sessions`,
     { method: "POST", body: data },
-    { redirectTo: "/conversations" }
+    // { redirectTo: "/conversations" }
   );
 }

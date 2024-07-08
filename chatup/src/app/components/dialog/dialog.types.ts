@@ -1,5 +1,5 @@
 export interface DialogAction {
-  label: "confirm" | "remove" | "update";
+  label: "confirm" | "remove" | "update" | "block";
   onClick: () => void;
   category: "dismissal" | "confirmation";
 }

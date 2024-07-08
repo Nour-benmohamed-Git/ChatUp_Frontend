@@ -1,11 +1,11 @@
 "use client";
-import { logout } from "@/app/_actions/auth-actions/logout";
+import { logout } from "@/app/_actions/authActions/logout";
 import useConversation from "@/hooks/useConversation";
-import { sideBarMenuActions } from "@/utils/constants/action-lists/sideBarActions";
+import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
 import Link from "next/link";
 import { FC, memo } from "react";
 import { BsPersonFillAdd } from "react-icons/bs";
-import BlocContainer from "../../bloc-container/bloc-container";
+import BlocContainer from "../../blocContainer/BlocContainer";
 import ConversationList from "../conversationList/ConversationList";
 import { ConversationListContainerProps } from "./ConversationListContainer.types";
 

@@ -25,43 +25,51 @@ export const formatMessageDate = (day?: number) => {
 };
 dayjs.extend(relativeTime);
 
-export const renderDateChip = (
-  messageDate: number,
-  index: number,
-  messages: Message[]
-) => {
-  // Multiply by 1000 to convert seconds to milliseconds
-  const messageDay = dayjs(messageDate * 1000);
+export const renderDateChip = (messageDate: string) => {
+  const now = dayjs(); // Current date/time
+  const date = dayjs(messageDate, "YYYY-MM-DD"); // Parse messageDate with format 'DD/MM/YYYY'
 
-  // Check if it's the first message
-  if (index === 0) {
-    return <Chip content={messageDay.fromNow()} />;
+  if (!date.isValid()) {
+    return null; // Handle invalid date input gracefully
   }
-
-  // Get the previous message date
-  const prevMessageDate = dayjs(
-    (messages?.[index - 1].timestamp as number) * 1000
-  );
-
-  // Check if it's the same day as the previous message
-  if (messageDay.isSame(prevMessageDate, "day")) {
-    return null; // No chip needed
+  // Check if it's today
+  if (date.isSame(now, "day")) {
+    return <Chip content="Today" />;
   }
 
   // Check if it's yesterday
-  if (messageDay.isSame(prevMessageDate.subtract(1, "day"), "day")) {
+  if (date.isSame(now.subtract(1, "day"), "day")) {
     return <Chip content="Yesterday" />;
   }
 
   // Check if it's within the last week
-  if (messageDay.isAfter(dayjs().subtract(7, "day"))) {
-    return <Chip content={messageDay.format("dddd")} />;
+  if (date.isAfter(now.subtract(7, "day"))) {
+    return <Chip content={date.format("dddd")} />; // Display day name (e.g., Monday, Tuesday)
   }
 
-  // For older messages, just display the date
-  return <Chip content={messageDay.format("MMM D, YYYY")} />;
+  // Check if it's within the same year (but older than a week)
+  if (date.isSame(now, "year")) {
+    return <Chip content={date.format("MMM D")} />; // Display month and day (e.g., Jan 1)
+  }
+
+  // For older messages, display the full date
+  return <Chip content={date.format("MMM D, YYYY")} />; // Display full date (e.g., Jan 1, 2023)
 };
 
 export const compactDateAndTimeFormatter = (timestamp: number) => {
   return dayjs(timestamp * 1000).format("MMMM D, YYYY [at] hh:mm A");
+};
+export const groupMessagesByDate = (messages: Message[]) => {
+  return messages.reduce(
+    (acc: { [date: string]: Message[] }, message: Message) => {
+      const messageDate = dayjs(message.timestamp * 1000).format("YYYY-MM-DD");
+
+      if (!acc[messageDate]) {
+        acc[messageDate] = [];
+      }
+      acc[messageDate].push(message);
+      return acc;
+    },
+    {}
+  );
 };

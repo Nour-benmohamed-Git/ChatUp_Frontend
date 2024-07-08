@@ -16,7 +16,11 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   };
 
   return (
-    <li onClick={handleClick} key={label}>
+    <li
+      onClick={handleClick}
+      key={label}
+      // className={href !== "/conversations" ? "mt-5" : ""}
+    >
       <Link
         href={href}
         className={` 
@@ -27,10 +31,10 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
             font-semibold 
             text-gold-600 
             shadow-2xl
-            ${active ? "bg-gray-800" : "hover:bg-gray-800"}
+            ${active && "bg-gray-800"}
           `}
       >
-        <Icon className="h-6 w-6 shrink-0  z-50" aria-hidden="true" />
+        <Icon className="h-6 w-6 shrink-0 z-50" aria-hidden="true" />
       </Link>
     </li>
   );

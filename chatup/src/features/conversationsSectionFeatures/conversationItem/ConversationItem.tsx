@@ -1,23 +1,27 @@
 import { removeConversation } from "@/app/_actions/conversationActions/removeConversation";
-import { chatItemActions } from "@/utils/constants/action-lists/chat-item-actions";
-import { globals } from "@/utils/constants/globals";
-import { getItem } from "@/utils/helpers/cookies-helpers";
+import Avatar from "@/app/components/avatar/Avatar";
+import Dialog from "@/app/components/dialog/Dialog";
+import Menu from "@/app/components/menu/Menu";
+import UnreadMessagesCounter from "@/app/components/unreadMessagesCounter/UnreadMessagesCounter";
+import { useSocket } from "@/context/SocketContext";
+import { chatItemActions } from "@/utils/constants/actionLists/chatItemActions";
+import { MenuPosition, globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
+import { emitMessage } from "@/utils/helpers/socket-helpers";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-import Dialog from "@/app/components/dialog/dialog";
-import Avatar from "@/app/components/avatar/avatar";
-import UnreadMessagesCounter from "@/app/components/unread-messages/unread-messages-counter";
-import Menu from "@/app/components/menu/menu";
-import { MenuPosition } from "@/app/components/menu/menu.types";
+import GetLastMessagePreview from "../getLastMessagePreview/GetLastMessagePreview";
 import { ConversationItemProps } from "./ConversationItem.types";
 
 const ConversationItem: FC<ConversationItemProps> = (props) => {
   const { conversation } = props;
-  const currentUserId = getItem(globals.currentUserId) as string;
+  const router = useRouter();
+  const { socket } = useSocket();
+  const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const pathname = usePathname();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +52,23 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
   const handleRemoveConversation = async () => {
     await removeConversation({ conversationId: conversation.id });
     closeModal();
+    router.push("/conversations");
+  };
+  const handleEmitMarkAsReadMessagesEvent = () => {
+    if (socket && !conversation.seen) {
+      console.log("first conversation", conversation);
+      emitMessage(socket, {
+        action: "markAsRead",
+        message: {
+          senderId: getOtherUserId(
+            conversation.participantsData,
+            `${currentUserId}`
+          ),
+          receiverId: currentUserId,
+          chatSessionId: conversation.id,
+        },
+      });
+    }
   };
   return (
     <>
@@ -67,13 +88,14 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         </Dialog>
       )}
       <Link
+        onClick={handleEmitMarkAsReadMessagesEvent}
         href={{
           pathname: `/conversations/${conversation.id}`,
           query: {
             deletedByCurrentUser: conversation.deletedByCurrentUser,
             secondMemberId: getOtherUserId(
               conversation.participantsData,
-              currentUserId
+              `${currentUserId}`
             ),
           },
         }}
@@ -97,14 +119,12 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
               {formatChatSessionDate(conversation.lastMessage?.timestamp)}
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-white truncate">
-              {conversation.lastMessage?.content}
-            </div>
+          <div className="flex items-center justify-between gap-2 h-7">
+            <GetLastMessagePreview lastMessage={conversation.lastMessage} />
             <div className="flex items-center gap-2">
               <UnreadMessagesCounter
                 conversation={conversation}
-                currentUserId={parseInt(currentUserId, 10)}
+                currentUserId={currentUserId}
               />
               <div
                 ref={buttonRef}

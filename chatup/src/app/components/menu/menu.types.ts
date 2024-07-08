@@ -1,11 +1,7 @@
+import { MenuPosition } from "@/utils/constants/globals";
 import { RefObject } from "react";
 
-export enum MenuPosition {
-  BOTTOM_RIGHT = "bottom-right",
-  BOTTOM_LEFT = "bottom-left",
-  TOP_RIGHT = "top-right",
-  TOP_LEFT = "top-left",
-}
+
 export interface MenuProps {
   isOpen: boolean;
   onClose: () => void;

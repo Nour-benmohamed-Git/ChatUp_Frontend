@@ -5,4 +5,6 @@ export interface MessageItemProps {
   conversationRelatedData: {
     [key: string]: string | number | boolean | undefined;
   };
+  highlight: string;
+  isHighlighted: boolean;
 }

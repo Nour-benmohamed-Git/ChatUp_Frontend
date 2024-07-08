@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FC, memo } from "react";
-import { DialogProps } from "./dialog.types";
 import { IoIosClose } from "react-icons/io";
+import { DialogProps } from "./Dialog.types";
 
 const Dialog: FC<DialogProps> = ({ title, onClose, children, actions }) => {
+
   return (
     <AnimatePresence>
       <motion.div
@@ -18,13 +19,14 @@ const Dialog: FC<DialogProps> = ({ title, onClose, children, actions }) => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
         >
-          <div className="flex justify-between items-center px-6 py-4">
+          <div
+           className="flex justify-between items-center px-6 py-4">
             <h2 className="text-lg font-semibold">{title}</h2>
             <button
               className="text-gray-900 text-xl font-medium rounded-full flex justify-center items-center hover:bg-gray-100"
               onClick={onClose}
             >
-             <IoIosClose/>
+              <IoIosClose />
             </button>
           </div>
           <div className="px-6 pb-4 text-sm font-medium">{children}</div>

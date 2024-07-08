@@ -1,4 +1,4 @@
-import ToasterContext from "@/context/toaster-context";
+import ToasterContext from "@/context/ToasterContext";
 import "./globals.css";
 
 export default function RootLayout({

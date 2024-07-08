@@ -1,13 +1,17 @@
 import { fetchConversations } from "@/app/_actions/conversationActions/fetchConversations";
-import Loader from "@/app/components/loader/loader";
-import Skeleton from "@/app/components/skeleton/skeleton";
-import { useSocket } from "@/context/socket-context";
-import PanelContentWrapper from "@/features/panel-content-wrapper/panel-content-wrapper";
-import { ConversationResponse } from "@/types/ChatSession";
+import Loader from "@/app/components/loader/Loader";
+import Skeleton from "@/app/components/skeleton/Skeleton";
+import { useSocket } from "@/context/SocketContext";
+import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
+import {
+  ConversationResponse,
+  ConversationsResponse,
+} from "@/types/ChatSession";
 import dynamic from "next/dynamic";
 import { FC, memo, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ConversationListProps } from "./ConversationList.types";
+
 const ConversationItem = dynamic(
   () => import("../conversationItem/ConversationItem"),
   { loading: () => <Skeleton />, ssr: false }
@@ -21,17 +25,17 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   const [paginator, setPaginator] = useState({
     page: 1,
     offset: 10,
-    total: initialConversations?.total,
+    total: initialConversations?.total, 
   });
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newConversations = await fetchConversations(
+    const newConversations = (await fetchConversations(
       nextPage,
       paginator.offset,
       paramToSearch
-    );
-    setDataSource((prevItems) => [...prevItems, ...newConversations?.data]);
+    )) as ConversationsResponse;
+    setDataSource((prevItems) => [...prevItems, ...newConversations.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       page: nextPage,
@@ -39,11 +43,11 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   };
   useEffect(() => {
     const fetchNewUsers = async () => {
-      const newConversations = await fetchConversations(
+      const newConversations = (await fetchConversations(
         1,
         paginator.offset,
         paramToSearch
-      );
+      )) as ConversationsResponse;
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
@@ -52,7 +56,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       setDataSource(newConversations?.data);
     };
     fetchNewUsers();
-  }, [paramToSearch, paginator.offset]);
+  }, [paramToSearch, paginator.offset]); 
 
   useEffect(() => {
     const handleNotification = (chatSessionData: any) => {
@@ -67,12 +71,9 @@ const ConversationList: FC<ConversationListProps> = (props) => {
                 if (chatSession.id === chatSessionData.data.id) {
                   return {
                     ...chatSession,
-                    lastMessage: {
-                      content: chatSessionData.data.lastMessage.content,
-                      timestamp: chatSessionData.data.lastMessage.timestamp,
-                    },
+                    lastMessage: chatSessionData.data.lastMessage,
                     senderId: chatSessionData.senderId,
-                    unreadMessages: chatSessionData.unreadMessages,
+                    unreadMessagesCount: chatSessionData.unreadMessagesCount,
                   };
                 }
                 return chatSession;
@@ -84,16 +85,26 @@ const ConversationList: FC<ConversationListProps> = (props) => {
                   id: chatSessionData.data.id,
                   title: chatSessionData.data.title,
                   image: chatSessionData.data.image,
-                  lastMessage: {
-                    content: chatSessionData.data.lastMessage.content,
-                    timestamp: chatSessionData.data.lastMessage.timestamp,
-                  },
+                  lastMessage: chatSessionData.data.lastMessage,
                   senderId: chatSessionData.senderId,
-                  unreadMessages: chatSessionData.unreadMessages,
+                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
                   participantsData: chatSessionData.participantsData,
                 },
               ];
             }
+          });
+          break;
+        case "updateChatListOnMessageEdit":
+          setDataSource((prevChatSessions: any) => {
+            return prevChatSessions?.map((chatSession: any) => {
+              if (chatSession.id === chatSessionData.data.id) {
+                return {
+                  ...chatSession,
+                  lastMessage: chatSessionData.data.lastMessage.content,
+                };
+              }
+              return chatSession;
+            });
           });
           break;
         case "markAsReadOnChatListUpdate":
@@ -102,7 +113,8 @@ const ConversationList: FC<ConversationListProps> = (props) => {
               if (chatSession.id === chatSessionData.data.id) {
                 return {
                   ...chatSession,
-                  unreadMessages: chatSessionData.unreadMessages,
+                  senderId: chatSessionData.senderId,
+                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
                 };
               }
               return chatSession;
@@ -115,12 +127,9 @@ const ConversationList: FC<ConversationListProps> = (props) => {
               if (chatSession.id === chatSessionData.data.id) {
                 return {
                   ...chatSession,
-                  lastMessage: {
-                    content: chatSessionData.data.lastMessage.content,
-                    timestamp: chatSessionData.data.lastMessage.timestamp,
-                  },
+                  lastMessage: chatSessionData.data.lastMessage,
                   senderId: chatSessionData.senderId,
-                  unreadMessages: chatSessionData.unreadMessages,
+                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
                 };
               }
               return chatSession;
@@ -143,7 +152,8 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   return (
     <PanelContentWrapper
       hasSearchField
-      height="calc(100vh - 8.5rem)"
+      hasFilterBar
+      height="calc(100% - 7.75rem)"
       label={label}
       setParamToSearch={setParamToSearch}
     >
@@ -152,7 +162,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
         next={fetchMoreData}
         hasMore={dataSource?.length < paginator.total}
         loader={<Loader />}
-        height="calc(100vh - 8.5rem)"
+        height="calc(100% - 7.75rem)"
       >
         {dataSource?.map?.((conversation) => (
           <ConversationItem key={conversation.id} conversation={conversation} />

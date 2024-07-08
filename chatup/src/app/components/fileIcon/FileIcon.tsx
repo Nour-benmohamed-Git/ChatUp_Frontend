@@ -1,7 +1,7 @@
 import environment from "@/utils/config/environment";
 import { FC, memo } from "react";
 import { FaFileAlt } from "react-icons/fa";
-import Avatar from "../avatar/avatar";
+import Avatar from "../avatar/Avatar";
 import { FileIconProps } from "./FileIcon.types";
 const FileIcon: FC<FileIconProps> = (props) => {
   const { file, additionalClasses } = props;

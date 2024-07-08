@@ -3,10 +3,18 @@ import FileIcon from "../fileIcon/FileIcon";
 import { FileDisplayProps } from "./FileDisplay.types";
 import { motion } from "framer-motion";
 import FileViewer from "../fileViewer/FileViewer";
+import { getUserById } from "@/app/_actions/userActions/getUserById";
+import { UserResponse } from "@/types/User";
 
 const FileDisplay: FC<FileDisplayProps> = (props) => {
-  const { files ,messageDetails} = props;
+  const { files, messageDetails } = props;
   const [showFileViewer, setShowFileViewer] = useState(false);
+  const [senderData, setSenderData] = useState<UserResponse>();
+  const getSenderData = async () => {
+    const res = await getUserById(`${messageDetails.senderId}`);
+    setSenderData(res.data);
+    setShowFileViewer(true);
+  };
   const renderFiles = () => {
     const imagesAndVideos = files.filter(
       (file: any) =>
@@ -28,13 +36,17 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
             variants={{ open: { y: 0 }, closed: { y: "100%" } }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
             className={
-              "z-50 absolute bottom-0 left-0 w-full h-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
+              "z-50 fixed top-0 left-0 w-full h-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
             }
           >
             <FileViewer
               files={imagesAndVideos}
               onClose={() => setShowFileViewer(false)}
-              messageDetails={messageDetails}
+              messageDetails={{
+                senderPicture: senderData?.profilePicture,
+                senderName: senderData?.username as string,
+                timestamp: messageDetails?.timestamp,
+              }}
             />
           </motion.div>
         ) : null}
@@ -43,7 +55,7 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
             <div
               role="button"
               className="flex flex-col gap-2 hover:opacity-85"
-              onClick={() => setShowFileViewer(true)}
+              onClick={getSenderData}
             >
               {imagesAndVideos.length === 1 ? (
                 <div className="flex items-center justify-center">

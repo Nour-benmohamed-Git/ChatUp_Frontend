@@ -1,5 +1,5 @@
-import { Message } from "@/types/Message";
 import { FriendRequestResponse } from "@/types/FriendRequest";
+import { Message } from "@/types/Message";
 import { Socket } from "socket.io-client";
 
 export const handleJoinPrivateRoom = (
@@ -16,17 +16,11 @@ export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
 export const emitMessage = (
   socket: Socket,
   messageData: {
-    action: "create" | "hardRemove" | "markAsRead";
+    action: "create" | "edit" | "hardRemove" | "markAsRead";
     message: Message;
-    participantsData?: { [userId: string]: string };
   }
 ) => {
-  const { participantsData, ...rest } = messageData;
-  if (participantsData) {
-    socket?.emit("sendMessage", messageData);
-  } else {
-    socket?.emit("sendMessage", rest);
-  }
+  socket?.emit("sendMessage", messageData);
 };
 
 export const emitFriendRequest = (

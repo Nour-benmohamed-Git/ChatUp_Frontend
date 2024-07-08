@@ -1,19 +1,19 @@
 import { addConversation } from "@/app/_actions/conversationActions/addConversation";
-import { updateConversation } from "@/app/_actions/conversationActions/updateConversation";
+import { restoreCurrentUserConversation } from "@/app/_actions/conversationActions/updateConversation";
 import { addMessage } from "@/app/_actions/messageActions/addMessage";
 import { updateMessage } from "@/app/_actions/messageActions/updateMessage";
-import EmojiPicker from "@/app/components/emoji-picker/emoji-picker";
+import EmojiPicker from "@/app/components/emojiPicker/EmojiPicker";
 import FileDropArea from "@/app/components/fileDropArea/FileDropArea";
-import Menu from "@/app/components/menu/menu";
-import { MenuPosition } from "@/app/components/menu/menu.types";
-import MessageField from "@/app/components/message-field/message-field";
-import { useSocket } from "@/context/socket-context";
+import Menu from "@/app/components/menu/Menu";
+import MessageField from "@/app/components/messageField/MessageField";
+import { useSocket } from "@/context/SocketContext";
 import useAutoSizeTextArea from "@/hooks/useAutoSizeTextArea";
+import { ConversationResponse } from "@/types/ChatSession";
 import { Message } from "@/types/Message";
-import { chatControlPanelActions } from "@/utils/constants/action-lists/chatControlPanelActions";
-import { fileMenuActions } from "@/utils/constants/action-lists/fileMenuActions";
-import { globals } from "@/utils/constants/globals";
-import { getItem } from "@/utils/helpers/cookies-helpers";
+import { chatControlPanelActions } from "@/utils/constants/actionLists/chatControlPanelActions";
+import { fileMenuActions } from "@/utils/constants/actionLists/fileMenuActions";
+import { MenuPosition, globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { motion } from "framer-motion";
 import { FC, RefObject, memo, useRef, useState } from "react";
@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { ChatControlPanelProps } from "./ChatControlPanel.types";
 
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
-  const { conversationRelatedData } = props;
+  const { conversationRelatedData, messageListRef } = props;
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
@@ -50,7 +50,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const additionalParams: {
     [key: string]: { onClick: () => void; ref?: RefObject<HTMLDivElement> };
   } = {
-    emojiPicker: { onClick: () => openEmojiPicker() },
+    emojiPicker: { onClick: openEmojiPicker },
     addFiles: { onClick: handleOpenMenu, ref: buttonRef },
   };
 
@@ -85,10 +85,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     ...action,
     onClick: onClickFunctions[action.label],
   }));
-  const createMessage = async (
-    chatSessionId: number,
-    participantsData?: { [userId: string]: string }
-  ) => {
+  const createMessage = async (chatSessionId: number) => {
     const messageToCreate: Message = {
       content: getValues("message"),
       files: getValues("files"),
@@ -111,8 +108,37 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         socket &&
           emitMessage(socket, {
             action: "create",
-            message: res?.data,
-            participantsData: participantsData,
+            message: (res as { data: Message })?.data,
+          });
+        reset();
+        if (messageListRef?.current) {
+          messageListRef.current?.scrollTo({
+            top: messageListRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      })
+      .catch((error) => {
+        toast.error(error);
+      });
+  };
+
+  const editMessage = async (chatSessionId: number) => {
+    const messageToEdit: Message = {
+      id: getValues("id"),
+      content: getValues("message"),
+      files: getValues("files"),
+      senderId: currentUserId,
+      receiverId: conversationRelatedData?.secondMemberId as number,
+      chatSessionId,
+    };
+
+    await updateMessage(getValues("id"), getValues("message"))
+      .then(() => {
+        socket &&
+          emitMessage(socket, {
+            action: "edit",
+            message: messageToEdit,
           });
         reset();
       })
@@ -126,14 +152,13 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     }
     if (!getValues("id")) {
       if (!conversationRelatedData.conversationId) {
-        const conversation = await addConversation({
+        const conversation = (await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
-        });
+        })) as {
+          data: ConversationResponse;
+        };
         if (conversation && conversationRelatedData?.secondMemberId) {
-          createMessage(
-            conversation.data.id,
-            conversation?.data.participantsData
-          );
+          createMessage(conversation.data.id);
           const queryParams = `deletedByCurrentUser=${
             conversation.data.deletedByCurrentUser
           }&secondMemberId=${
@@ -147,16 +172,18 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         }
       } else {
         if (conversationRelatedData?.deletedByCurrentUser) {
-          const conversation = await updateConversation(
+          const conversation = (await restoreCurrentUserConversation(
             conversationRelatedData.conversationId as number
-          );
+          )) as {
+            data: ConversationResponse;
+          };
           createMessage(conversation.data.id);
         } else {
           createMessage(conversationRelatedData.conversationId as number);
         }
       }
     } else {
-      updateMessage(getValues("id"), getValues("message"));
+      editMessage(conversationRelatedData.conversationId as number);
     }
   };
   return (

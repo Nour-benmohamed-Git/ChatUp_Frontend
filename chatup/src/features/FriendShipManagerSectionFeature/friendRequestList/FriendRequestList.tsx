@@ -1,6 +1,6 @@
 "use client";
-import { useSocket } from "@/context/socket-context";
-import PanelContentWrapper from "@/features/panel-content-wrapper/panel-content-wrapper";
+import { useSocket } from "@/context/SocketContext";
+import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
 import { FriendRequestResponse } from "@/types/FriendRequest";
 import { FC, memo, useEffect, useState } from "react";
 import FriendRequestItem from "../friendRequestItem/FriendRequestItem";

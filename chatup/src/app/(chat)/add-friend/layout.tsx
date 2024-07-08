@@ -1,6 +1,6 @@
-import SendFriendRequest from "@/features/send-friend-request/send-friend-request";
 import type { Metadata } from "next";
 import "../../globals.css";
+import SendFriendRequest from "@/features/sendFriendRequest/SendFriendRequest";
 export const metadata: Metadata = {
   title: "ChatUp | Add Friend",
   description: "Add Friend",

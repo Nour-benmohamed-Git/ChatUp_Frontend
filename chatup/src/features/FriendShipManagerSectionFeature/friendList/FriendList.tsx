@@ -1,15 +1,15 @@
 import { getConversationByParticipants } from "@/app/_actions/conversationActions/getConversationByParticipants";
 import { fetchOwnFriends } from "@/app/_actions/userActions/fetchOwnFriends";
 
-import Loader from "@/app/components/loader/loader";
-import { UserResponse } from "@/types/User";
+import Loader from "@/app/components/loader/Loader";
+import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
+import { UserResponse, UsersResponse } from "@/types/User";
 import { useRouter } from "next/navigation";
 import { FC, memo, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import FriendItem from "../friendItem/FriendItem";
 import { FriendListProps } from "./FriendList.types";
-import PanelContentWrapper from "@/features/panel-content-wrapper/panel-content-wrapper";
-
+import { ConversationResponse } from "@/types/ChatSession";
 
 const FriendList: FC<FriendListProps> = (props) => {
   const { label, initialFriends } = props;
@@ -25,11 +25,11 @@ const FriendList: FC<FriendListProps> = (props) => {
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newFriends = await fetchOwnFriends(
+    const newFriends = (await fetchOwnFriends(
       nextPage,
       paginator.offset,
       paramToSearch
-    );
+    )) as UsersResponse;
     setDataSource((prevItems) => [...prevItems, ...newFriends?.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
@@ -38,11 +38,11 @@ const FriendList: FC<FriendListProps> = (props) => {
   };
   useEffect(() => {
     const fetchNewFriends = async () => {
-      const newFriends = await fetchOwnFriends(
+      const newFriends = (await fetchOwnFriends(
         1,
         paginator.offset,
         paramToSearch
-      );
+      )) as UsersResponse;
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
@@ -55,9 +55,9 @@ const FriendList: FC<FriendListProps> = (props) => {
 
   const handleCreateNewChat = async (userId: number) => {
     try {
-      const response = await getConversationByParticipants({
+      const response = (await getConversationByParticipants({ 
         secondMemberId: userId.toString(),
-      });
+      })) as { data: ConversationResponse };
       const conversationId = response?.data?.id || 0;
       const deletedByCurrentUser =
         response?.data?.deletedByCurrentUser || false;

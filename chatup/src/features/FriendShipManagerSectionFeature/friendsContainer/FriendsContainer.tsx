@@ -1,11 +1,10 @@
 "use client";
-
-import { logout } from "@/app/_actions/auth-actions/logout";
-import Tabs from "@/app/components/tabs/tabs";
-import { useSocket } from "@/context/socket-context";
-import BlocContainer from "@/features/bloc-container/bloc-container";
-import { sideBarMenuActions } from "@/utils/constants/action-lists/sideBarActions";
-import { tabsActions } from "@/utils/constants/action-lists/tabsActions";
+import { logout } from "@/app/_actions/authActions/logout";
+import Tabs from "@/app/components/tabs/Tabs";
+import { useSocket } from "@/context/SocketContext";
+import BlocContainer from "@/features/blocContainer/BlocContainer";
+import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
+import { tabsActions } from "@/utils/constants/actionLists/tabsActions";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
 import { FC, ReactNode, memo, useEffect } from "react";
 import FriendList from "../friendList/FriendList";
@@ -15,7 +14,7 @@ import { FriendsContainerProps } from "./FriendsContainer.types";
 const FriendsContainer: FC<FriendsContainerProps> = (props) => {
   const { initialFriendRequests, initialFriends, currentUser } = props;
   const components: { [key: string]: ReactNode } = {
-    FiendRequests: <FriendRequestList friendRequests={initialFriendRequests} />,
+    FriendRequests: <FriendRequestList friendRequests={initialFriendRequests} />,
     friends: <FriendList label="Friends" initialFriends={initialFriends} />,
   };
   const updatedTabsActions = tabsActions.map((action) => ({
@@ -40,7 +39,7 @@ const FriendsContainer: FC<FriendsContainerProps> = (props) => {
         action: "markAsSeen",
         friendRequest: { receiverId: currentUser?.id },
       });
-  }, [socket]);
+  }, [socket, currentUser?.id]);
   return (
     <aside
       id="sidebar"

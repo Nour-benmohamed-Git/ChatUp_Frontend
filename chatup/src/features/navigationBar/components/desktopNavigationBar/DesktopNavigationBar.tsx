@@ -1,4 +1,4 @@
-import Avatar from "@/app/components/avatar/avatar";
+import Avatar from "@/app/components/avatar/Avatar";
 import Badge from "@/app/components/badge/Badge";
 import { labelsWithBadge } from "@/hooks/useRoutes";
 import Link from "next/link";
@@ -28,11 +28,9 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
   useEffect(() => {
     if (navRef.current) {
       const firstSegment = `/${pathname.split("/")[1]}`;
-      console.log(firstSegment);
       const activeItem = navRef.current.querySelector(
         `a[href="${firstSegment}"]`
       );
-      console.log(activeItem);
       if (activeItem) {
         const itemRect = activeItem.getBoundingClientRect();
         const navRect = navRef.current.getBoundingClientRect();
@@ -48,11 +46,11 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
   }, [pathname]);
   return (
     <div className="hidden md:flex md:flex-col md:justify-between md:col-span-1 bg-gray-900 md:border-r md:border-slate-500 h-full">
-      <nav className="h-full items-center my-4 flex flex-col justify-between">
+      <nav className="h-full items-center my-2.5 flex flex-col justify-between">
         <ul
           ref={navRef}
           role="list"
-          className="flex flex-col items-center space-y-2 relative"
+          className="flex flex-col items-center relative gap-5"
         >
           <div
             className="absolute left-0 top-0 w-full bg-gray-800 rounded-md transition-all duration-300 ease-in-out"
