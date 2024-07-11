@@ -6,6 +6,7 @@ import { FriendRequestsResponse } from "@/types/FriendRequest";
 import { UserResponse, UsersResponse } from "@/types/User";
 import type { Metadata } from "next";
 import "../../globals.css";
+import { CustomError } from "@/utils/config/exceptions";
 export const metadata: Metadata = {
   title: "ChatUp | Friend Ship Manager",
   description: "Friend Ship Manager",
@@ -16,21 +17,25 @@ export default async function FriendsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const friendRequestsPromise = await fetchFriendRequests();
-  const friendsPromise = await fetchOwnFriends();
-  const currentUserPromise = await fetchCurrentUser();
-
   const [friendRequests, friends, currentUser] = await Promise.all([
-    friendRequestsPromise,
-    friendsPromise,
-    currentUserPromise,
+    fetchFriendRequests(),
+    fetchOwnFriends(),
+    fetchCurrentUser(),
   ]);
+
+  if (friendRequests.error || friends.error || currentUser.error) {
+    const message =
+      friendRequests.error?.message ||
+      friendRequests.error?.message ||
+      currentUser.error?.message;
+    throw new CustomError(message);
+  }
   return (
     <div className="h-screen md:col-span-11 grid md:grid-cols-12 bg-slate-700">
       <FriendShipManagerContainer
-        initialFriendRequests={friendRequests as FriendRequestsResponse}
-        initialFriends={friends as UsersResponse}
-        currentUser={(currentUser as { data: UserResponse })?.data}
+        initialFriendRequests={friendRequests.data as FriendRequestsResponse}
+        initialFriends={friends.data as UsersResponse}
+        currentUser={currentUser.data?.data as UserResponse}
       />
       {children}
     </div>

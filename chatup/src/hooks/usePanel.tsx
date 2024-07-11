@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
-const usePanel = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const usePanel = (closeOnClickOutside: boolean = true) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const togglePanel = (_event?: React.MouseEvent) => {
     setIsOpen((prev) => !prev);
   };
   useEffect(() => {
+    if (!closeOnClickOutside) {
+      return;
+    }
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&

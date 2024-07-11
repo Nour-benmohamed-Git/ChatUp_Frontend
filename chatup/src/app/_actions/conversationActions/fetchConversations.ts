@@ -5,7 +5,7 @@ import { fetchFromServer } from "../fetchFromServer";
 
 export async function fetchConversations(
   page: number = 1,
-  offset: number = 10,
+  offset: number = 30,
   search: string = ""
 ) {
   return fetchFromServer<ConversationsResponse>(

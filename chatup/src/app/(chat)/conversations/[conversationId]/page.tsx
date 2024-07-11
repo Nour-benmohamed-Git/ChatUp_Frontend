@@ -4,6 +4,7 @@ import { getUserById } from "@/app/_actions/userActions/getUserById";
 import SelectedConversation from "@/features/conversationsSectionFeatures/selectedConversation/SelectedConversation";
 import { Messages } from "@/types/Message";
 import { UserResponse } from "@/types/User";
+import { CustomError } from "@/utils/config/exceptions";
 import { convertSearchParams } from "@/utils/helpers/sharedHelpers";
 const Conversation = async ({
   params,
@@ -13,37 +14,29 @@ const Conversation = async ({
   searchParams: { [key: string]: string | undefined };
 }) => {
   const { conversationId } = params;
-  const messagesPromise = fetchConversationMessages(conversationId);
 
-  const filesPromise = getFilesByConversationId(conversationId);
-  const userDataPromise = getUserById(searchParams?.secondMemberId as string);
   const [messages, userData, files] = await Promise.all([
-    messagesPromise,
-    userDataPromise,
-    filesPromise,
+    fetchConversationMessages(conversationId),
+    getUserById(searchParams?.secondMemberId as string),
+    getFilesByConversationId(conversationId),
   ]);
 
+  if (messages.error || userData.error || files.error) {
+    const message =
+      messages.error?.message ||
+      userData.error?.message ||
+      files.error?.message;
+    throw new CustomError(message);
+  }
   return (
     <SelectedConversation
       conversationRelatedData={convertSearchParams({
         conversationId,
         ...searchParams,
       })}
-      initialMessages={messages as Messages}
-      userData={
-        (
-          userData as {
-            data: UserResponse;
-          }
-        ).data
-      }
-      files={
-        (
-          files as {
-            data: File[];
-          }
-        ).data
-      }
+      initialMessages={messages.data as Messages}
+      userData={userData.data?.data as UserResponse}
+      files={files.data?.data as File[]}
     />
   );
 };

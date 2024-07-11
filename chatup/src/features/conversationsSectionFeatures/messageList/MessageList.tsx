@@ -28,6 +28,7 @@ const MessageList: FC<MessageListProps> = (props) => {
     currentSearchIndex,
     setCurrentSearchIndex,
   } = props;
+
   const { socket } = useSocket();
   const [dataSource, setDataSource] = useState<Message[]>(initialMessages.data);
   const [paginator, setPaginator] = useState<{
@@ -38,56 +39,60 @@ const MessageList: FC<MessageListProps> = (props) => {
     hasMoreBefore: boolean;
     hasMoreAfter: boolean;
   }>({
-    limit: 10,
+    limit: 30,
     total: initialMessages.total,
     cursor: initialMessages.newCursor,
     direction: Direction.FORWARD,
     hasMoreBefore: initialMessages.hasMoreBefore,
     hasMoreAfter: initialMessages.hasMoreAfter,
   });
+  // console.log("initialMessages", initialMessages);
   const prevScrollTopRef = useRef<number>(0);
+  const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
   const fetchMoreData = async (data: {
     limit: number;
     search: string;
     cursor?: { earliest?: number; latest?: number };
     direction: Direction;
+    startIndex: number;
   }) => {
-    console.log("first");
     const newMessages = (await fetchConversationMessages(
       `${conversationRelatedData.conversationId}`,
       data
-    )) as Messages;
+    )) as { data: Messages };
     if (paramToSearch) {
       if (!data.cursor?.earliest && !data.cursor?.latest) {
-        setDataSource(newMessages?.data);
+        setDataSource(newMessages.data.data);
         const newCursor = {
-          earliest: newMessages?.data[0]?.timestamp,
-          latest: newMessages?.data[newMessages?.data.length - 1]?.timestamp,
+          earliest: newMessages.data.data[0].timestamp,
+          latest:
+            newMessages.data.data[newMessages.data.data.length - 1].timestamp,
         };
-
+        setSearchResults(newMessages.data.searchMatches);
         setPaginator((prevPaginator) => ({
           ...prevPaginator,
           cursor: newCursor,
-          hasMoreBefore: newMessages.hasMoreBefore,
-          hasMoreAfter: newMessages.hasMoreAfter,
+          hasMoreBefore: newMessages.data.hasMoreBefore,
+          hasMoreAfter: newMessages.data.hasMoreAfter,
         }));
       } else {
         setDataSource((prevItems) => {
           const combinedMessages =
             paginator.direction === Direction.FORWARD
-              ? [...prevItems, ...newMessages?.data]
-              : [...newMessages?.data, ...prevItems];
+              ? [...prevItems, ...newMessages.data.data]
+              : [...newMessages.data.data, ...prevItems];
 
           const newCursor = {
-            earliest: combinedMessages[0]?.timestamp,
-            latest: combinedMessages[combinedMessages.length - 1]?.timestamp,
+            earliest: combinedMessages[0].timestamp,
+            latest: combinedMessages[combinedMessages.length - 1].timestamp,
           };
 
           setPaginator((prevPaginator) => ({
             ...prevPaginator,
             cursor: newCursor,
-            hasMoreBefore: newMessages.hasMoreBefore,
-            hasMoreAfter: newMessages.hasMoreAfter,
+            hasMoreBefore: newMessages.data.hasMoreBefore,
+            hasMoreAfter: newMessages.data.hasMoreAfter,
           }));
           return combinedMessages;
         });
@@ -96,26 +101,25 @@ const MessageList: FC<MessageListProps> = (props) => {
       setDataSource((prevItems) => {
         const combinedMessages =
           paginator.direction === Direction.FORWARD
-            ? [...prevItems, ...newMessages?.data]
-            : [...newMessages?.data, ...prevItems];
+            ? [...prevItems, ...newMessages.data.data]
+            : [...newMessages.data.data, ...prevItems];
 
         const newCursor = {
-          earliest: combinedMessages[0]?.timestamp,
-          latest: combinedMessages[combinedMessages.length - 1]?.timestamp,
+          earliest: combinedMessages[0].timestamp,
+          latest: combinedMessages[combinedMessages.length - 1].timestamp,
         };
 
         setPaginator((prevPaginator) => ({
           ...prevPaginator,
           cursor: newCursor,
-          hasMoreBefore: newMessages.hasMoreBefore,
-          hasMoreAfter: newMessages.hasMoreAfter,
+          hasMoreBefore: newMessages.data.hasMoreBefore,
+          hasMoreAfter: newMessages.data.hasMoreAfter,
         }));
 
         return combinedMessages;
       });
     }
   };
-
   useEffect(() => {
     if (paramToSearch) {
       fetchMoreData({
@@ -123,7 +127,13 @@ const MessageList: FC<MessageListProps> = (props) => {
         search: paramToSearch,
         cursor: { earliest: undefined, latest: undefined },
         direction: paginator.direction,
+        startIndex: 0,
       });
+      setSearchResults([]);
+      setCurrentSearchIndex(0);
+    } else {
+      setSearchResults([]);
+      setCurrentSearchIndex(0);
     }
   }, [paramToSearch]);
 
@@ -174,40 +184,39 @@ const MessageList: FC<MessageListProps> = (props) => {
       socket?.off("receiveMessage", handleReceiveMessage);
     };
   }, [socket]);
-  // useEffect(() => {
-  //   if (paramToSearch) {
-  //     const results = dataSource.reduce<number[]>((acc, message, index) => {
-  //       if (
-  //         message?.content?.toLowerCase()?.includes(paramToSearch.toLowerCase())
-  //       ) {
-  //         acc.push(index);
-  //       }
-  //       return acc;
-  //     }, []);
-  //     setSearchResults(results);
-  //     setCurrentSearchIndex(0);
-  //   } else {
-  //     setSearchResults([]);
-  //     setCurrentSearchIndex(0);
-  //   }
-  // }, [paramToSearch, dataSource]);
-  // useEffect(() => {
-  //   if (messageListRef.current && searchResults.length > 0) {
-  //     const selectedItemIndex = searchResults[currentSearchIndex];
-  //     const selectedItem = messageListRef.current.children[0].children[0]
-  //       .children[selectedItemIndex] as HTMLElement;
-  //     if (selectedItem) {
-  //       const containerHeight = messageListRef.current.offsetHeight;
-  //       const itemHeight = selectedItem.offsetHeight;
-  //       const scrollPosition =
-  //         selectedItem.offsetTop - containerHeight / 2 + itemHeight / 2;
-  //       messageListRef.current.scrollTo({
-  //         top: scrollPosition,
-  //         behavior: "smooth",
-  //       });
-  //     }
-  //   }
-  // }, [currentSearchIndex, searchResults]);
+
+  useEffect(() => {
+    if (searchResults.length && currentSearchIndex >= 0) {
+      const highlightedMessageId = searchResults[currentSearchIndex];
+      const highlightedElement = messageRefs.current[highlightedMessageId];
+      if (highlightedElement && messageListRef.current) {
+        const list = messageListRef.current;
+        const topPos = highlightedElement.offsetTop;
+        const offset =
+          list.clientHeight / 2 - highlightedElement.clientHeight / 2;
+        list.scrollTo({
+          top: topPos - list.offsetTop - offset,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [currentSearchIndex, searchResults]);
+
+  useEffect(() => {
+    if (
+      paramToSearch &&
+      !dataSource.map((el) => el.id).includes(searchResults[currentSearchIndex])
+    ) {
+      fetchMoreData({
+        limit: 0,
+        search: paramToSearch,
+        cursor: { earliest: undefined, latest: undefined },
+        direction: paginator.direction,
+        startIndex: currentSearchIndex,
+      });
+    }
+  }, [paramToSearch, currentSearchIndex]);
+
   const messageGroups = Object.entries(groupMessagesByDate(dataSource)).map(
     ([date, messages]) => ({
       date,
@@ -254,6 +263,7 @@ const MessageList: FC<MessageListProps> = (props) => {
               search: paramToSearch,
               cursor: paginator.cursor,
               direction: paginator.direction,
+              startIndex: currentSearchIndex,
             })
           }
           hasMore={
@@ -271,18 +281,27 @@ const MessageList: FC<MessageListProps> = (props) => {
         >
           {messageGroups.map(({ date, messages }) => (
             <Fragment key={date}>
-              {messages?.map((message, index) => (
-                <MessageItem
-                  key={message.id}
-                  message={message}
-                  conversationRelatedData={conversationRelatedData}
-                  highlight={paramToSearch}
-                  isHighlighted={
-                    searchResults.includes(index) &&
-                    currentSearchIndex === searchResults.indexOf(index)
-                  }
-                />
-              ))}
+              {messages?.map((message) => {
+                const isHighlighted =
+                  currentSearchIndex ===
+                  searchResults.indexOf(message.id as number);
+                return (
+                  <div
+                    key={message.id}
+                    ref={(el) =>
+                      (messageRefs.current[message.id as number] = el)
+                    }
+                  >
+                    <MessageItem
+                      key={message.id}
+                      message={message}
+                      conversationRelatedData={conversationRelatedData}
+                      highlight={paramToSearch}
+                      isHighlighted={isHighlighted}
+                    />
+                  </div>
+                );
+              })}
               {renderDateChip(date)}
             </Fragment>
           ))}

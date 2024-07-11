@@ -14,7 +14,6 @@ import { ImSpinner9 } from "react-icons/im";
 import { toast } from "sonner";
 import { z } from "zod";
 import BlocContainer from "../blocContainer/BlocContainer";
-import { FetchError } from "@/app/_actions/fetchFromServer";
 
 const SendFriendRequest: FC = () => {
   const { socket } = useSocket();
@@ -42,8 +41,8 @@ const SendFriendRequest: FC = () => {
       const formData = new FormData();
       formData.append("email", data.email);
       const response = await addFriendRequest(null, formData);
-      if ((response as FetchError)?.message) {
-        toast.error((response as FetchError)?.message);
+      if (response?.error) {
+        toast.error(response.error.message); 
       } else {
         if (
           socket &&

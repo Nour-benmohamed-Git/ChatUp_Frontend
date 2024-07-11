@@ -1,7 +1,7 @@
 import SocketProvider from "@/context/SocketContext";
 import NavigationBar from "@/features/navigationBar/NavigationBar";
-import { ConversationsResponse } from "@/types/ChatSession";
 import { UserResponse } from "@/types/User";
+import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";
 import { fetchConversations } from "../_actions/conversationActions/fetchConversations";
 import { fetchCurrentUser } from "../_actions/userActions/fetchCurrentUser";
@@ -16,21 +16,21 @@ export default async function ConversationsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentUserPromise = await fetchCurrentUser();
-  const conversationsPromise = await fetchConversations();
-
   const [currentUser, conversations] = await Promise.all([
-    currentUserPromise,
-    conversationsPromise,
-    ,
+    fetchCurrentUser(),
+    fetchConversations(),
   ]);
+  if (currentUser.error || conversations.error) {
+    const message = currentUser.error?.message || conversations.error?.message;
+    throw new CustomError(message);
+  }
   return (
     <div className="h-screen grid grid-cols-1 md:grid-cols-12">
       <SocketProvider>
         <NavigationBar
-          currentUser={(currentUser as { data: UserResponse })?.data}
+          currentUser={currentUser.data?.data as UserResponse}
           initialUnseenConversationsCount={
-            (conversations as ConversationsResponse).unseenCount
+            conversations.data?.unseenCount as number
           }
           initialUnseenFriendRequestsCount={6}
         />

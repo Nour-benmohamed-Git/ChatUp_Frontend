@@ -17,7 +17,7 @@ export const emitMessage = (
   socket: Socket,
   messageData: {
     action: "create" | "edit" | "hardRemove" | "markAsRead";
-    message: Message;
+    message: Partial<Message>;
   }
 ) => {
   socket?.emit("sendMessage", messageData);

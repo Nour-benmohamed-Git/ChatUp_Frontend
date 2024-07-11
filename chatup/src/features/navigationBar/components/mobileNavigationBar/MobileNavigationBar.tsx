@@ -1,6 +1,7 @@
 import Badge from "@/app/components/badge/Badge";
 import useConversation from "@/hooks/useConversation";
 import { labelsWithBadge } from "@/hooks/useRoutes";
+import { motion } from "framer-motion";
 import { FC, memo } from "react";
 import { NavigationBarProps } from "../desktopNavigationBar/NavigationBar.types";
 import MobileItem from "../mobileItem/MobileItem";
@@ -16,6 +17,7 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
   return (
     <div
       className="
+        h-16
         fixed 
         flex 
         items-center 
@@ -29,24 +31,28 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
       "
     >
       {routesWithBadge.map((route) => (
-        <div key={route.href} className="flex-grow">
-          <Badge content={route.count}>
+        <div key={route.href} className="flex-grow h-full">
+          {/* <Badge content={route.count}> */}
             <MobileItem
               href={route.href}
               active={route.active}
               icon={route.icon}
               onClick={route.onClick}
             />
-          </Badge>
+          {/* </Badge> */}
         </div>
       ))}
-      <div className="flex justify-center relative">
+      <motion.div
+        className="flex justify-center relative"
+        whileTap={{ scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+      >
         <MobileProfileItem profilePicture={currentUser?.profilePicture} />
-      </div>
+      </motion.div>
       {routes
         .filter((item) => !labelsWithBadge.includes(item.label))
         .map((route) => (
-          <div key={route.href} className="flex-grow">
+          <div key={route.href} className="flex-grow h-full">
             <MobileItem
               href={route.href}
               active={route.active}

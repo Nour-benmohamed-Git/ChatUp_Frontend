@@ -25,7 +25,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   const [paginator, setPaginator] = useState({
     page: 1,
     offset: 10,
-    total: initialConversations?.total, 
+    total: initialConversations?.total,
   });
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
@@ -34,8 +34,11 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       nextPage,
       paginator.offset,
       paramToSearch
-    )) as ConversationsResponse;
-    setDataSource((prevItems) => [...prevItems, ...newConversations.data]);
+    )) as { data: ConversationsResponse };
+    setDataSource((prevItems) => [
+      ...prevItems,
+      ...newConversations.data?.data,
+    ]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       page: nextPage,
@@ -47,16 +50,16 @@ const ConversationList: FC<ConversationListProps> = (props) => {
         1,
         paginator.offset,
         paramToSearch
-      )) as ConversationsResponse;
+      )) as { data: ConversationsResponse };
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
-        total: newConversations.total,
+        total: newConversations.data?.total,
       }));
-      setDataSource(newConversations?.data);
+      setDataSource(newConversations.data?.data);
     };
     fetchNewUsers();
-  }, [paramToSearch, paginator.offset]); 
+  }, [paramToSearch, paginator.offset]);
 
   useEffect(() => {
     const handleNotification = (chatSessionData: any) => {

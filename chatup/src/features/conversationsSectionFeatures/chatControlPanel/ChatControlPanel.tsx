@@ -86,7 +86,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     onClick: onClickFunctions[action.label],
   }));
   const createMessage = async (chatSessionId: number) => {
-    const messageToCreate: Message = {
+    const messageToCreate = {
       content: getValues("message"),
       files: getValues("files"),
       senderId: currentUserId,
@@ -100,7 +100,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         formData.append(key, value);
       }
     });
-    messageToCreate.files?.forEach((file) => {
+    messageToCreate.files?.forEach((file: File) => {
       formData.append("files", file);
     });
     await addMessage(formData)
@@ -108,7 +108,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         socket &&
           emitMessage(socket, {
             action: "create",
-            message: (res as { data: Message })?.data,
+            message: res.data?.data as Message,
           });
         reset();
         if (messageListRef?.current) {
@@ -124,7 +124,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   };
 
   const editMessage = async (chatSessionId: number) => {
-    const messageToEdit: Message = {
+    const messageToEdit = {
       id: getValues("id"),
       content: getValues("message"),
       files: getValues("files"),
@@ -155,19 +155,19 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         const conversation = (await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
         })) as {
-          data: ConversationResponse;
+          data: { data: ConversationResponse };
         };
         if (conversation && conversationRelatedData?.secondMemberId) {
-          createMessage(conversation.data.id);
+          createMessage(conversation.data.data.id);
           const queryParams = `deletedByCurrentUser=${
-            conversation.data.deletedByCurrentUser
+            conversation.data.data.deletedByCurrentUser
           }&secondMemberId=${
             conversationRelatedData?.secondMemberId as number
           }`;
           window.history.replaceState(
             {},
             "",
-            `/conversations/${conversation.data.id}?${queryParams}`
+            `/conversations/${conversation.data.data.id}?${queryParams}`
           );
         }
       } else {
@@ -175,9 +175,9 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           const conversation = (await restoreCurrentUserConversation(
             conversationRelatedData.conversationId as number
           )) as {
-            data: ConversationResponse;
+            data: { data: ConversationResponse };
           };
-          createMessage(conversation.data.id);
+          createMessage(conversation.data.data.id);
         } else {
           createMessage(conversationRelatedData.conversationId as number);
         }

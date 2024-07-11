@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { FC, memo } from "react";
 import { ImCross } from "react-icons/im";
 import { SlidingPanelProps } from "./SlidingPanel.types";
@@ -13,6 +13,8 @@ const SlidingPanel: FC<SlidingPanelProps> = (props) => {
     title,
     panelHeight = "h-full",
     panelWidth = "w-full",
+    hasHeader = true,
+    zIndex = "z-50",
   } = props;
   const variants = {
     open: { x: 0, y: 0 },
@@ -37,29 +39,40 @@ const SlidingPanel: FC<SlidingPanelProps> = (props) => {
     }
   };
   return (
-    isOpen && (
-      <motion.div
-        ref={panelRef}
-        initial="closed"
-        animate={isOpen ? "open" : "closed"}
-        variants={variants}
-        transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        className={`absolute ${panelPositionClasses()} ${panelHeight} ${panelWidth} bg-gradient-to-b from-slate-800 to-slate-600 shadow-md z-50`}
-      >
-        <header className="sticky top-0 bg-gray-900 shadow-md h-16 z-40 px-4 py-2.5">
-          <div className="flex items-center gap-6 h-full">
-            <button
-              onClick={togglePanel}
-              className="text-gold-900 rounded-full hover:text-gold-300"
-            >
-              <ImCross className="text-sm" />
-            </button>
-            <div className="text-md font-medium text-gold-600">{title}</div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={panelRef}
+          initial="closed"
+          animate="open"
+          exit="closed"
+          variants={variants}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          className={`absolute ${panelPositionClasses()} ${panelHeight} ${panelWidth} bg-gradient-to-b from-slate-800 to-slate-600 shadow-md ${zIndex}`}
+        >
+          {hasHeader && (
+            <header className="sticky top-0 bg-gray-900 shadow-md h-16 z-40 px-4 py-2.5">
+              <div className="flex items-center gap-6 h-full">
+                <button
+                  onClick={togglePanel}
+                  className="text-gold-900 rounded-full hover:text-gold-300"
+                >
+                  <ImCross className="text-sm" />
+                </button>
+                <div className="text-md font-medium text-gold-600">{title}</div>
+              </div>
+            </header>
+          )}
+          <div
+            className={`flex w-full ${
+              hasHeader ? "h-[calc(100%-4rem)]" : "h-full items-end"
+            }`}
+          >
+            {children}
           </div>
-        </header>
-        <div className="flex w-full h-[calc(100%-4rem)]">{children}</div>
-      </motion.div>
-    )
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

@@ -29,8 +29,8 @@ const FriendList: FC<FriendListProps> = (props) => {
       nextPage,
       paginator.offset,
       paramToSearch
-    )) as UsersResponse;
-    setDataSource((prevItems) => [...prevItems, ...newFriends?.data]);
+    )) as { data: UsersResponse };
+    setDataSource((prevItems) => [...prevItems, ...newFriends.data.data]);
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       page: nextPage,
@@ -42,25 +42,25 @@ const FriendList: FC<FriendListProps> = (props) => {
         1,
         paginator.offset,
         paramToSearch
-      )) as UsersResponse;
+      )) as { data: UsersResponse };
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
-        total: newFriends.total,
+        total: newFriends.data.total,
       }));
-      setDataSource(newFriends?.data);
+      setDataSource(newFriends.data.data);
     };
     fetchNewFriends();
   }, [paramToSearch, paginator.offset]);
 
   const handleCreateNewChat = async (userId: number) => {
     try {
-      const response = (await getConversationByParticipants({ 
+      const response = (await getConversationByParticipants({
         secondMemberId: userId.toString(),
-      })) as { data: ConversationResponse };
-      const conversationId = response?.data?.id || 0;
+      })) as { data: { data: ConversationResponse } };
+      const conversationId = response.data.data.id || 0;
       const deletedByCurrentUser =
-        response?.data?.deletedByCurrentUser || false;
+        response.data.data?.deletedByCurrentUser || false;
       const queryParams = `deletedByCurrentUser=${deletedByCurrentUser}&secondMemberId=${userId}`;
       router.push(`/conversations/${conversationId}?${queryParams}`, {
         scroll: false,

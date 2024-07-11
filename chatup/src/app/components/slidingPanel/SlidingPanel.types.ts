@@ -7,4 +7,6 @@ export interface SlidingPanelProps {
   title?: string;
   panelHeight?: string;
   panelWidth?: string;
+  hasHeader?: boolean;
+  zIndex?: string;
 }

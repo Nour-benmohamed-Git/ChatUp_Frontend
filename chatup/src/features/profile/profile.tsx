@@ -19,7 +19,6 @@ import { z } from "zod";
 import SubmitButton from "../authSection/submitButton/SubmitButton";
 import BlocContainer from "../blocContainer/BlocContainer";
 import { ProfileProps } from "./Profile.types";
-import { FetchError } from "@/app/_actions/fetchFromServer";
 
 const Profile: FC<ProfileProps> = (props) => {
   const { data } = props;
@@ -67,8 +66,8 @@ const Profile: FC<ProfileProps> = (props) => {
         );
       }
       const response = await updateCurrentUser(null, formData);
-      if ((response as FetchError)?.error) {
-        toast.error((response as FetchError)?.error);
+      if (response?.error) {
+        toast.error(response.error.message);
       } else {
         toast.success("Profile has been successfully updated.");
         handleToggleEdit();

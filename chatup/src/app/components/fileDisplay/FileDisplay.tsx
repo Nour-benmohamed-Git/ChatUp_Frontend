@@ -11,8 +11,8 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
   const [showFileViewer, setShowFileViewer] = useState(false);
   const [senderData, setSenderData] = useState<UserResponse>();
   const getSenderData = async () => {
-    const res = await getUserById(`${messageDetails.senderId}`);
-    setSenderData(res.data);
+    const user = await getUserById(`${messageDetails.senderId}`);
+    setSenderData(user.data?.data);
     setShowFileViewer(true);
   };
   const renderFiles = () => {

@@ -14,7 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { FC, memo, useEffect, useRef, useState } from "react";
+import { FC, memo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import ContactInfo from "../contactInfo/ContactInfo";
@@ -75,7 +75,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
     panelRef: searchMessagesPanelRef,
-  } = usePanel();
+  } = usePanel(false);
   const {
     isOpen: isOpenContactInfoPanel,
     togglePanel: toggleContactInfoPanel,
@@ -92,11 +92,15 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
           searchResults={searchResults}
           currentSearchIndex={currentSearchIndex}
           setCurrentSearchIndex={setCurrentSearchIndex}
+          toggleSearchBar={toggleSearchMessagesPanel}
+          setSearchResults={setSearchResults}
         />
       ) : null,
       fromSide: "top",
       title: "Search messages",
       panelHeight: "h-32",
+      hasHeader: false,
+      zIndex: "z-10",
     },
     contactInfo: {
       isOpen: isOpenContactInfoPanel,
@@ -137,12 +141,6 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     },
     resolver: zodResolver(schema),
   });
-  
-  // useEffect(() => {
-  //   if (!isOpenSearchMessagesPanel) {
-  //     setParamToSearch("");
-  //   }
-  // }, [isOpenSearchMessagesPanel]);
 
   return (
     <>
@@ -177,6 +175,8 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             title={panel.title}
             panelHeight={panel?.panelHeight}
             panelWidth={panel?.panelWidth}
+            hasHeader={panel?.hasHeader}
+            zIndex={panel?.zIndex}
           >
             {panel.children}
           </SlidingPanel>

@@ -16,9 +16,6 @@ export async function verifyToken(token?: string) {
     );
     return payload;
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(`Error verifying token: ${error.name}`);
-    }
     return null;
   }
 }

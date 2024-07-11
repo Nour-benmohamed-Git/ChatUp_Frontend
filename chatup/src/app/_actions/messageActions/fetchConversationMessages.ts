@@ -11,11 +11,13 @@ export async function fetchConversationMessages(
     search: string;
     cursor?: { earliest?: number; latest?: number };
     direction: Direction;
+    startIndex: number;
   } = {
     limit: 10,
     search: "",
     cursor: { earliest: undefined, latest: undefined },
     direction: Direction.FORWARD,
+    startIndex: 0,
   }
 ) {
   return fetchFromServer<
@@ -25,6 +27,7 @@ export async function fetchConversationMessages(
       search: string;
       cursor?: { earliest?: number; latest?: number };
       direction?: Direction;
+      startIndex: number;
     }
   >(`/api/messages/${conversationId}/chat-sessions`, {
     method: "POST",

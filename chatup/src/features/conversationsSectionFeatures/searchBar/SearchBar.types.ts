@@ -5,4 +5,6 @@ export interface SearchBarProps {
   searchResults: number[];
   currentSearchIndex: number;
   setCurrentSearchIndex: Dispatch<SetStateAction<number>>;
+  setSearchResults: Dispatch<SetStateAction<number[]>>;
+  toggleSearchBar: () => void;
 }

@@ -1,10 +1,10 @@
 export interface Message {
-  id?: number;
+  id: number;
   content?: string;
   files?: File[];
   senderId?: number;
   receiverId?: number;
-  timestamp?: number;
+  timestamp: number;
   edited?: boolean;
   readStatus?: boolean;
   chatSessionId?: number;
@@ -16,4 +16,5 @@ export type Messages = {
   newCursor: { earliest?: number; latest?: number };
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
+  searchMatches: number[];
 };
