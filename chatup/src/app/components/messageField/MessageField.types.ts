@@ -5,4 +5,5 @@ export interface MessageFieldProps {
   name: string;
   placeholder: string;
   messageFieldRef: RefObject<HTMLTextAreaElement>;
+  handleSendMessage: () => Promise<void>;
 }

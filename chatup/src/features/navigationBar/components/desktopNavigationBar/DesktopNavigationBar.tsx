@@ -1,11 +1,10 @@
 import Avatar from "@/app/components/avatar/Avatar";
-import Badge from "@/app/components/badge/Badge";
 import { labelsWithBadge } from "@/hooks/useRoutes";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FC, memo, useEffect, useRef, useState } from "react";
 import DesktopItem from "../desktopItem/DesktopItem";
 import { NavigationBarProps } from "./NavigationBar.types";
-import { usePathname } from "next/navigation";
 
 const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
   const { currentUser, routesWithBadge, routes } = props;
@@ -45,7 +44,7 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
     }
   }, [pathname]);
   return (
-    <div className="hidden md:flex md:flex-col md:justify-between md:col-span-1 bg-gray-900 md:border-r md:border-slate-500 h-full">
+    <div className="hidden md:flex md:flex-col md:justify-between md:col-span-1 bg-gray-900 md:border-r md:border-slate-500 h-screen">
       <nav className="h-full items-center my-2.5 flex flex-col justify-between">
         <ul
           ref={navRef}
@@ -57,15 +56,14 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
             style={indicatorStyle}
           />
           {routesWithBadge.map((item) => (
-            <Badge key={item.label} content={item.count}>
-              <DesktopItem
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                active={item.active}
-                onClick={(e) => handleItemClick(e)}
-              />
-            </Badge>
+            <DesktopItem
+              key={item.label}
+              href={item.href}
+              icon={item.icon}
+              active={item.active}
+              count={item.count}
+              onClick={(e) => handleItemClick(e)}
+            />
           ))}
           {routes
             .filter((item) => !labelsWithBadge.includes(item.label))
@@ -73,7 +71,6 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
               <DesktopItem
                 key={item.label}
                 href={item.href}
-                label={item.label}
                 icon={item.icon}
                 active={item.active}
                 onClick={(e) => {

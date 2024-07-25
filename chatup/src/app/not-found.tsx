@@ -5,7 +5,7 @@ import { IoHome } from "react-icons/io5";
 import Background from "./components/background/Background";
 const NotFound: FC = () => {
   return (
-    <div className="flex items-center justify-center h-screen w-full bg-gradient-to-r from-gray-700 via-gray-900 to-black">
+    <div className="flex items-center justify-center h-full w-full bg-gradient-to-r from-gray-700 via-gray-900 to-black">
       <div className="hidden md:block h-80 w-96">
         <Background />
       </div>

@@ -2,8 +2,8 @@
 
 import { fetchFromServer } from "../fetchFromServer";
 
-export async function getFilesByConversationId(conversationId: string) {
-  return fetchFromServer<{ data: File[] }, string>(
+export async function getFilesByConversationId(conversationId: number) {
+  return fetchFromServer<{ data: File[] }, number>(
     `/api/chat-sessions/${conversationId}/files`,
     { method: "GET" }
   );

@@ -20,7 +20,7 @@ export default async function ProfileLayout({
     throw new CustomError(message);
   }
   return (
-    <div className="h-screen md:col-span-11 grid md:grid-cols-12 bg-slate-700">
+    <div className="h-full w-full col-span-1 md:col-span-11 md:grid md:grid-cols-12">
       <Profile data={currentUser.data?.data as UserResponse} />
       {children}
     </div>

@@ -3,6 +3,7 @@ import Picker from "@emoji-mart/react";
 import { FC, memo } from "react";
 import { useFormContext } from "react-hook-form";
 import { EmojiPickerProps } from "./EmojiPicker.types";
+
 const EmojiPicker: FC<EmojiPickerProps> = (props) => {
   const { closeEmojiPicker } = props;
   const { getValues, setValue } = useFormContext();

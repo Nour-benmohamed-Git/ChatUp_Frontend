@@ -5,7 +5,6 @@ import { useSocket } from "@/context/SocketContext";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
 import { FC, memo } from "react";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { toast } from "sonner";
 import { FriendRequestItemProps } from "./FriendRequestItem.types";
 
@@ -59,20 +58,18 @@ const FriendRequestItem: FC<FriendRequestItemProps> = (props) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-4">
           <button
             onClick={handleAccept}
-            className="flex-1 bg-green-600 hover:bg-green-500 transition-colors duration-300 p-2 rounded-md focus:outline-none flex items-center justify-center"
+            className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-xs font-bold transition-colors duration-300 p-2 rounded-md flex items-center justify-center"
           >
-            <FaCheckCircle className="w-4 h-4 mr-1" />
-            <span className="text-xs font-bold">Accept</span>
+            Accept
           </button>
           <button
             onClick={handleDecline}
-            className="flex-1 bg-red-600 hover:bg-red-500 transition-colors duration-300 p-2 rounded-md focus:outline-none flex items-center justify-center"
+            className="flex-1 bg-red-500 hover:bg-red-400 text-xs font-bold transition-colors duration-300 p-2 rounded-md flex items-center justify-center"
           >
-            <FaTimesCircle className="w-4 h-4 mr-1" />
-            <span className="text-xs font-bold">Decline</span>
+            Decline
           </button>
         </div>
       </div>

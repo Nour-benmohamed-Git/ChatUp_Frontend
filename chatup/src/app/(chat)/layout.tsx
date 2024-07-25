@@ -6,33 +6,42 @@ import type { Metadata } from "next";
 import { fetchConversations } from "../_actions/conversationActions/fetchConversations";
 import { fetchCurrentUser } from "../_actions/userActions/fetchCurrentUser";
 import "../globals.css";
+import { fetchFriendRequests } from "../_actions/friendRequestActions/fetchFriendRequests";
+
 export const metadata: Metadata = {
   title: "ChatUp | Conversations",
   description: "Conversations",
 };
 
-export default async function ConversationsLayout({
+export default async function ChatLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [currentUser, conversations] = await Promise.all([
+  const [currentUser, conversations, friendRequests] = await Promise.all([
     fetchCurrentUser(),
     fetchConversations(),
+    fetchFriendRequests(),
   ]);
-  if (currentUser.error || conversations.error) {
-    const message = currentUser.error?.message || conversations.error?.message;
+
+  if (currentUser.error || conversations.error || friendRequests.error) {
+    const message =
+      currentUser.error?.message ||
+      conversations.error?.message ||
+      friendRequests.error?.message;
     throw new CustomError(message);
   }
   return (
-    <div className="h-screen grid grid-cols-1 md:grid-cols-12">
+    <div className="h-full w-full grid grid-cols-1 md:grid-cols-12">
       <SocketProvider>
         <NavigationBar
           currentUser={currentUser.data?.data as UserResponse}
           initialUnseenConversationsCount={
             conversations.data?.unseenCount as number
           }
-          initialUnseenFriendRequestsCount={6}
+          initialUnseenFriendRequestsCount={
+            friendRequests.data?.unseenCount as number
+          }
         />
         {children}
       </SocketProvider>

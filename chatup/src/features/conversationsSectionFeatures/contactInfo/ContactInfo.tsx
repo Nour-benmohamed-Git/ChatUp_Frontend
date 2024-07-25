@@ -1,8 +1,9 @@
+import { getFilesByConversationId } from "@/app/_actions/conversationActions/getFilesByConversationId";
 import Avatar from "@/app/components/avatar/Avatar";
 import FileIcon from "@/app/components/fileIcon/FileIcon";
 import FileViewer from "@/app/components/fileViewer/FileViewer";
 import { motion } from "framer-motion";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   FaPhoneAlt,
   FaTrashAlt,
@@ -15,8 +16,8 @@ import { ContactInfoProps } from "./ContactInfo.types";
 
 const ContactInfo: React.FC<ContactInfoProps> = ({
   userData,
-  files,
   lastSeen,
+  conversationId,
   onMessage,
   onAudioCall,
   onVideoCall,
@@ -24,6 +25,23 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
   const [showFileViewer, setShowFileViewer] = useState(false);
   const [selectedFileIndex, setSelectedFileIndex] = useState<number>(-1);
   const fileListRef = useRef<HTMLUListElement>(null);
+  const [files, setFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const filesData = await getFilesByConversationId(conversationId);
+      const imagesAndVideos = filesData.data?.data
+        ?.filter(
+          (file: any) =>
+            file.mimetype.startsWith("image/") ||
+            file.mimetype.startsWith("video/")
+        )
+        .slice(0, 12);
+      setFiles(imagesAndVideos || []);
+    };
+
+    fetchFiles();
+  }, [conversationId]);
 
   const onSelectItem = (index: number) => {
     setSelectedFileIndex(index);
@@ -82,7 +100,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
         </motion.div>
       ) : null}
       <div className="flex flex-col items-center w-full h-full gap-2 overflow-y-auto">
-        <div className="flex flex-col items-center gap-2 px-4 md:px-8 py-4 w-full bg-slate-700 shadow-2xl border-b border-slate-500">
+        <div className="flex flex-col items-center gap-2 px-4 md:px-8 py-4 w-full bg-gradient-to-r from-gray-600 to-gray-700 shadow-2xl border-b border-slate-500">
           <Avatar
             additionalClasses="h-36 w-36 rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
             fileName={userData.profilePicture}
@@ -94,31 +112,31 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
           <div className="flex items-center gap-4 w-full">
             <button
               onClick={onMessage}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-slate-600"
+              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-gray-500 to-gray-600"
             >
               <MdMessage className="text-gold-900 h-6 w-6" />
               Message
             </button>
             <button
               onClick={onAudioCall}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-slate-600"
+              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-gray-500 to-gray-600"
             >
               <FaPhoneAlt className="text-gold-900 h-6 w-6" />
               Audio
             </button>
             <button
               onClick={onVideoCall}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-slate-600"
+              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-gray-500 to-gray-600"
             >
               <FaVideo className="text-gold-900 h-6 w-6" />
               Video
             </button>
           </div>
         </div>
-        <div className="flex items-center w-full px-4 py-5 md:px-8 md:py-9 bg-slate-700 shadow-2xl border-b border-slate-500">
+        <div className="flex items-center w-full px-4 py-5 md:px-8 md:py-9 bg-gradient-to-r from-gray-600 to-gray-700 shadow-2xl border-b border-slate-500">
           <p className="text-gray-100">{userData.profileInfo}</p>
         </div>
-        <div className="flex flex-col items-center justify-center w-full bg-slate-700 shadow-2xl border-b border-slate-500">
+        <div className="flex flex-col items-center justify-center w-full bg-gradient-to-r from-gray-600 to-gray-700 shadow-2xl border-b border-slate-500">
           <h6
             className={`flex items-center justify-start text-gold-600 px-4 md:px-8 py-2 w-full ${
               files.length ? "auto" : "h-24"
@@ -128,23 +146,23 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
           </h6>
           {files.length ? displayUploadedFiles() : null}
         </div>
-        <div className="flex flex-col w-full bg-slate-700 shadow-2xl border-b border-slate-500">
+        <div className="flex flex-col w-full bg-gradient-to-r from-gray-600 to-gray-700 shadow-2xl border-b border-slate-500">
           <h6 className="text-gold-600 self-start px-4 md:px-8 py-2">
             No groups in common
           </h6>
-          <button className="flex items-center gap-4 md:gap-6 text-slate-200 hover:bg-slate-600 px-4 md:px-8 py-5 min-w-0">
+          <button className="flex items-center gap-4 md:gap-6 text-slate-200 hover:bg-gradient-to-r from-gray-500 to-gray-600 px-4 md:px-8 py-5 min-w-0">
             <FaUsers className="text-gold-900 h-6 w-6 flex-shrink-0" />
             <div className="truncate">
               Create group with {userData.username}
             </div>
           </button>
         </div>
-        <div className="flex flex-col w-full bg-slate-700 shadow-2xl border-b border-slate-500">
-          <button className="flex items-center gap-6 text-red-500 hover:bg-slate-600 px-4 md:px-8 py-5">
+        <div className="flex flex-col w-full bg-gradient-to-r from-gray-600 to-gray-700 shadow-2xl border-b border-slate-500">
+          <button className="flex items-center gap-6 text-red-500 hover:bg-gradient-to-r from-gray-500 to-gray-600 px-4 md:px-8 py-5">
             <FaTrashAlt className="text-red-500 h-6 w-6" />
             Delete {userData.username}
           </button>
-          <button className="flex items-center gap-6 text-red-500 hover:bg-slate-600 px-4 md:px-8 py-5">
+          <button className="flex items-center gap-6 text-red-500 hover:bg-gradient-to-r from-gray-500 to-gray-600 px-4 md:px-8 py-5">
             <FaUserSlash className="text-red-500 h-6 w-6" />
             Block {userData.username}
           </button>

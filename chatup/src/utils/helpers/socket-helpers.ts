@@ -6,11 +6,11 @@ export const handleJoinPrivateRoom = (
   socket: Socket,
   conversationId: number
 ): void => {
-  socket.emit("joinPrivateRoom", conversationId);
+  socket.emit("join_private_room", conversationId);
 };
 
 export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
-  socket.emit("joinGroupRoom", groupId);
+  socket.emit("join_group_room", groupId);
 };
 
 export const emitMessage = (
@@ -20,7 +20,7 @@ export const emitMessage = (
     message: Partial<Message>;
   }
 ) => {
-  socket?.emit("sendMessage", messageData);
+  socket?.emit("send_Message", messageData);
 };
 
 export const emitFriendRequest = (
@@ -30,5 +30,5 @@ export const emitFriendRequest = (
     friendRequest?: FriendRequestResponse;
   }
 ) => {
-  socket?.emit("send-friend-request", friendRequestData);
+  socket?.emit("send_friend_request", friendRequestData);
 };

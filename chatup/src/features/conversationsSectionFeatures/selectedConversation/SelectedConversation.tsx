@@ -1,7 +1,6 @@
 "use client";
 import { removeConversation } from "@/app/_actions/conversationActions/removeConversation";
 import Dialog from "@/app/components/dialog/Dialog";
-import MessagesLoader from "@/app/components/messagesLoader/MessagesLoader";
 import SlidingPanel from "@/app/components/slidingPanel/SlidingPanel";
 import { SlidingPanelProps } from "@/app/components/slidingPanel/SlidingPanel.types";
 import BlocContainer from "@/features/blocContainer/BlocContainer";
@@ -11,36 +10,24 @@ import {
   conversationActions,
   conversationMenuActions,
 } from "@/utils/constants/actionLists/conversationActions";
+import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import ContactInfo from "../contactInfo/ContactInfo";
+import MessageList from "../messageList/MessageList";
 import SearchBar from "../searchBar/SearchBar";
 import { SelectedConversationProps } from "./SelectedConversation.types";
 
-const MessageList = dynamic(() => import("../messageList/MessageList"), {
-  loading: () => <MessagesLoader />,
-  ssr: false,
-});
-
-const schema = z.object({
-  message: z.string().min(1, "message is required."),
-});
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
-  const { conversationRelatedData, initialMessages, userData, files } = props;
+  const { conversation, conversationRelatedData, initialMessages, userData } =
+    props;
   const messageListRef = useRef<HTMLDivElement>(null);
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
-  const imagesAndVideos = files
-    ?.filter(
-      (file: any) =>
-        file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")
-    )
-    .slice(0, 12);
   const [openDialog, setOpenDialog] = useState(false);
   const { isOpen } = useConversation();
   const router = useRouter();
@@ -109,8 +96,8 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
       children: isOpenContactInfoPanel ? (
         <ContactInfo
           userData={userData}
-          files={imagesAndVideos}
           lastSeen={"azdazd"}
+          conversationId={conversationRelatedData.conversationId as number}
           onMessage={toggleContactInfoPanel}
           onAudioCall={function (): void {
             throw new Error("Function not implemented.");
@@ -134,12 +121,14 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     acc[key] = { togglePanel: panels[key].togglePanel };
     return acc;
   }, {} as Record<string, { togglePanel: () => void }>);
-  const methods = useForm<{ id?: number; message: string; files?: File[] }>({
+  const methods = useForm<z.infer<typeof sendMessageSchema>>({
     defaultValues: {
+      id: 0,
       message: "",
       files: [],
     },
-    resolver: zodResolver(schema),
+    mode: "all",
+    resolver: zodResolver(sendMessageSchema),
   });
 
   return (
@@ -163,7 +152,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
         id="main_content"
         className={`relative ${
           isOpen ? "flex flex-col" : "hidden"
-        } md:flex md:flex-col md:col-span-7 lg:col-span-8 h-full`}
+        } md:flex md:flex-col md:col-span-7 lg:col-span-8 bg-gradient-to-r from-gray-600 to-gray-700`}
       >
         {Object.entries(panels).map(([key, panel]) => (
           <SlidingPanel
@@ -194,6 +183,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             messageListRef={messageListRef}
           >
             <MessageList
+              conversation={conversation}
               conversationRelatedData={conversationRelatedData}
               initialMessages={initialMessages}
               messageListRef={messageListRef}

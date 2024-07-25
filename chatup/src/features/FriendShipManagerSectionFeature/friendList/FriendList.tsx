@@ -1,5 +1,5 @@
 import { getConversationByParticipants } from "@/app/_actions/conversationActions/getConversationByParticipants";
-import { fetchOwnFriends } from "@/app/_actions/userActions/fetchOwnFriends";
+import { fetchFriends } from "@/app/_actions/friendActions/fetchFriends";
 
 import Loader from "@/app/components/loader/Loader";
 import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
@@ -25,7 +25,7 @@ const FriendList: FC<FriendListProps> = (props) => {
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newFriends = (await fetchOwnFriends(
+    const newFriends = (await fetchFriends(
       nextPage,
       paginator.offset,
       paramToSearch
@@ -38,7 +38,7 @@ const FriendList: FC<FriendListProps> = (props) => {
   };
   useEffect(() => {
     const fetchNewFriends = async () => {
-      const newFriends = (await fetchOwnFriends(
+      const newFriends = (await fetchFriends(
         1,
         paginator.offset,
         paramToSearch
@@ -56,9 +56,9 @@ const FriendList: FC<FriendListProps> = (props) => {
   const handleCreateNewChat = async (userId: number) => {
     try {
       const response = (await getConversationByParticipants({
-        secondMemberId: userId.toString(),
+        secondMemberId: userId,
       })) as { data: { data: ConversationResponse } };
-      const conversationId = response.data.data.id || 0;
+      const conversationId = response.data.data?.id || "new";
       const deletedByCurrentUser =
         response.data.data?.deletedByCurrentUser || false;
       const queryParams = `deletedByCurrentUser=${deletedByCurrentUser}&secondMemberId=${userId}`;

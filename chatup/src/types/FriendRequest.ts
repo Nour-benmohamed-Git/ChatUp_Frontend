@@ -12,4 +12,5 @@ export interface FriendRequestResponse {
 export type FriendRequestsResponse = {
   data: FriendRequestResponse[];
   total: number;
+  unseenCount: number;
 };

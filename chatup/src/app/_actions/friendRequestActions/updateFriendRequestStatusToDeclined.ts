@@ -7,7 +7,7 @@ export async function updateFriendRequestStatusToDeclined(
   friendRequestId: number
 ) {
   return fetchFromServer<{ data: FriendRequestResponse }>(
-    `/api/friendRequests/${friendRequestId}/decline`,
+    `/api/friend-requests/${friendRequestId}/decline`,
     { method: "PATCH" },
     { tag: "requests" }
   );

@@ -15,6 +15,6 @@ export async function removeConversation(data: { conversationId: number }) {
       method: "POST",
       body: data,
     },
-    { tag: "conversations", redirectTo: "/conversations" }
+    { tag: "conversations" }
   );
 }

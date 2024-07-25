@@ -24,10 +24,10 @@ const FileIcon: FC<FileIconProps> = (props) => {
   } else {
     return (
       <a
-        // target="_blank"
+        target="_blank"
         href={`${environment.baseUrl}/uploads/${file.filename}`}
         download={`${environment.baseUrl}/uploads/${file.filename}`}
-        className="text-sm flex gap-2 items-center bg-gray-800 rounded-md p-4 text-blue-500 hover:text-blue-400 max-w-full"
+        className="w-full text-sm flex gap-2 items-center bg-gray-800 rounded-md p-4 text-blue-500 hover:text-blue-400 max-w-full"
       >
         <FaFileAlt className="h-10 w-10 text-gray-400 flex-shrink-0" />
         <div className="text-sm font-medium truncate">{file.filename}</div>

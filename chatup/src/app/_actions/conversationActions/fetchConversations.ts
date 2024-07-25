@@ -4,15 +4,26 @@ import { ConversationsResponse } from "@/types/ChatSession";
 import { fetchFromServer } from "../fetchFromServer";
 
 export async function fetchConversations(
-  page: number = 1,
-  offset: number = 30,
-  search: string = ""
+  data: {
+    page: number;
+    offset: number;
+    search: string;
+  } = {
+    page: 1,
+    offset: 30,
+    search: "",
+  }
 ) {
-  return fetchFromServer<ConversationsResponse>(
-    `/api/current-user-chat-sessions?page=${page}&offset=${offset}&search=${search}`,
+  return fetchFromServer<
+    ConversationsResponse,
     {
-      method: "GET",
-      next: { tags: ["conversations"] },
+      page: number;
+      offset: number;
+      search: string;
     }
-  );
+  >(`/api/current-user-chat-sessions`, {
+    method: "POST",
+    body: data,
+    next: { tags: ["conversations"] },
+  });
 }

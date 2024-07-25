@@ -1,22 +1,63 @@
 "use client";
+import { fetchFriendRequests } from "@/app/_actions/friendRequestActions/fetchFriendRequests";
+import Loader from "@/app/components/loader/Loader";
 import { useSocket } from "@/context/SocketContext";
 import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
-import { FriendRequestResponse } from "@/types/FriendRequest";
+import {
+  FriendRequestResponse,
+  FriendRequestsResponse,
+} from "@/types/FriendRequest";
 import { FC, memo, useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import FriendRequestItem from "../friendRequestItem/FriendRequestItem";
 import { FriendRequestListProps } from "./FriendRequestList.types";
 
 const FriendRequestList: FC<FriendRequestListProps> = (props) => {
-  const { friendRequests } = props;
+  const {label, initialFriendRequests } = props;
   const { socket } = useSocket();
+
+  const [dataSource, setDataSource] = useState<FriendRequestResponse[]>(
+    initialFriendRequests?.data
+  );
   const [paginator, setPaginator] = useState({
     page: 1,
     offset: 10,
-    total: friendRequests?.total,
+    total: initialFriendRequests?.total,
   });
-  const [dataSource, setDataSource] = useState<FriendRequestResponse[]>(
-    friendRequests?.data
-  );
+  const [paramToSearch, setParamToSearch] = useState<string>("");
+  const fetchMoreData = async () => {
+    const nextPage = paginator.page + 1;
+    const newFriendRequests = (await fetchFriendRequests(
+      nextPage,
+      paginator.offset,
+      paramToSearch
+    )) as { data: FriendRequestsResponse };
+    setDataSource((prevItems) => [
+      ...prevItems,
+      ...newFriendRequests.data.data,
+    ]);
+    setPaginator((prevPaginator) => ({
+      ...prevPaginator,
+      page: nextPage,
+    }));
+  };
+  useEffect(() => {
+    const fetchNewFriends = async () => {
+      const newFriendRequests = (await fetchFriendRequests(
+        1,
+        paginator.offset,
+        paramToSearch
+      )) as { data: FriendRequestsResponse };
+      setPaginator((prevPaginator) => ({
+        ...prevPaginator,
+        page: 1,
+        total: newFriendRequests.data.total,
+      }));
+      setDataSource(newFriendRequests.data.data);
+    };
+    fetchNewFriends();
+  }, [paramToSearch, paginator.offset]);
+
   useEffect(() => {
     const handleFriendRequestNotification = (friendRequestData: any) => {
       switch (friendRequestData.action) {
@@ -44,30 +85,35 @@ const FriendRequestList: FC<FriendRequestListProps> = (props) => {
     };
 
     if (socket) {
-      socket.on("friend-request-notification", handleFriendRequestNotification);
+      socket.on("friend_request_notification", handleFriendRequestNotification);
     }
 
     return () => {
       socket?.off(
-        "friend-request-notification",
+        "friend_request_notification",
         handleFriendRequestNotification
       );
     };
   }, [socket]);
 
   return (
-    <PanelContentWrapper hasSearchField height="calc(100vh - 12.25rem)">
-      {/* <InfiniteScroll
+    <PanelContentWrapper
+      hasSearchField
+      height="calc(100vh - 12.25rem)"
+      label={label}
+      setParamToSearch={setParamToSearch}
+    >
+      <InfiniteScroll
           dataLength={dataSource?.length}
-        //   next={fetchMoreData}
+        next={fetchMoreData}
           hasMore={dataSource?.length < paginator.total}
           loader={<Loader />}
           height="calc(100vh - 12.5rem)"
-        > */}
+        >
       {dataSource?.map?.((request) => (
         <FriendRequestItem key={request.id} friendRequestData={request} />
       ))}
-      {/* </InfiniteScroll> */}
+    </InfiniteScroll> 
     </PanelContentWrapper>
   );
 };

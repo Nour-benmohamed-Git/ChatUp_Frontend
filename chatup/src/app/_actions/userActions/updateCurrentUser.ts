@@ -17,7 +17,8 @@ export const updateCurrentUser = async (
       {
         method: "PATCH",
         body: data,
-      }
+      },
+      { tag: "currentUser" }
     );
   }
 };

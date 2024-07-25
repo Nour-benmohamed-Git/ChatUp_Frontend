@@ -30,11 +30,11 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const fetchMoreData = async () => {
     const nextPage = paginator.page + 1;
-    const newConversations = (await fetchConversations(
-      nextPage,
-      paginator.offset,
-      paramToSearch
-    )) as { data: ConversationsResponse };
+    const newConversations = (await fetchConversations({
+      page: nextPage,
+      offset: paginator.offset,
+      search: paramToSearch,
+    })) as { data: ConversationsResponse };
     setDataSource((prevItems) => [
       ...prevItems,
       ...newConversations.data?.data,
@@ -46,11 +46,11 @@ const ConversationList: FC<ConversationListProps> = (props) => {
   };
   useEffect(() => {
     const fetchNewUsers = async () => {
-      const newConversations = (await fetchConversations(
-        1,
-        paginator.offset,
-        paramToSearch
-      )) as { data: ConversationsResponse };
+      const newConversations = (await fetchConversations({
+        page: 1,
+        offset: paginator.offset,
+        search: paramToSearch,
+      })) as { data: ConversationsResponse };
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,

@@ -22,7 +22,6 @@ const SignUpForm: FC = () => {
       confirmPassword: "",
     },
     mode: "all",
-    shouldFocusError: true,
     resolver: zodResolver(signUpSchema),
   });
 

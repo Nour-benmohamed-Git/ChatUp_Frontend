@@ -1,30 +1,36 @@
 "use client";
 import { logout } from "@/app/_actions/authActions/logout";
-import { addFriendRequest } from "@/app/_actions/friendRequestActions/addFriendRequest";
+import { sendFriendRequest } from "@/app/_actions/friendRequestActions/sendFriendRequest";
 import InputField from "@/app/components/inputField/InputField";
 import { useSocket } from "@/context/SocketContext";
 import { FriendRequestResponse } from "@/types/FriendRequest";
 import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
+import { EnabledInput } from "@/utils/constants/globals";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
-import { addFriendRequestSchema } from "@/utils/schemas/addFriendRequestSchema";
+import { sendFriendRequestSchema } from "@/utils/schemas/sendFriendRequestSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { AiOutlineMail, AiOutlinePhone } from "react-icons/ai";
 import { ImSpinner9 } from "react-icons/im";
 import { toast } from "sonner";
 import { z } from "zod";
 import BlocContainer from "../blocContainer/BlocContainer";
+import FriendSuggestionList from "../FriendShipManagerSectionFeature/friendSuggestionList/FriendSuggestionList";
+import { SendFriendRequestProps } from "./SendFriendRequest.types";
 
-const SendFriendRequest: FC = () => {
+const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
+  const { initialFriendSuggestions } = props;
   const { socket } = useSocket();
   const [isPending, startTransition] = useTransition();
-
-  const methods = useForm<z.infer<typeof addFriendRequestSchema>>({
+  const methods = useForm<z.infer<typeof sendFriendRequestSchema>>({
     defaultValues: {
       email: "",
+      phone: "",
+      enabledInput: EnabledInput.EMAIL,
     },
-    mode: "onChange",
-    resolver: zodResolver(addFriendRequestSchema),
+    mode: "all",
+    resolver: zodResolver(sendFriendRequestSchema),
   });
 
   const onClickFunctions: { [key: string]: () => void } = {
@@ -36,18 +42,26 @@ const SendFriendRequest: FC = () => {
     onClick: onClickFunctions[action.label],
   }));
 
-  const onSubmit = async (data: z.infer<typeof addFriendRequestSchema>) => {
+  const onSubmit = async (data: z.infer<typeof sendFriendRequestSchema>) => {
     startTransition(async () => {
       const formData = new FormData();
-      formData.append("email", data.email);
-      const response = await addFriendRequest(null, formData);
+      if (data.enabledInput === EnabledInput.EMAIL) {
+        if (data?.email) {
+          formData.append("email", data.email);
+          formData.append("enabledInput", data.enabledInput);
+        }
+      } else {
+        if (data.phone) formData.append("phone", data.phone);
+        formData.append("enabledInput", data.enabledInput);
+      }
+      const response = await sendFriendRequest(null, formData);
       if (response?.error) {
-        toast.error(response.error.message); 
+        toast.error(response.error.message);
       } else {
         if (
           socket &&
           (
-            response as {
+            response?.data as {
               data: FriendRequestResponse;
             }
           ).data
@@ -55,7 +69,7 @@ const SendFriendRequest: FC = () => {
           emitFriendRequest(socket, {
             action: "send",
             friendRequest: (
-              response as {
+              response?.data  as {
                 data: FriendRequestResponse;
               }
             ).data,
@@ -65,28 +79,56 @@ const SendFriendRequest: FC = () => {
       }
     });
   };
+
+  const toggleEnabledInput = () => {
+    const currentEnabledInput = methods.getValues("enabledInput");
+    const newEnabledInput =
+      currentEnabledInput === EnabledInput.EMAIL
+        ? EnabledInput.PHONE
+        : EnabledInput.EMAIL;
+    methods.setValue("enabledInput", newEnabledInput);
+    methods.setValue(
+      currentEnabledInput === EnabledInput.EMAIL ? "email" : "phone",
+      ""
+    );
+  };
+
   return (
     <aside
       id="sidebar"
-      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500"
+      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-gray-600 to-gray-700"
     >
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <BlocContainer
-            title="Add Friend"
-            label="left_container"
-            menuActionList={updatedSideBarMenuActions}
-            cssClass="p-2 h-[calc(100vh-3.5rem)]"
-          >
-            <div className="md:h-auto max-w-md p-2 gap-4 rounded-none md:rounded-md">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <p className="block text-xs font-medium text-white">
-                    Please insert the E_mail address of the person you want to
-                    add as a friend.
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
+      <BlocContainer
+        title="Add Friend"
+        label="left_container"
+        menuActionList={updatedSideBarMenuActions}
+        cssClass="p-4 h-[calc(100vh-3.5rem)]"
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)}>
+            <div className="flex flex-col items-center gap-6">
+              <button
+                type="button"
+                onClick={toggleEnabledInput}
+                className="rounded-full p-3 transition-colors duration-300 ease-in-out border-2 border-gray-400 bg-gray-200 hover:bg-gray-300 shadow-2xl"
+              >
+                {methods.watch("enabledInput") === EnabledInput.EMAIL ? (
+                  <AiOutlineMail size={24} className="text-gray-700" />
+                ) : (
+                  <AiOutlinePhone size={24} className="text-gray-700" />
+                )}
+              </button>
+              <div className="flex flex-col items-center gap-2 w-full">
+                <p className="block text-sm text-gray-100">
+                  Please insert the{" "}
+                  {methods.watch("enabledInput") === EnabledInput.EMAIL
+                    ? "email address"
+                    : "phone number"}{" "}
+                  of the person of the person you would like to add as a friend.
+                </p>
+              </div>
+              <div className="flex items-center gap-4 w-full">
+                {methods.watch("enabledInput") === EnabledInput.EMAIL ? (
                   <InputField
                     id="email"
                     name="email"
@@ -94,26 +136,41 @@ const SendFriendRequest: FC = () => {
                     placeholder="example@example.com"
                     autoComplete="email"
                   />
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    data-te-ripple-init
-                    data-te-ripple-color="light"
-                    className="flex justify-center items-center rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium uppercase text-gray-900 transition duration-150 ease-in-out hover:bg-gold-600"
-                  >
-                    {isPending ? (
-                      <ImSpinner9 size={20} className="animate-spin" />
-                    ) : (
-                      "SEND"
-                    )}
-                  </button>
-                </div>
+                ) : (
+                  <InputField
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="123-456-7890"
+                    autoComplete="tel"
+                  />
+                )}
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  data-te-ripple-init
+                  data-te-ripple-color="light"
+                  className="self-start w-24 rounded-md bg-gold-900 px-6 py-2.5 text-sm font-medium text-gray-900 transition duration-150 ease-in-out hover:bg-gold-600"
+                >
+                  {isPending ? (
+                    <ImSpinner9 size={20} className="animate-spin" />
+                  ) : (
+                    "Send"
+                  )}
+                </button>
               </div>
             </div>
-          </BlocContainer>
-        </form>
-      </FormProvider>
+          </form>
+        </FormProvider>
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg font-semibold text-gold-900">Quick Add</h3>
+          <FriendSuggestionList
+            initialFriendSuggestions={initialFriendSuggestions}
+          />
+        </div>
+      </BlocContainer>
     </aside>
   );
 };
+
 export default SendFriendRequest;

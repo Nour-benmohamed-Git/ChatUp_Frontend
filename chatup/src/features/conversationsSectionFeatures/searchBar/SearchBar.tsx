@@ -71,7 +71,7 @@ const SearchBar: FC<SearchBarProps> = ({
         <button
           disabled={!searchResults?.length}
           onClick={() => handleNavigateSearchResults("down")}
-          className={`rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md ${
+          className={`rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md border-2 border-gray-700 ${
             searchResults?.length
               ? "bg-gray-300 hover:bg-gray-100"
               : "text-gray-400 cursor-not-allowed"
@@ -83,7 +83,7 @@ const SearchBar: FC<SearchBarProps> = ({
         <button
           disabled={!searchResults?.length}
           onClick={() => handleNavigateSearchResults("up")}
-          className={`rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md ${
+          className={`rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md border-2 border-gray-700 ${
             searchResults?.length
               ? "bg-gray-300 hover:bg-gray-100"
               : "text-gray-400 cursor-not-allowed"
@@ -94,7 +94,7 @@ const SearchBar: FC<SearchBarProps> = ({
         </button>
         <button
           onClick={handleCloseSearchBar}
-          className="bg-gray-300 hover:bg-gray-100 rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md"
+          className="bg-gray-300 hover:bg-gray-100 rounded-md p-2 transition-colors duration-300 ease-in-out shadow-md border-2 border-gray-700"
         >
           <IoMdClose size={20} />
         </button>

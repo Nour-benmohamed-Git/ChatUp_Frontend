@@ -13,7 +13,7 @@ const VideoPicker: FC<VideoPickerProps> = (props) => {
           if (typeof reader.result === "string") {
             setPreviewUrl(reader.result);
           }
-        };
+        }; 
         reader.readAsDataURL(file);
       }
     };

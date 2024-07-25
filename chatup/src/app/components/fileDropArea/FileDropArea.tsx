@@ -9,9 +9,11 @@ import {
   useState,
 } from "react";
 import { useFormContext } from "react-hook-form";
+import { FaExclamation } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { MdCloudUpload, MdOutlineAdd } from "react-icons/md";
 import { RiCloseLine, RiSendPlaneFill } from "react-icons/ri";
+import { ZodIssue } from "zod";
 import FilePicker from "../filePicker/FilePicker";
 import ImagePicker from "../imagePicker/ImagePicker";
 import MessageField from "../messageField/MessageField";
@@ -22,7 +24,7 @@ const FileDropArea: FC<FileDropAreaProps> = ({
   onClose,
   handleSendMessage,
 }) => {
-  const { watch, setValue, getValues } = useFormContext();
+  const { watch, setValue, getValues, formState } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea(textAreaRef.current, getValues("message"));
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,13 +33,14 @@ const FileDropArea: FC<FileDropAreaProps> = ({
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
-    setValue("files", [...getValues("files"), ...Array.from(files)]);
-    // Reset file input value to allow re-uploading the same file
+    setValue("files", [...getValues("files"), ...Array.from(files)], {
+      shouldValidate: true,
+    });
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    setSelectedFileIndex(watch("files").length - 1);
+    setSelectedFileIndex(getValues("files").length - 1);
   };
 
   const handleDragOver = (event: DragEvent) => {
@@ -48,12 +51,13 @@ const FileDropArea: FC<FileDropAreaProps> = ({
   const handleDrop = (event: DragEvent) => {
     event.preventDefault();
     const droppedFiles = event.dataTransfer!.files as FileList;
-    setValue("files", Array.from(droppedFiles));
+    setValue("files", Array.from(droppedFiles), { shouldValidate: true });
   };
 
   const handleUpload = () => {
     handleSendMessage();
-    setValue("files", []);
+    setValue("files", [], { shouldValidate: true });
+
     onClose();
   };
   const handleRemoveFile = (indexToRemove: number, event: React.MouseEvent) => {
@@ -61,15 +65,16 @@ const FileDropArea: FC<FileDropAreaProps> = ({
     const updatedFiles = getValues("files").filter(
       (_: any, index: number) => index !== indexToRemove
     );
-    setValue("files", updatedFiles);
-    setSelectedFileIndex(watch("files").length - 1);
+    setValue("files", updatedFiles, { shouldValidate: true });
+
+    setSelectedFileIndex(getValues("files").length - 1);
   };
 
   const displayUploadedFiles = () =>
     watch("files").length > 0 && (
       <ul
         ref={fileListRef}
-        className="flex space-x-4 overflow-auto p-4 max-w-[calc(100%-4rem)]"
+        className="flex gap-4 overflow-auto p-4 max-w-[calc(100%-4rem)]"
       >
         {watch("files").map((file: any, index: number) => (
           <li
@@ -85,6 +90,12 @@ const FileDropArea: FC<FileDropAreaProps> = ({
             >
               <RiCloseLine size={10} />
             </button>
+            {(formState.errors.files as unknown as ZodIssue[])?.[index] && (
+              <FaExclamation
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full p-1 shadow-md z-10"
+                size={20}
+              />
+            )}
             {file.type.startsWith("image/") ? (
               <ImagePicker
                 file={file}
@@ -181,12 +192,24 @@ const FileDropArea: FC<FileDropAreaProps> = ({
               )}
             </div>
             <div className="flex flex-col w-full">
+              {(formState.errors.files as unknown as ZodIssue[])?.[
+                selectedFileIndex
+              ] && (
+                <div className="flex items-center justify-center text-red-500 pl-4 pb-4">
+                  {
+                    (formState.errors.files as unknown as ZodIssue[])[
+                      selectedFileIndex
+                    ].message
+                  }
+                </div>
+              )}
               <div className="pl-4 py-4 w-[calc(100%-4rem)]">
                 <MessageField
                   id="message"
                   name="message"
                   placeholder="Type your message"
                   messageFieldRef={textAreaRef}
+                  handleSendMessage={handleSendMessage}
                 />
               </div>
               <div className="flex items-center w-full">
@@ -194,13 +217,19 @@ const FileDropArea: FC<FileDropAreaProps> = ({
                 <label
                   htmlFor="fileInput"
                   role="button"
-                  className="flex justify-center items-center h-14 w-14 text-5xl text-gold-900 hover:text-gold-600 shadow-2xl rounded-md border-2 border-dashed border-slate-700 ml-2"
+                  onClick={
+                    !formState.isValid ? (e) => e.preventDefault() : undefined
+                  }
+                  className={`flex justify-center items-center h-14 w-14 text-5xl text-gold-900 hover:text-gold-600 shadow-2xl rounded-md border-2 border-dashed border-slate-700 ml-2 ${
+                    !formState.isValid ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   <MdOutlineAdd />
                 </label>
                 <button
+                  disabled={!formState.isValid}
                   onClick={handleUpload}
-                  className="flex justify-center items-center h-14 w-14 text-5xl text-gold-900 hover:text-gold-600 shadow-2xl rounded-md border-2 border-slate-700 ml-2"
+                  className="flex justify-center items-center h-14 w-14 text-5xl text-gold-900 hover:text-gold-600 shadow-2xl rounded-md border-2 border-slate-700 ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <RiSendPlaneFill />
                 </button>

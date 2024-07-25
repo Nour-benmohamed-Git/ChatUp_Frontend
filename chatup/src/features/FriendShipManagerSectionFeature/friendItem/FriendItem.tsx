@@ -1,5 +1,5 @@
-import { blockFriend } from "@/app/_actions/userActions/blockFriend";
-import { removeFriend } from "@/app/_actions/userActions/removeFriend";
+import { blockFriend } from "@/app/_actions/friendActions/blockFriend";
+import { removeFriend } from "@/app/_actions/friendActions/removeFriend";
 import Avatar from "@/app/components/avatar/Avatar";
 import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";

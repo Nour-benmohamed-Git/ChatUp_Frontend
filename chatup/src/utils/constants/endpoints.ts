@@ -3,7 +3,7 @@ export const endpoints = {
   signUp: "/api/sign-up",
   getUsers: "/api/users",
   currentUser: "/api/current-user",
-  getCurrentUserChatSessions: "/api/current-user-chat-sessions",
+  getCurrentUserChatSessions: "/api/chat-sessions",
   getChatSessionByParticipants: "/api/chat-sessions/by-participants",
   removeMessage: "/api/messages/id",
   getMessagesByChatSession: "/api/messages/id/chat-sessions",

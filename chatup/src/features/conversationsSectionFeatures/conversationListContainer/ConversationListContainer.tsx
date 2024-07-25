@@ -2,9 +2,7 @@
 import { logout } from "@/app/_actions/authActions/logout";
 import useConversation from "@/hooks/useConversation";
 import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
-import Link from "next/link";
 import { FC, memo } from "react";
-import { BsPersonFillAdd } from "react-icons/bs";
 import BlocContainer from "../../blocContainer/BlocContainer";
 import ConversationList from "../conversationList/ConversationList";
 import { ConversationListContainerProps } from "./ConversationListContainer.types";
@@ -27,9 +25,9 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
   return (
     <aside
       id="sidebar"
-      className={`relative ${
+      className={`h-full ${
         isOpen ? "hidden" : "flex flex-col"
-      } md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500`}
+      } md:flex md:flex-col md:col-span-5 lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-gray-600 bg-gray-700`}
     >
       <BlocContainer
         title="Chat"
@@ -43,12 +41,6 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
           currentUser={currentUser}
         />
       </BlocContainer>
-      <Link
-        href="/add-friend"
-        className={`hidden md:flex items-center justify-center absolute bg-gray-900 rounded-full shadow-2xl z-30 right-4 bottom-4 h-11 w-11`}
-      >
-        <BsPersonFillAdd size={24} style={{ color: "#ffa500" }} />
-      </Link>
     </aside>
   );
 };

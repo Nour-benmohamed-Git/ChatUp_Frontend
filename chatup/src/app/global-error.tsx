@@ -5,7 +5,6 @@ import { FC } from "react";
 import { SlRefresh } from "react-icons/sl";
 import { TbAccessPoint } from "react-icons/tb";
 import Background from "./components/background/Background";
-import "./globals.css";
 import { IoHome } from "react-icons/io5";
 
 type ErrorProps = {
@@ -54,7 +53,7 @@ const GlobalError: FC<ErrorProps> = ({ error, reset }) => {
 
   return (
     <html>
-      <body className="flex items-center justify-center h-screen w-full bg-gradient-to-r from-gray-700 via-gray-900 to-black">
+      <body className="flex items-center justify-center h-screen w-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black">
         <div className="hidden md:block h-80 w-96">
           <Background />
         </div>

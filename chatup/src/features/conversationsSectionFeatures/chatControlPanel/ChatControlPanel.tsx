@@ -15,16 +15,20 @@ import { fileMenuActions } from "@/utils/constants/actionLists/fileMenuActions";
 import { MenuPosition, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { motion } from "framer-motion";
+import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { FC, RefObject, memo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
 import { toast } from "sonner";
+import { z } from "zod";
 import { ChatControlPanelProps } from "./ChatControlPanel.types";
 
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { conversationRelatedData, messageListRef } = props;
+  const router = useRouter();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
@@ -32,7 +36,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const [showDocumentsUploadPanel, setShowDocumentsUploadPanel] =
     useState(false);
   const { socket } = useSocket();
-  const { watch, reset, getValues, setValue } = useFormContext();
+  const { watch, reset, getValues, setValue, handleSubmit } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea(textAreaRef.current, getValues("message"));
   const openEmojiPicker = () => {
@@ -65,7 +69,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     console.log("location");
   };
   const handleUploadDocuments = () => {
-    console.log("second");
     setShowDocumentsUploadPanel(true);
   };
   const handleClosePhotosAndVideosUpload = () => {
@@ -85,10 +88,13 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     ...action,
     onClick: onClickFunctions[action.label],
   }));
-  const createMessage = async (chatSessionId: number) => {
+  const createMessage = async (
+    chatSessionId: number,
+    data: z.infer<typeof sendMessageSchema>
+  ) => {
     const messageToCreate = {
-      content: getValues("message"),
-      files: getValues("files"),
+      content: data.message,
+      files: data.files,
       senderId: currentUserId,
       receiverId: conversationRelatedData?.secondMemberId as number,
       chatSessionId,
@@ -97,7 +103,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     const formData = new FormData();
     Object.entries(messageToCreate).forEach(([key, value]) => {
       if (key !== "files") {
-        formData.append(key, value);
+        formData.append(key, value as any);
       }
     });
     messageToCreate.files?.forEach((file: File) => {
@@ -146,29 +152,36 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
         toast.error(error);
       });
   };
-  const handleSendMessage = async () => {
-    if (!getValues("message") && !getValues("files")) {
+  const handleSendMessage = async (data: z.infer<typeof sendMessageSchema>) => {
+    if (
+      getValues("message").trim().length == 0 &&
+      (!getValues("files") || getValues("files").length === 0)
+    ) {
       return;
     }
-    if (!getValues("id")) {
-      if (!conversationRelatedData.conversationId) {
+    if (!data.id) {
+      if (conversationRelatedData.conversationId === "new") {
+        // console.log(conversationRelatedData);
         const conversation = (await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
         })) as {
           data: { data: ConversationResponse };
         };
         if (conversation && conversationRelatedData?.secondMemberId) {
-          createMessage(conversation.data.data.id);
+          await createMessage(conversation.data.data.id, data);
           const queryParams = `deletedByCurrentUser=${
             conversation.data.data.deletedByCurrentUser
           }&secondMemberId=${
             conversationRelatedData?.secondMemberId as number
           }`;
-          window.history.replaceState(
-            {},
-            "",
+          router.replace(
             `/conversations/${conversation.data.data.id}?${queryParams}`
           );
+          // window.history.replaceState(
+          //   {},
+          //   "",
+          //   `/conversations/${conversation.data.data.id}?${queryParams}`
+          // );
         }
       } else {
         if (conversationRelatedData?.deletedByCurrentUser) {
@@ -177,96 +190,108 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           )) as {
             data: { data: ConversationResponse };
           };
-          createMessage(conversation.data.data.id);
+          createMessage(conversation.data.data.id, data);
         } else {
-          createMessage(conversationRelatedData.conversationId as number);
+          createMessage(conversationRelatedData.conversationId as number, data);
         }
       }
     } else {
       editMessage(conversationRelatedData.conversationId as number);
     }
   };
+
+  const onSubmit = async (data: z.infer<typeof sendMessageSchema>) => {
+    handleSendMessage(data);
+  };
+
   return (
-    <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
-      <div className="flex items-center justify-center h-full w-full gap-5">
+    <>
+      <AnimatePresence>
         {showEmojiPicker ? (
           <motion.div
             initial="closed"
-            animate={showEmojiPicker ? "open" : "closed"}
+            animate="open"
+            exit="closed"
             variants={{ open: { y: 0 }, closed: { y: "100%" } }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className={"absolute bottom-full left-0"}
+            className={"absolute bottom-16 left-0"}
           >
             <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
           </motion.div>
         ) : null}
-
-        {showDocumentsUploadPanel ? (
-          <motion.div
-            initial="closed"
-            animate={showDocumentsUploadPanel ? "open" : "closed"}
-            variants={{ open: { y: 0 }, closed: { y: "100%" } }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className={
-              "z-50 absolute bottom-0 left-0 w-full h-[calc(100vh-4rem)] bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
-            }
-          >
-            <FileDropArea
-              onClose={handleClosePhotosAndVideosUpload}
-              handleSendMessage={handleSendMessage}
-            />
-          </motion.div>
-        ) : null}
-        <div className="flex gap-7 h-full">
-          {updatedChatControlPanelActions.map((action) => (
-            <button key={action.label} onClick={action.onClick}>
+      </AnimatePresence>
+      <div className="flex items-center sticky bottom-0 bg-gray-900 shadow-lg min-h-16 max-h-40 z-40 px-4 py-2.5">
+        <div className="flex items-center justify-center h-full w-full gap-5">
+          <AnimatePresence>
+            {showDocumentsUploadPanel ? (
               <motion.div
-                ref={action.ref}
-                transition={{
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 20,
-                }}
-                whileHover={{
-                  scale: 1.5,
-                  rotate: 360,
-                }}
-                className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
+                initial="closed"
+                animate="open"
+                exit="closed"
+                variants={{ open: { y: 0 }, closed: { y: "100%" } }}
+                transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                className={
+                  "z-50 absolute bottom-0 left-0 w-full h-[calc(100vh-4rem)] bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
+                }
               >
-                {action.icon}
+                <FileDropArea
+                  onClose={handleClosePhotosAndVideosUpload}
+                  handleSendMessage={handleSubmit(onSubmit)}
+                />
               </motion.div>
-            </button>
-          ))}
-        </div>
-        <MessageField
-          id="message"
-          name="message"
-          placeholder="Type your message"
-          messageFieldRef={textAreaRef}
-        />
-        {watch("message") ? (
-          <button onClick={handleSendMessage}>
-            <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
+            ) : null}
+          </AnimatePresence>
+          <div className="flex gap-4 md:gap-6 h-full">
+            {updatedChatControlPanelActions.map((action) => (
+              <button key={action.label} onClick={action.onClick}>
+                <motion.div
+                  ref={action.ref}
+                  transition={{
+                    type: "spring",
+                    stiffness: 120,
+                    damping: 20,
+                  }}
+                  whileHover={{
+                    scale: 1.5,
+                    rotate: 360,
+                  }}
+                  className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
+                >
+                  {action.icon}
+                </motion.div>
+              </button>
+            ))}
+          </div>
+          <MessageField
+            id="message"
+            name="message"
+            placeholder="Type your message"
+            messageFieldRef={textAreaRef}
+            handleSendMessage={handleSubmit(onSubmit)}
+          />
+          {watch("message").trim().length !== 0 ? (
+            <button
+              type="submit"
+              onClick={handleSubmit(onSubmit)}
+              className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
+            >
               <BsFillSendFill size={24} />
-            </div>
-          </button>
-        ) : (
-          <button>
-            <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
+            </button>
+          ) : (
+            <button className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
               <FaMicrophone size={24} />
-            </div>
-          </button>
-        )}
+            </button>
+          )}
+        </div>
+        <Menu
+          actionList={updatedFileMenuActions}
+          isOpen={isOpenMenu}
+          onClose={handleCloseMenu}
+          buttonRef={buttonRef}
+          position={MenuPosition.TOP_RIGHT}
+        />
       </div>
-
-      <Menu
-        actionList={updatedFileMenuActions}
-        isOpen={isOpenMenu}
-        onClose={handleCloseMenu}
-        buttonRef={buttonRef}
-        position={MenuPosition.TOP_RIGHT}
-      />
-    </div>
+    </>
   );
 };
 export default memo(ChatControlPanel);

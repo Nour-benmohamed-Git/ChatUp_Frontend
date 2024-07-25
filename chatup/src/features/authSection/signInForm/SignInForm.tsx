@@ -18,7 +18,6 @@ const SignInForm: FC = () => {
       password: "",
     },
     mode: "all",
-    shouldFocusError: true,
     resolver: zodResolver(signInSchema),
   });
 

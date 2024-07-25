@@ -7,7 +7,7 @@ export async function updateFriendRequestStatusToAccepted(
   friendRequestId: number
 ) {
   return fetchFromServer<{ data: FriendRequestResponse }, FormData>(
-    `/api/friendRequests/${friendRequestId}/accept`,
+    `/api/friend-requests/${friendRequestId}/accept`,
     { method: "PATCH" },
     { tag: "requests" }
   );

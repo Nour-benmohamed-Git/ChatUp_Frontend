@@ -24,6 +24,7 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
   );
   useEffect(() => {
     const handleConversationCount = (data: { unseenConversations: number }) => {
+      console.log("handleConversationCount", data);
       setConversationCount(data.unseenConversations);
     };
     const handleFriendRequestCount = (data: {
@@ -33,16 +34,12 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
     };
 
     if (socket) {
-      socket.on("conversationCount", handleConversationCount);
-      socket.on("friendRequestCount", handleFriendRequestCount);
+      socket.on("conversation_count", handleConversationCount);
+      socket.on("friend_request_count", handleFriendRequestCount);
     }
     const handleFriendRequestNotification = (friendRequestData: any) => {
       console.log("friendRequestData", friendRequestData);
       switch (friendRequestData.action) {
-        // case "send":
-
-        //   break;
-
         case "accept":
           toast.info(friendRequestData.message);
           break;
@@ -55,14 +52,14 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
     };
 
     if (socket) {
-      socket.on("friend-request-notification", handleFriendRequestNotification);
+      socket.on("friend_request_notification", handleFriendRequestNotification);
     }
 
     return () => {
-      socket?.off("conversationCount", handleConversationCount);
-      socket?.off("friendRequestCount", handleFriendRequestCount);
+      socket?.off("conversation_count", handleConversationCount);
+      socket?.off("friend_request_count", handleFriendRequestCount);
       socket?.off(
-        "friend-request-notification",
+        "friend_request_notification",
         handleFriendRequestNotification
       );
     };

@@ -1,7 +1,9 @@
+import { ConversationResponse } from "@/types/ChatSession";
 import { Messages } from "@/types/Message";
 import { RefObject } from "react";
 
 export interface MessageListProps {
+  conversation: ConversationResponse;
   conversationRelatedData: {
     [key: string]: string | number | boolean | undefined;
   };
@@ -12,5 +14,4 @@ export interface MessageListProps {
   setSearchResults: (result: number[]) => void;
   currentSearchIndex: number;
   setCurrentSearchIndex: (result: number) => void;
-  
 }

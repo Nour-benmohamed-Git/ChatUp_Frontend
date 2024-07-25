@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
 export interface BadgeProps {
-  content: number;
+  content?: number;
   children: ReactNode;
 }

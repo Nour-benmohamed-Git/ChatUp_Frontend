@@ -4,11 +4,13 @@ import MessagesLoader from "@/app/components/messagesLoader/MessagesLoader";
 import ScrollToBottomButton from "@/app/components/scrollToBottomButton/ScrollToBottomButton";
 import { useSocket } from "@/context/SocketContext";
 import { Message, Messages } from "@/types/Message";
-import { Direction } from "@/utils/constants/globals";
+import { Direction, globals } from "@/utils/constants/globals";
+import { getItem } from "@/utils/helpers/cookiesHelpers";
 import {
   groupMessagesByDate,
   renderDateChip,
 } from "@/utils/helpers/dateHelpers";
+import { emitMessage } from "@/utils/helpers/socket-helpers";
 import dynamic from "next/dynamic";
 import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -19,6 +21,7 @@ const MessageItem = dynamic(() => import("../messageItem/MessageItem"), {
 });
 const MessageList: FC<MessageListProps> = (props) => {
   const {
+    conversation,
     conversationRelatedData,
     initialMessages,
     messageListRef,
@@ -28,7 +31,7 @@ const MessageList: FC<MessageListProps> = (props) => {
     currentSearchIndex,
     setCurrentSearchIndex,
   } = props;
-
+  const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
   const [dataSource, setDataSource] = useState<Message[]>(initialMessages.data);
   const [paginator, setPaginator] = useState<{
@@ -46,7 +49,6 @@ const MessageList: FC<MessageListProps> = (props) => {
     hasMoreBefore: initialMessages.hasMoreBefore,
     hasMoreAfter: initialMessages.hasMoreAfter,
   });
-  // console.log("initialMessages", initialMessages);
   const prevScrollTopRef = useRef<number>(0);
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -138,16 +140,24 @@ const MessageList: FC<MessageListProps> = (props) => {
   }, [paramToSearch]);
 
   useEffect(() => {
-    if (conversationRelatedData?.conversationId) {
-      socket?.emit("joinPrivateRoom", conversationRelatedData?.conversationId);
+    if (socket && conversationRelatedData?.conversationId) {
+      const handleJoinRoom = () => {
+        socket.emit("join_private_room", conversationRelatedData.conversationId);
+      };
+  
+      handleJoinRoom(); // Initial join
+      socket.io.on("reconnect", handleJoinRoom); // Rejoin on reconnect
+  
+      return () => {
+        socket.emit("leave_private_room", conversationRelatedData.conversationId);
+        socket.io.off("reconnect", handleJoinRoom);
+      };
     }
-    return () => {
-      socket?.emit("leavePrivateRoom", conversationRelatedData?.conversationId);
-    };
   }, [socket, conversationRelatedData?.conversationId]);
 
   useEffect(() => {
     const handleReceiveMessage = (newMessage: any) => {
+      console.log("newMessage", newMessage);
       switch (newMessage.action) {
         case "create":
           setDataSource((prevMessages) => [newMessage.data, ...prevMessages]);
@@ -179,9 +189,9 @@ const MessageList: FC<MessageListProps> = (props) => {
           break;
       }
     };
-    socket?.on("receiveMessage", handleReceiveMessage);
+    socket?.on("receive_Message", handleReceiveMessage);
     return () => {
-      socket?.off("receiveMessage", handleReceiveMessage);
+      socket?.off("receive_Message", handleReceiveMessage);
     };
   }, [socket]);
 
@@ -217,6 +227,19 @@ const MessageList: FC<MessageListProps> = (props) => {
     }
   }, [paramToSearch, currentSearchIndex]);
 
+  useEffect(() => {
+    if (socket && conversation && !conversation?.seen) {
+      emitMessage(socket, {
+        action: "markAsRead",
+        message: {
+          senderId: currentUserId,
+          receiverId: conversationRelatedData?.secondMemberId as number,
+          chatSessionId: conversationRelatedData?.conversationId as number,
+        },
+      });
+    }
+  }, [socket, conversation?.seen]);
+
   const messageGroups = Object.entries(groupMessagesByDate(dataSource)).map(
     ([date, messages]) => ({
       date,
@@ -237,7 +260,7 @@ const MessageList: FC<MessageListProps> = (props) => {
   };
 
   let content = null;
-  if (!conversationRelatedData?.conversationId || !dataSource.length) {
+  if (conversationRelatedData?.conversationId === "new" || !dataSource.length) {
     content = (
       <div className="flex flex-col-reverse h-full py-2">
         <Chip content="Today" />

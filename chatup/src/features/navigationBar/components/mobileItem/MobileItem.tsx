@@ -1,3 +1,4 @@
+import Badge from "@/app/components/badge/Badge";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { memo } from "react";
@@ -7,6 +8,7 @@ const MobileItem: React.FC<MobileItemProps> = ({
   href,
   icon: Icon,
   active,
+  count,
   onClick,
 }) => {
   const handleClick = () => {
@@ -33,12 +35,14 @@ const MobileItem: React.FC<MobileItemProps> = ({
       transition-all duration-300 ease-in-out
     `}
     >
-      <motion.div
-        animate={vibrationKeyframes}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
-      >
-        <Icon className="h-6 w-6" />
-      </motion.div>
+      <Badge content={count}>
+        <motion.div
+          animate={vibrationKeyframes}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <Icon className="h-8 w-8" />
+        </motion.div>
+      </Badge>
     </Link>
   );
 };

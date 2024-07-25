@@ -2,7 +2,7 @@ import { UserResponse } from "@/types/User";
 
 export interface ContactInfoProps {
   userData: UserResponse;
-  files: File[];
+  conversationId: number;
   lastSeen: string;
   onMessage: () => void;
   onAudioCall: () => void;

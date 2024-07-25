@@ -3,13 +3,11 @@ import Avatar from "@/app/components/avatar/Avatar";
 import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";
 import UnreadMessagesCounter from "@/app/components/unreadMessagesCounter/UnreadMessagesCounter";
-import { useSocket } from "@/context/SocketContext";
 import { chatItemActions } from "@/utils/constants/actionLists/chatItemActions";
 import { MenuPosition, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, memo, useRef, useState } from "react";
@@ -20,7 +18,6 @@ import { ConversationItemProps } from "./ConversationItem.types";
 const ConversationItem: FC<ConversationItemProps> = (props) => {
   const { conversation } = props;
   const router = useRouter();
-  const { socket } = useSocket();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const pathname = usePathname();
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -54,22 +51,7 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
     closeModal();
     router.push("/conversations");
   };
-  const handleEmitMarkAsReadMessagesEvent = () => {
-    if (socket && !conversation.seen) {
-      console.log("first conversation", conversation);
-      emitMessage(socket, {
-        action: "markAsRead",
-        message: {
-          senderId: getOtherUserId(
-            conversation.participantsData,
-            `${currentUserId}`
-          ),
-          receiverId: currentUserId,
-          chatSessionId: conversation.id,
-        },
-      });
-    }
-  };
+
   return (
     <>
       {isOpen && (
@@ -88,7 +70,6 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         </Dialog>
       )}
       <Link
-        onClick={handleEmitMarkAsReadMessagesEvent}
         href={{
           pathname: `/conversations/${conversation.id}`,
           query: {
@@ -110,12 +91,12 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
           additionalClasses="h-12 w-12 rounded-full"
           fileName={conversation.image}
         />
-        <div className="flex flex-col flex-1 min-w-0 gap-2">
+        <div className="flex flex-col min-w-0 w-[calc(100%-4rem)] gap-2">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-gold-600 truncate">
+            <div className="text-sm font-medium text-gold-600 max-w-[calc(100%-3rem)] truncate">
               {conversation.title}
             </div>
-            <div className="text-xs text-gold-400 ml-2">
+            <div className="text-xs text-gold-400 ml-2 truncate">
               {formatChatSessionDate(conversation.lastMessage?.timestamp)}
             </div>
           </div>

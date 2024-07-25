@@ -1,12 +1,13 @@
+import Badge from "@/app/components/badge/Badge";
 import Link from "next/link";
 import { memo } from "react";
 import { DesktopItemProps } from "./DesktopItem.types";
 
 const DesktopItem: React.FC<DesktopItemProps> = ({
-  label,
   href,
   icon: Icon,
   active,
+  count,
   onClick,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
@@ -16,14 +17,11 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   };
 
   return (
-    <li
-      onClick={handleClick}
-      key={label}
-      // className={href !== "/conversations" ? "mt-5" : ""}
-    >
-      <Link
-        href={href}
-        className={` 
+    <Badge content={count}>
+      <li onClick={handleClick}>
+        <Link
+          href={href}
+          className={` 
             flex 
             rounded-md 
             p-3 
@@ -33,10 +31,11 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
             shadow-2xl
             ${active && "bg-gray-800"}
           `}
-      >
-        <Icon className="h-6 w-6 shrink-0 z-50" aria-hidden="true" />
-      </Link>
-    </li>
+        >
+          <Icon className="h-6 w-6 shrink-0 z-50" aria-hidden="true" />
+        </Link>
+      </li>
+    </Badge>
   );
 };
 

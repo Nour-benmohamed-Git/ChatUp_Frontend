@@ -1,4 +1,3 @@
-import Badge from "@/app/components/badge/Badge";
 import useConversation from "@/hooks/useConversation";
 import { labelsWithBadge } from "@/hooks/useRoutes";
 import { motion } from "framer-motion";
@@ -15,31 +14,16 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
     return null;
   }
   return (
-    <div
-      className="
-        h-16
-        fixed 
-        flex 
-        items-center 
-        justify-between 
-        w-full 
-        bottom-0 
-        z-40 
-        bg-gray-900
-        border-t-[1px] 
-        md:hidden
-      "
-    >
+    <div className="h-16 fixed flex items-center justify-between w-full bottom-0 z-20 bg-gray-900 border-t-[1px] md:hidden">
       {routesWithBadge.map((route) => (
         <div key={route.href} className="flex-grow h-full">
-          {/* <Badge content={route.count}> */}
-            <MobileItem
-              href={route.href}
-              active={route.active}
-              icon={route.icon}
-              onClick={route.onClick}
-            />
-          {/* </Badge> */}
+          <MobileItem
+            href={route.href}
+            icon={route.icon}
+            active={route.active}
+            count={route.count}
+            onClick={route.onClick}
+          />
         </div>
       ))}
       <motion.div
@@ -55,8 +39,8 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
           <div key={route.href} className="flex-grow h-full">
             <MobileItem
               href={route.href}
-              active={route.active}
               icon={route.icon}
+              active={route.active}
               onClick={route.onClick}
             />
           </div>

@@ -6,13 +6,29 @@ export const globals = {
   algorithm: "HS256",
   expireIn: 24 * 60 * 60 * 1000,
 };
-export const maxFileSize = 5 * 1024 * 1024;
 export const units = ["B", "KB", "MB", "GB", "TB"];
-export const acceptedImageTypes = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
+export const maxFileSize = 5 * 1024 * 1024;
+export const allowedProfilePictureExtensions = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "gif",
+];
+export const allowedExtensions = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "gif",
+  "mp4",
+  "mov",
+  "avi",
+  "wmv",
+  "flv",
+  "pdf",
+  "docx",
+  "txt",
 ];
 
 export enum MenuPosition {
@@ -23,6 +39,11 @@ export enum MenuPosition {
 }
 
 export enum Direction {
-  "FORWARD",
-  "BACKWARD",
+  FORWARD = "FORWARD",
+  BACKWARD = "BACKWARD",
+}
+
+export enum EnabledInput {
+  EMAIL = "EMAIL",
+  PHONE = "PHONE",
 }

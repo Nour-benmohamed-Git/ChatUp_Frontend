@@ -14,7 +14,9 @@ import { FriendsContainerProps } from "./FriendsContainer.types";
 const FriendsContainer: FC<FriendsContainerProps> = (props) => {
   const { initialFriendRequests, initialFriends, currentUser } = props;
   const components: { [key: string]: ReactNode } = {
-    FriendRequests: <FriendRequestList friendRequests={initialFriendRequests} />,
+    FriendRequests: (
+      <FriendRequestList label="FriendRequests" initialFriendRequests={initialFriendRequests} />
+    ),
     friends: <FriendList label="Friends" initialFriends={initialFriends} />,
   };
   const updatedTabsActions = tabsActions.map((action) => ({
@@ -43,7 +45,7 @@ const FriendsContainer: FC<FriendsContainerProps> = (props) => {
   return (
     <aside
       id="sidebar"
-      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500"
+      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-gray-600 to-gray-700"
     >
       <BlocContainer
         title="Friends"

@@ -20,8 +20,8 @@ export const profileFields: ProfileField[] = [
   {
     name: "phone",
     icon: <FaMobileAlt size={18} />,
-    type: "text",
-    autoComplete: "phone",
+    type: "tel",
+    autoComplete: "tel",
   },
   {
     name: "profileInfo",

@@ -1,5 +1,6 @@
 import { FriendRequestsResponse } from "@/types/FriendRequest";
 
 export interface FriendRequestListProps {
-  friendRequests: FriendRequestsResponse;
+  label: string;
+  initialFriendRequests: FriendRequestsResponse;
 }

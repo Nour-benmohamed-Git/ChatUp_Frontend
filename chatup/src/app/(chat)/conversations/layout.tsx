@@ -6,27 +6,28 @@ import { UserResponse } from "@/types/User";
 import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";
 import "../../globals.css";
+
 export const metadata: Metadata = {
   title: "ChatUp | Chat Box",
   description: "Chat Box",
 };
 
-export default async function ChatLayout({
+export default async function ConversationsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [conversations, currentUser] = await Promise.all([
-    fetchConversations(),
+  const [currentUser, conversations] = await Promise.all([
     fetchCurrentUser(),
+    fetchConversations(),
   ]);
 
-  if (conversations.error || currentUser.error) {
-    const message = conversations.error?.message || currentUser.error?.message;
+  if (currentUser.error || conversations.error) {
+    const message = currentUser.error?.message || conversations.error?.message;
     throw new CustomError(message);
   }
   return (
-    <div className="h-screen md:col-span-11 grid md:grid-cols-12 bg-slate-700">
+    <div className="h-full w-full col-span-1 md:col-span-11 md:grid md:grid-cols-12">
       <ConversationListContainer
         initialConversations={conversations.data as ConversationsResponse}
         currentUser={currentUser.data?.data as UserResponse}

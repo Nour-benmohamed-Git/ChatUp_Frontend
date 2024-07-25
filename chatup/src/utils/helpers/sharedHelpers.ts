@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import environment from "../config/environment";
-import { units } from "../constants/globals";
+import { allowedExtensions, maxFileSize, units } from "../constants/globals";
 
 export function getOtherUserId(
   participantsData: { [userId: string]: string },
@@ -68,3 +68,25 @@ export const downloadFile = async (fileName: string) => {
   }
 };
 
+export function isValidFileExtension(file: File): {
+  isValid: boolean;
+  message: string;
+} {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const isValid =
+    extension !== undefined && allowedExtensions.includes(extension);
+  return {
+    isValid,
+    message: isValid
+      ? ""
+      : `Invalid file type "${extension}" for file "${file.name}".`,
+  };
+}
+
+export const isValidFileSize = (file: File) => {
+  const isValid = file.size <= maxFileSize;
+  return {
+    isValid,
+    message: isValid ? "" : `File "${file.name}" exceeds 5 MB in size.`,
+  };
+};

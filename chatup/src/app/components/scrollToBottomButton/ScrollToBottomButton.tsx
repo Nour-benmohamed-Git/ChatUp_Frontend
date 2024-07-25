@@ -35,7 +35,7 @@ const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({
     <button
       id="scrollToBottomBtn"
       onClick={scrollToBottom}
-      className={`absolute rounded-md bottom-4 right-4 bg-gold-300 animate-bounce border-2 shadow-2xl z-50`}
+      className={`absolute rounded-md bottom-4 right-4 bg-gold-300 animate-bounce border-2 shadow-2xl z-40`}
       style={{ display: isVisible ? "block" : "none" }}
     >
       <PiArrowFatLineDownFill size={36} className="text-gray-900" />

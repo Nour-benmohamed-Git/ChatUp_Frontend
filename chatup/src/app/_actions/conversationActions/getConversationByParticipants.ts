@@ -4,12 +4,12 @@ import { ConversationResponse } from "@/types/ChatSession";
 import { fetchFromServer } from "../fetchFromServer";
 
 export async function getConversationByParticipants(data: {
-  secondMemberId: string;
+  secondMemberId: number;
 }) {
   return fetchFromServer<
     { data: ConversationResponse },
     {
-      secondMemberId: string;
+      secondMemberId: number;
     }
   >(`/api/chat-sessions/by-participants`, { method: "POST", body: data });
 }
