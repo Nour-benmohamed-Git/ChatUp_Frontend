@@ -15,9 +15,9 @@ import { AiOutlineMail, AiOutlinePhone } from "react-icons/ai";
 import { ImSpinner9 } from "react-icons/im";
 import { toast } from "sonner";
 import { z } from "zod";
-import BlocContainer from "../blocContainer/BlocContainer";
-import FriendSuggestionList from "../FriendShipManagerSectionFeature/friendSuggestionList/FriendSuggestionList";
 import { SendFriendRequestProps } from "./SendFriendRequest.types";
+import BlocContainer from "@/features/blocContainer/BlocContainer";
+import FriendSuggestionList from "../friendSuggestionList/FriendSuggestionList";
 
 const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
   const { initialFriendSuggestions } = props;
@@ -96,7 +96,7 @@ const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
   return (
     <aside
       id="sidebar"
-      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-gray-600 to-gray-700"
+      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-slate-600 to-gray-700"
     >
       <BlocContainer
         title="Add Friend"

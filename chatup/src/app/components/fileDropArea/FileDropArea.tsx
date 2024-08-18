@@ -99,17 +99,17 @@ const FileDropArea: FC<FileDropAreaProps> = ({
             {file.type.startsWith("image/") ? (
               <ImagePicker
                 file={file}
-                additionalClasses="h-14 w-14 rounded-md"
+                additionalClasses="h-14 w-14"
               />
             ) : file.type.startsWith("video/") ? (
               <VideoPicker
                 file={file}
-                additionalClasses="h-14 w-14 rounded-md"
+                additionalClasses="h-14 w-14"
               />
             ) : (
               <FilePicker
                 file={file}
-                additionalClasses="h-14 w-14 rounded-md"
+                additionalClasses="h-14 w-14"
               />
             )}
           </li>
@@ -173,20 +173,20 @@ const FileDropArea: FC<FileDropAreaProps> = ({
               {watch("files")[selectedFileIndex].type.startsWith("image/") ? (
                 <ImagePicker
                   file={watch("files")[selectedFileIndex]}
-                  additionalClasses="h-48 w-40 rounded-md"
+                  additionalClasses="h-48 w-40"
                 />
               ) : watch("files")[selectedFileIndex].type.startsWith(
                   "video/"
                 ) ? (
                 <VideoPicker
                   file={watch("files")[selectedFileIndex]}
-                  additionalClasses="h-60 w-96 rounded-md"
+                  additionalClasses="h-60 w-96"
                   controls
                 />
               ) : (
                 <FilePicker
                   file={watch("files")[selectedFileIndex]}
-                  additionalClasses="h-48 w-40 rounded-md"
+                  additionalClasses="h-48 w-40"
                   showFileDetails
                 />
               )}

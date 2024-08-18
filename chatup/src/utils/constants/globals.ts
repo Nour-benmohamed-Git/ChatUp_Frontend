@@ -47,3 +47,6 @@ export enum EnabledInput {
   EMAIL = "EMAIL",
   PHONE = "PHONE",
 }
+
+export const predefinedReactions = ["👍", "❤️", "😂", "😮", "🙏"];
+

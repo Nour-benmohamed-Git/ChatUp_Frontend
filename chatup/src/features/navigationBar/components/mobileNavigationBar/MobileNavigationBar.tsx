@@ -31,7 +31,10 @@ const MobileNavigationBar: FC<NavigationBarProps> = (props) => {
         whileTap={{ scale: 0.9 }}
         transition={{ duration: 0.2 }}
       >
-        <MobileProfileItem profilePicture={currentUser?.profilePicture} />
+        <MobileProfileItem
+          profilePicture={currentUser?.profilePicture}
+          currentUser={currentUser}
+        />
       </motion.div>
       {routes
         .filter((item) => !labelsWithBadge.includes(item.label))

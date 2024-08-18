@@ -81,8 +81,9 @@ const DesktopNavigationBar: FC<NavigationBarProps> = (props) => {
         </ul>
         <Link href={"/profile"}>
           <Avatar
-            additionalClasses="h-10 w-10 rounded-md"
+            additionalClasses="h-10 w-10"
             fileName={currentUser?.profilePicture}
+            userId={currentUser.id}
           />
         </Link>
       </nav>

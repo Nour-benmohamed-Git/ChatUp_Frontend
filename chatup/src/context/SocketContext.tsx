@@ -7,6 +7,7 @@ interface SocketContextType {
 }
 interface SocketProviderProps {
   children: ReactNode;
+  currentUserId: number;
 }
 const SocketContext = createContext<SocketContextType>({
   socket: null,
@@ -22,18 +23,19 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const SocketProvider: React.FC<SocketProviderProps> = (props) => {
-  const { children } = props;
+  const { children, currentUserId } = props;
   const [socket, setSocket] = useState<Socket | null>(null);
+  let newSocket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
 
   useEffect(() => {
-    let newSocket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
+    // let newSocket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
     const initializeSocket = async () => {
       const token = await getCookie(globals.tokenKey);
 
       newSocket = io(`${environment.wsBaseUrl}`, {
         autoConnect: false,
         reconnection: true, // Enable automatic reconnection
-        reconnectionAttempts: 10, // Try a maximum of 10 times        
+        reconnectionAttempts: 10, // Try a maximum of 10 times
         reconnectionDelay: 2000, // Reconnect every 1 second
 
         auth: {
@@ -43,27 +45,29 @@ const SocketProvider: React.FC<SocketProviderProps> = (props) => {
       setSocket(newSocket);
       newSocket.connect();
 
+      // Listen for user connection
+      newSocket.emit("user_connected", currentUserId);
       newSocket.on("connect_error", () => {
         toast.error("Connection error!");
       });
 
-      // newSocket.on("disconnect", () => {
-      //   toast.error("Connection lost. Check your network.");
-      // });
+      newSocket.on("disconnect", () => {
+        toast.error("Connection lost. Check your network.");
+      });
 
-      // newSocket.on("reconnect_attempt", () => {
-      //   toast.info("Reconnecting...");
-      // });
+      newSocket.on("reconnect_attempt", () => {
+        toast.info("Reconnecting...");
+      });
 
-      newSocket.io.on("reconnect", (attempt) => {
+      newSocket.on("reconnect", (attempt) => {
         toast.success(`Reconnected after ${attempt} attempt(s).`);
       });
 
-      // newSocket.io.on("reconnect_error", () => {
-      //   toast.error("Reconnection error. Please try again.");
-      // });
+      newSocket.on("reconnect_error", () => {
+        toast.error("Reconnection error. Please try again.");
+      });
 
-      newSocket.io.on("reconnect_failed", () => {
+      newSocket.on("reconnect_failed", () => {
         toast.error("Reconnection failed. Please check your connection.");
       });
     };
@@ -72,10 +76,16 @@ const SocketProvider: React.FC<SocketProviderProps> = (props) => {
 
     return () => {
       if (newSocket) {
+        newSocket.off("connect_error");
+        newSocket.off("disconnect");
+        newSocket.off("reconnect_attempt");
+        newSocket.off("reconnect");
+        newSocket.off("reconnect_error");
+        newSocket.off("reconnect_failed");
         newSocket.disconnect();
       }
     };
-  }, []);
+  }, [currentUserId]);
   return (
     <SocketContext.Provider value={{ socket }}>
       {children}

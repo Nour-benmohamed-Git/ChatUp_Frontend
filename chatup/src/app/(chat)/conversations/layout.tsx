@@ -17,13 +17,16 @@ export default async function ConversationsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [currentUser, conversations] = await Promise.all([
+  const [currentUser, conversations,] = await Promise.all([
     fetchCurrentUser(),
     fetchConversations(),
+
   ]);
 
-  if (currentUser.error || conversations.error) {
-    const message = currentUser.error?.message || conversations.error?.message;
+  if (currentUser.error || conversations.error ) {
+    const message =
+      currentUser.error?.message ||
+      conversations.error?.message 
     throw new CustomError(message);
   }
   return (

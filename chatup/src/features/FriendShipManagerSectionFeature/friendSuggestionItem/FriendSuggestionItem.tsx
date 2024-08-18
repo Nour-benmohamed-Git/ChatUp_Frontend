@@ -54,7 +54,8 @@ const FriendSuggestionItem: React.FC<FriendSuggestionItemProps> = (props) => {
   return (
     <div className="flex items-center rounded-md gap-4 px-2 py-3 mt-2 bg-gray-900">
       <Avatar
-        additionalClasses="h-24 w-24 rounded-full"
+        additionalClasses="h-24 w-24"
+         rounded="rounded-full"
         fileName={friendSuggestionData?.profilePicture}
       />
       <div className="flex flex-col flex-1 min-w-0 gap-1">
@@ -70,7 +71,8 @@ const FriendSuggestionItem: React.FC<FriendSuggestionItemProps> = (props) => {
                 {mutualFriendsImages.map((image, index) => (
                   <Avatar
                     key={`${image}-${index}`}
-                    additionalClasses="h-7 w-7 rounded-full border-2 border-gray-900"
+                    additionalClasses="h-7 w-7"
+                    rounded="rounded-full border-2 border-gray-900"
                     fileName={image}
                   />
                 ))}

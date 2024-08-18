@@ -50,7 +50,7 @@ const FileViewer: FC<FileViewerProps> = ({
             }`}
             onClick={() => setSelectedFileIndex(index)}
           >
-            <FileIcon file={file} additionalClasses="h-14 w-14 rounded-md" />
+            <FileIcon file={file} additionalClasses="h-14 w-14" />
           </li>
         ))}
       </ul>
@@ -74,19 +74,27 @@ const FileViewer: FC<FileViewerProps> = ({
 
   return (
     <div className="w-full h-full space-y-4">
-      <div className="flex justify-between items-center w-full">
-        <div className="flex flex-1 gap-4">
-          <Avatar
-            additionalClasses="h-10 w-10 rounded-full"
-            fileName={messageDetails?.senderPicture}
-          />
-          <FileViewerHeaderInfo
-            username={messageDetails?.senderName}
-            timestamp={compactDateAndTimeFormatter(
-              messageDetails.timestamp as number
-            )}
-          />
-        </div>
+      <div
+        className={`flex ${
+          messageDetails ? "justify-between" : "justify-end"
+        } items-center w-full`}
+      >
+        {messageDetails ? (
+          <div className="flex flex-1 gap-4">
+            <Avatar
+              additionalClasses="h-10 w-10"
+              rounded="rounded-full"
+              fileName={messageDetails?.senderPicture}
+              userId={messageDetails?.senderId}
+            />
+            <FileViewerHeaderInfo
+              username={messageDetails?.senderName}
+              timestamp={compactDateAndTimeFormatter(
+                messageDetails.timestamp as number
+              )}
+            />
+          </div>
+        ) : null}
         <div className="flex flex-row-reverse items-center gap-6">
           <button
             className="text-2xl text-gold-900 hover:text-gold-600 rounded-full"
@@ -108,11 +116,11 @@ const FileViewer: FC<FileViewerProps> = ({
           </button>
         </div>
       </div>
-      <div className="h-[calc(100%-2.75rem)] rounded-md shadow-lg  p-4 flex flex-col items-center justify-center">
+      <div className="h-[calc(100%-2.75rem)] p-4 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center justify-between h-full w-full">
           <div className="relative flex items-center justify-center w-full">
             <motion.button
-              className="absolute left-0 p-2 border border-gold-300 rounded-full shadow-md transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
+              className="hidden md:block absolute left-0 p-2 border border-gold-300 rounded-full shadow-md transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={slideLeft}
               whileTap={{ boxShadow: "0 0 30px 15px rgba(255, 165, 0, 0.4)" }}
               disabled={selectedFileIndex === 0}
@@ -120,13 +128,26 @@ const FileViewer: FC<FileViewerProps> = ({
               <IoIosArrowBack className="text-2xl text-gold-900 hover:text-gold-600" />
             </motion.button>
 
-            <FileIcon
-              file={files[selectedFileIndex]}
-              additionalClasses="h-96 w-72 rounded-md shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900 rounded-md transition-transform duration-300"
-            />
+            <motion.div
+              className="w-72 h-96"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={(_event, info) => {
+                if (info.offset.x < -100) {
+                  slideRight();
+                } else if (info.offset.x > 100) {
+                  slideLeft();
+                }
+              }}
+            >
+              <FileIcon
+                file={files[selectedFileIndex]}
+                additionalClasses="h-full w-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900 rounded-md transition-transform duration-300"
+              />
+            </motion.div>
 
             <motion.button
-              className="absolute right-0 p-2 border border-gold-300 rounded-full shadow-md transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
+              className="hidden md:block absolute right-0 p-2 border border-gold-300 rounded-full shadow-md transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={slideRight}
               whileTap={{ boxShadow: "0 0 30px 15px rgba(255, 165, 0, 0.4)" }}
               disabled={selectedFileIndex === files.length - 1}

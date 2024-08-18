@@ -8,6 +8,7 @@ export interface Message {
   edited?: boolean;
   readStatus?: boolean;
   chatSessionId?: number;
+  reactions: Record<number, string>;
 }
 
 export type Messages = {

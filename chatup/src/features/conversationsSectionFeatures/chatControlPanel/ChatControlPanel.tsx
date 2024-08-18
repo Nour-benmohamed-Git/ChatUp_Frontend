@@ -10,7 +10,6 @@ import { useSocket } from "@/context/SocketContext";
 import useAutoSizeTextArea from "@/hooks/useAutoSizeTextArea";
 import { ConversationResponse } from "@/types/ChatSession";
 import { Message } from "@/types/Message";
-import { chatControlPanelActions } from "@/utils/constants/actionLists/chatControlPanelActions";
 import { fileMenuActions } from "@/utils/constants/actionLists/fileMenuActions";
 import { MenuPosition, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
@@ -18,10 +17,11 @@ import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { FC, RefObject, memo, useRef, useState } from "react";
+import { FC, memo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { BsFillSendFill } from "react-icons/bs";
-import { FaMicrophone } from "react-icons/fa";
+import { FaMicrophone, FaPlus } from "react-icons/fa";
+import { MdEmojiEmotions } from "react-icons/md";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ChatControlPanelProps } from "./ChatControlPanel.types";
@@ -29,8 +29,6 @@ import { ChatControlPanelProps } from "./ChatControlPanel.types";
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const { conversationRelatedData, messageListRef } = props;
   const router = useRouter();
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showDocumentsUploadPanel, setShowDocumentsUploadPanel] =
@@ -45,26 +43,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   const closeEmojiPicker = () => {
     setShowEmojiPicker(false);
   };
-  const handleOpenMenu = () => {
-    setIsOpenMenu(true);
-  };
-  const handleCloseMenu = () => {
-    setIsOpenMenu(false);
-  };
-  const additionalParams: {
-    [key: string]: { onClick: () => void; ref?: RefObject<HTMLDivElement> };
-  } = {
-    emojiPicker: { onClick: openEmojiPicker },
-    addFiles: { onClick: handleOpenMenu, ref: buttonRef },
-  };
-
-  const updatedChatControlPanelActions = chatControlPanelActions.map(
-    (action) => ({
-      ...action,
-      onClick: additionalParams[action.label].onClick,
-      ref: additionalParams[action.label].ref,
-    })
-  );
   const handleSendLocation = () => {
     console.log("location");
   };
@@ -130,6 +108,7 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
   };
 
   const editMessage = async (chatSessionId: number) => {
+    console.log(getValues("files"))
     const messageToEdit = {
       id: getValues("id"),
       content: getValues("message"),
@@ -161,7 +140,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     }
     if (!data.id) {
       if (conversationRelatedData.conversationId === "new") {
-        // console.log(conversationRelatedData);
         const conversation = (await addConversation({
           secondMemberId: conversationRelatedData.secondMemberId as number,
         })) as {
@@ -177,11 +155,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           router.replace(
             `/conversations/${conversation.data.data.id}?${queryParams}`
           );
-          // window.history.replaceState(
-          //   {},
-          //   "",
-          //   `/conversations/${conversation.data.data.id}?${queryParams}`
-          // );
         }
       } else {
         if (conversationRelatedData?.deletedByCurrentUser) {
@@ -204,6 +177,10 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     handleSendMessage(data);
   };
 
+  const handleAddEmoji = (params: { name: string; emoji: string }) => {
+    const { name, emoji } = params;
+    setValue(name, getValues(name) + emoji);
+  };
   return (
     <>
       <AnimatePresence>
@@ -216,7 +193,11 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
             className={"absolute bottom-16 left-0"}
           >
-            <EmojiPicker closeEmojiPicker={closeEmojiPicker} />
+            <EmojiPicker
+              closeEmojiPicker={closeEmojiPicker}
+              handleEmojiSelect={handleAddEmoji}
+              name="message"
+            />
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -242,25 +223,27 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             ) : null}
           </AnimatePresence>
           <div className="flex gap-4 md:gap-6 h-full">
-            {updatedChatControlPanelActions.map((action) => (
-              <button key={action.label} onClick={action.onClick}>
-                <motion.div
-                  ref={action.ref}
-                  transition={{
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                  }}
-                  whileHover={{
-                    scale: 1.5,
-                    rotate: 360,
-                  }}
-                  className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
-                >
-                  {action.icon}
-                </motion.div>
-              </button>
-            ))}
+            <button onClick={openEmojiPicker}>
+              <motion.div
+                transition={{
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 20,
+                }}
+                whileHover={{
+                  scale: 1.5,
+                  rotate: 360,
+                }}
+                className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300"
+              >
+                <MdEmojiEmotions size={24} />
+              </motion.div>
+            </button>
+            <Menu
+              actionList={updatedFileMenuActions}
+              position={MenuPosition.TOP_RIGHT}
+              icon={FaPlus}
+            />
           </div>
           <MessageField
             id="message"
@@ -283,13 +266,6 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
             </button>
           )}
         </div>
-        <Menu
-          actionList={updatedFileMenuActions}
-          isOpen={isOpenMenu}
-          onClose={handleCloseMenu}
-          buttonRef={buttonRef}
-          position={MenuPosition.TOP_RIGHT}
-        />
       </div>
     </>
   );

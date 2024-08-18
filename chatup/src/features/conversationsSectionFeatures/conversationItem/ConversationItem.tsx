@@ -10,7 +10,7 @@ import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FC, memo, useRef, useState } from "react";
+import { FC, memo, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import GetLastMessagePreview from "../getLastMessagePreview/GetLastMessagePreview";
 import { ConversationItemProps } from "./ConversationItem.types";
@@ -20,18 +20,7 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
   const router = useRouter();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const pathname = usePathname();
-  const buttonRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
-  const handleOpenMenu = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-    setIsOpenMenu(true);
-  };
-  const handleCloseMenu = () => {
-    setIsOpenMenu(false);
-  };
   const openModal = () => {
     setIsOpen(true);
   };
@@ -88,8 +77,13 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         } hover:bg-gray-800`}
       >
         <Avatar
-          additionalClasses="h-12 w-12 rounded-full"
+          additionalClasses="h-12 w-12"
+          rounded="rounded-full"
           fileName={conversation.image}
+          userId={getOtherUserId(
+            conversation.participantsData,
+            `${currentUserId}`
+          )}
         />
         <div className="flex flex-col min-w-0 w-[calc(100%-4rem)] gap-2">
           <div className="flex items-center justify-between">
@@ -107,25 +101,15 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
                 conversation={conversation}
                 currentUserId={currentUserId}
               />
-              <div
-                ref={buttonRef}
-                role="button"
-                onClick={handleOpenMenu}
-                className="flex justify-center items-center text-gold-900"
-              >
-                <BiDotsVerticalRounded size={20} />
-              </div>
+              <Menu
+                actionList={updatedChatItemActions}
+                position={MenuPosition.TOP_RIGHT}
+                icon={BiDotsVerticalRounded}
+              />
             </div>
           </div>
         </div>
       </Link>
-      <Menu
-        actionList={updatedChatItemActions}
-        isOpen={isOpenMenu}
-        onClose={handleCloseMenu}
-        buttonRef={buttonRef}
-        position={MenuPosition.TOP_RIGHT}
-      />
     </>
   );
 };

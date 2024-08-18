@@ -76,21 +76,23 @@ const FriendList: FC<FriendListProps> = (props) => {
       label={label}
       setParamToSearch={setParamToSearch}
     >
-      <InfiniteScroll
-        dataLength={dataSource?.length}
-        next={fetchMoreData}
-        hasMore={dataSource?.length < paginator.total}
-        loader={<Loader />}
-        height="calc(100vh - 12.5rem)"
-      >
-        {dataSource?.map?.((user) => (
-          <FriendItem
-            key={user.username}
-            userData={user}
-            handleCreateNewChat={handleCreateNewChat}
-          />
-        ))}
-      </InfiniteScroll>
+      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+        <InfiniteScroll
+          dataLength={dataSource?.length}
+          next={fetchMoreData}
+          hasMore={dataSource?.length < paginator.total}
+          loader={<Loader />}
+          scrollableTarget="scrollableDiv"
+        >
+          {dataSource?.map?.((user) => (
+            <FriendItem
+              key={user.username}
+              userData={user}
+              handleCreateNewChat={handleCreateNewChat}
+            />
+          ))}
+        </InfiniteScroll>
+      </div>
     </PanelContentWrapper>
   );
 };

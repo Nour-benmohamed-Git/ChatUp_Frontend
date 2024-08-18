@@ -1,6 +1,7 @@
 import { IoIosCopy, IoMdTrash } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
+import { TiArrowForward } from "react-icons/ti";
 
 export const messageActions = [
   {
@@ -13,6 +14,12 @@ export const messageActions = [
     name: "Copy",
     icon: <IoIosCopy size={22} />,
   },
+  {
+    label: "forward",
+    name: "Forward",
+    icon: <TiArrowForward size={22} />,
+  },
+
   {
     label: "softRemove",
     name: "Soft remove",

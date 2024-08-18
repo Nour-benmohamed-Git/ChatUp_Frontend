@@ -54,15 +54,16 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       setPaginator((prevPaginator) => ({
         ...prevPaginator,
         page: 1,
-        total: newConversations.data?.total,
+        total: newConversations?.data?.total,
       }));
-      setDataSource(newConversations.data?.data);
+      setDataSource(newConversations?.data?.data);
     };
     fetchNewUsers();
   }, [paramToSearch, paginator.offset]);
 
   useEffect(() => {
     const handleNotification = (chatSessionData: any) => {
+      console.log("chatSessionData", chatSessionData);
       switch (chatSessionData.type) {
         case "updateChatListOnAddition":
           setDataSource((prevChatSessions: any) => {
@@ -103,7 +104,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
               if (chatSession.id === chatSessionData.data.id) {
                 return {
                   ...chatSession,
-                  lastMessage: chatSessionData.data.lastMessage.content,
+                  lastMessage: chatSessionData.data.lastMessage,
                 };
               }
               return chatSession;
@@ -139,6 +140,21 @@ const ConversationList: FC<ConversationListProps> = (props) => {
             });
           });
           break;
+        case "updateChatListOnReaction":
+          setDataSource((prevChatSessions: any) => {
+            return prevChatSessions?.map((chatSession: any) => {
+              if (chatSession.id === chatSessionData.data.id) {
+                return {
+                  ...chatSession,
+                  lastMessage: chatSessionData.data.lastMessage,
+                  senderId: chatSessionData.senderId,
+                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
+                };
+              }
+              return chatSession;
+            });
+          });
+          break;
         default:
           console.log("Unknown notification type:", chatSessionData.type);
       }
@@ -160,17 +176,22 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       label={label}
       setParamToSearch={setParamToSearch}
     >
-      <InfiniteScroll
-        dataLength={dataSource?.length}
-        next={fetchMoreData}
-        hasMore={dataSource?.length < paginator.total}
-        loader={<Loader />}
-        height="calc(100% - 7.75rem)"
-      >
-        {dataSource?.map?.((conversation) => (
-          <ConversationItem key={conversation.id} conversation={conversation} />
-        ))}
-      </InfiniteScroll>
+      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+        <InfiniteScroll
+          dataLength={dataSource?.length}
+          next={fetchMoreData}
+          hasMore={dataSource?.length < paginator.total}
+          loader={<Loader />}
+          scrollableTarget="scrollableDiv"
+        >
+          {dataSource?.map?.((conversation) => (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+            />
+          ))}
+        </InfiniteScroll>
+      </div>
     </PanelContentWrapper>
   );
 };

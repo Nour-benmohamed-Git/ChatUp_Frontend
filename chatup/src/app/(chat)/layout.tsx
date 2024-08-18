@@ -1,12 +1,13 @@
+import { OnlineUsersProvider } from "@/context/OnlineUsersContext";
 import SocketProvider from "@/context/SocketContext";
 import NavigationBar from "@/features/navigationBar/NavigationBar";
 import { UserResponse } from "@/types/User";
 import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";
 import { fetchConversations } from "../_actions/conversationActions/fetchConversations";
+import { fetchFriendRequests } from "../_actions/friendRequestActions/fetchFriendRequests";
 import { fetchCurrentUser } from "../_actions/userActions/fetchCurrentUser";
 import "../globals.css";
-import { fetchFriendRequests } from "../_actions/friendRequestActions/fetchFriendRequests";
 
 export const metadata: Metadata = {
   title: "ChatUp | Conversations",
@@ -33,17 +34,21 @@ export default async function ChatLayout({
   }
   return (
     <div className="h-full w-full grid grid-cols-1 md:grid-cols-12">
-      <SocketProvider>
-        <NavigationBar
-          currentUser={currentUser.data?.data as UserResponse}
-          initialUnseenConversationsCount={
-            conversations.data?.unseenCount as number
-          }
-          initialUnseenFriendRequestsCount={
-            friendRequests.data?.unseenCount as number
-          }
-        />
-        {children}
+      <SocketProvider
+        currentUserId={(currentUser.data?.data as UserResponse).id}
+      >
+        <OnlineUsersProvider>
+          <NavigationBar
+            currentUser={currentUser.data?.data as UserResponse}
+            initialUnseenConversationsCount={
+              conversations.data?.unseenCount as number
+            }
+            initialUnseenFriendRequestsCount={
+              friendRequests.data?.unseenCount as number
+            }
+          />
+          {children}
+        </OnlineUsersProvider>
       </SocketProvider>
     </div>
   );

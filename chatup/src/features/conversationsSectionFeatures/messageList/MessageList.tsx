@@ -30,6 +30,7 @@ const MessageList: FC<MessageListProps> = (props) => {
     setSearchResults,
     currentSearchIndex,
     setCurrentSearchIndex,
+    initialFriends,
   } = props;
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
@@ -142,14 +143,20 @@ const MessageList: FC<MessageListProps> = (props) => {
   useEffect(() => {
     if (socket && conversationRelatedData?.conversationId) {
       const handleJoinRoom = () => {
-        socket.emit("join_private_room", conversationRelatedData.conversationId);
+        socket.emit(
+          "join_private_room",
+          conversationRelatedData.conversationId
+        );
       };
-  
+
       handleJoinRoom(); // Initial join
       socket.io.on("reconnect", handleJoinRoom); // Rejoin on reconnect
-  
+
       return () => {
-        socket.emit("leave_private_room", conversationRelatedData.conversationId);
+        socket.emit(
+          "leave_private_room",
+          conversationRelatedData.conversationId
+        );
         socket.io.off("reconnect", handleJoinRoom);
       };
     }
@@ -157,7 +164,6 @@ const MessageList: FC<MessageListProps> = (props) => {
 
   useEffect(() => {
     const handleReceiveMessage = (newMessage: any) => {
-      console.log("newMessage", newMessage);
       switch (newMessage.action) {
         case "create":
           setDataSource((prevMessages) => [newMessage.data, ...prevMessages]);
@@ -185,6 +191,17 @@ const MessageList: FC<MessageListProps> = (props) => {
         case "hardRemove":
           setDataSource((prevMessages) =>
             prevMessages.filter((item) => item.id !== newMessage.data.id)
+          );
+          break;
+        case "react":
+          // console.log("newMessage in react", newMessage);
+          setDataSource((prevMessages) =>
+            prevMessages.map((message) => {
+              if (message.id === newMessage.data.id) {
+                return { ...message, reactions: newMessage.data.reactions };
+              }
+              return message;
+            })
           );
           break;
       }
@@ -272,7 +289,7 @@ const MessageList: FC<MessageListProps> = (props) => {
         ref={messageListRef}
         id="scrollableDiv"
         className={`flex ${
-          paginator.direction === Direction.FORWARD
+          paginator.direction === Direction.FORWARD 
             ? "flex-col-reverse"
             : "flex-col"
         } px-2 md:px-8 py-2 h-[calc(100vh-8rem)] overflow-y-auto`}
@@ -321,6 +338,7 @@ const MessageList: FC<MessageListProps> = (props) => {
                       conversationRelatedData={conversationRelatedData}
                       highlight={paramToSearch}
                       isHighlighted={isHighlighted}
+                      initialFriends={initialFriends}
                     />
                   </div>
                 );

@@ -45,7 +45,8 @@ const FriendRequestItem: FC<FriendRequestItemProps> = (props) => {
   return (
     <div className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900">
       <Avatar
-        additionalClasses="h-12 w-12 rounded-full"
+        additionalClasses="h-12 w-12"
+        rounded="rounded-full"
         fileName={friendRequestData?.image}
       />
       <div className="flex flex-col flex-1 min-w-0 gap-2">

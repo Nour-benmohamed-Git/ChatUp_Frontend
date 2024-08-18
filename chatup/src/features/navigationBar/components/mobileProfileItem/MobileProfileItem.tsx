@@ -3,7 +3,10 @@ import Link from "next/link";
 import { FC, memo } from "react";
 import { MobileProfileItemProps } from "./MobileProfileItem.types";
 
-const MobileProfileItem: FC<MobileProfileItemProps> = ({ profilePicture }) => {
+const MobileProfileItem: FC<MobileProfileItemProps> = ({
+  profilePicture,
+  currentUser,
+}) => {
   return (
     <Link
       href={"/profile"}
@@ -11,8 +14,10 @@ const MobileProfileItem: FC<MobileProfileItemProps> = ({ profilePicture }) => {
     >
       <div className="absolute bottom-0 h-9 w-full bg-slate-700" />
       <Avatar
-        additionalClasses="h-16 w-16 rounded-full border-2 border-gold-600"
+        additionalClasses="h-16 w-16"
+        rounded="rounded-full border-2 border-gold-600"
         fileName={profilePicture}
+        userId={currentUser.id}
       />
     </Link>
   );

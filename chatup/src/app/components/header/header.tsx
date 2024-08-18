@@ -1,33 +1,28 @@
 import { avatarActions } from "@/utils/constants/actionLists/avatarActions";
 import { useRouter } from "next/navigation";
-import { FC, memo, useRef, useState } from "react";
+import { FC, memo } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Avatar from "../avatar/Avatar";
 import ConversationHeaderUserInfo from "../conversationHeaderUserInfo/ConversationHeaderUserInfo";
 import Menu from "../menu/Menu";
 
-import { HeaderProps } from "./Header.types";
 import { MenuPosition } from "@/utils/constants/globals";
+import { HeaderProps } from "./Header.types";
 
 const Header: FC<HeaderProps> = (props) => {
   const { actions, toggleHandlers, label, userData, menuActionList, title } =
     props;
   const router = useRouter();
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
-  const handleOpenMenu = () => {
-    setIsOpenMenu(true);
-  };
-  const handleCloseMenu = () => {
-    setIsOpenMenu(false);
+  const handleBack = () => {
+    router.push("/conversations");
   };
   return (
     <header className="sticky top-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5">
       <div className="flex items-center justify-between h-full gap-2">
         {label === "right_container" ? (
           <button
-            onClick={() => router.back()}
+            onClick={handleBack}
             className="text-gold-900 rounded-full hover:text-gold-300 md:hidden"
           >
             <IoMdArrowRoundBack className="text-2xl" />
@@ -40,12 +35,14 @@ const Header: FC<HeaderProps> = (props) => {
             className="flex flex-1 gap-4"
           >
             <Avatar
-              additionalClasses="h-10 w-10 rounded-full"
+              additionalClasses="h-10 w-10"
+              rounded="rounded-full"
               fileName={userData?.profilePicture}
+              userId={userData.id}
             />
             <ConversationHeaderUserInfo
               username={userData?.username}
-              lastSeen="today"
+              userId={userData.id}
             />
           </div>
         ) : (
@@ -62,23 +59,10 @@ const Header: FC<HeaderProps> = (props) => {
               </div>
             </button>
           ))}
-          <div
-            ref={buttonRef}
-            role="button"
-            onClick={handleOpenMenu}
-            className="flex justify-center items-center text-gold-900 rounded-full hover:text-gold-300"
-          >
-            <BiDotsVerticalRounded size={20} />
-          </div>
-          {/* <button   className="text-gold-900 rounded-full hover:text-gold-300">
-            <BiDotsVerticalRounded size={24} />
-          </button>  */}
           <Menu
             actionList={menuActionList}
-            isOpen={isOpenMenu}
-            onClose={handleCloseMenu}
-            buttonRef={buttonRef}
             position={MenuPosition.BOTTOM_LEFT}
+            icon={BiDotsVerticalRounded}
           />
         </div>
       </div>

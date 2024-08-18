@@ -5,7 +5,7 @@ import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";
 import { FriendItemActions } from "@/utils/constants/actionLists/friendItemActions";
 import { MenuPosition } from "@/utils/constants/globals";
-import { FC, memo, useRef, useState } from "react";
+import { FC, memo, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { FriendItemProps } from "./FriendItem.types";
 
@@ -13,25 +13,12 @@ const FriendItem: FC<FriendItemProps> = (props) => {
   const { userData, handleCreateNewChat } = props;
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
-  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const handleOpenMenu = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsOpenMenu(true);
-  };
-  const handleCloseMenu = () => {
-    setIsOpenMenu(false);
-  };
   const openRemoveModal = () => {
     setIsRemoveDialogOpen(true);
   };
   const closeRemoveModal = () => {
     setIsRemoveDialogOpen(false);
   };
-
   const openBlockModal = () => {
     setIsBlockDialogOpen(true);
   };
@@ -93,8 +80,10 @@ const FriendItem: FC<FriendItemProps> = (props) => {
         className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"
       >
         <Avatar
-          additionalClasses="h-12 w-12 rounded-full"
+          additionalClasses="h-12 w-12"
+          rounded="rounded-full"
           fileName={userData.profilePicture}
+          userId={userData.id}
         />
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           <div className="text-sm font-medium text-gold-600 truncate">
@@ -104,24 +93,14 @@ const FriendItem: FC<FriendItemProps> = (props) => {
             <div className="text-xs text-white truncate">
               {userData?.profileInfo}
             </div>
-            <div
-              ref={buttonRef}
-              role="button"
-              onClick={handleOpenMenu}
-              className="flex justify-center items-center text-gold-900"
-            >
-              <BiDotsVerticalRounded size={20} />
-            </div>
+            <Menu
+              actionList={updatedFriendItemActions}
+              position={MenuPosition.TOP_RIGHT}
+              icon={BiDotsVerticalRounded}
+            />
           </div>
         </div>
       </div>
-      <Menu
-        actionList={updatedFriendItemActions}
-        isOpen={isOpenMenu}
-        onClose={handleCloseMenu}
-        buttonRef={buttonRef}
-        position={MenuPosition.TOP_RIGHT}
-      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 import { ConversationResponse } from "@/types/ChatSession";
 import { Messages } from "@/types/Message";
-import { UserResponse } from "@/types/User";
+import { UserResponse, UsersResponse } from "@/types/User";
 
 export interface SelectedConversationProps {
   conversation: ConversationResponse;
@@ -9,4 +9,5 @@ export interface SelectedConversationProps {
   };
   initialMessages: Messages;
   userData: UserResponse;
+  initialFriends: UsersResponse;
 }

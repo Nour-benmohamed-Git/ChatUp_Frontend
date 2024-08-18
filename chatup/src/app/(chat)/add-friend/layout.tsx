@@ -1,5 +1,5 @@
 import { fetchSuggestions } from "@/app/_actions/friendSuggestionActions/fetchSuggestions";
-import SendFriendRequest from "@/features/sendFriendRequest/SendFriendRequest";
+import SendFriendRequest from "@/features/FriendShipManagerSectionFeature/sendFriendRequest/SendFriendRequest";
 import { FriendSuggestionsResponse } from "@/types/Suggestions";
 import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";

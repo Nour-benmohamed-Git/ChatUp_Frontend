@@ -14,6 +14,7 @@ export const sendMessageSchema = z
         message: "Message cannot be empty.",
       }),
     files: z.array(z.any()).optional(),
+    reaction: z.string().optional(),
   })
   .superRefine((val, ctx) => {
     if (!val.files?.length) return z.NEVER;

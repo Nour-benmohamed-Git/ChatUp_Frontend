@@ -13,7 +13,7 @@ const VideoPicker: FC<VideoPickerProps> = (props) => {
           if (typeof reader.result === "string") {
             setPreviewUrl(reader.result);
           }
-        }; 
+        };
         reader.readAsDataURL(file);
       }
     };
@@ -21,12 +21,14 @@ const VideoPicker: FC<VideoPickerProps> = (props) => {
   }, [file]);
 
   return previewUrl ? (
-    <video
-      controls={controls}
-      className={`${additionalClasses} overflow-hidden shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900 object-cover`}
-    >
-      <source src={previewUrl} />
-    </video>
+    <div className={`${additionalClasses}`}>
+      <video
+        controls={controls}
+        className="h-full w-full overflow-hidden shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900 object-cover"
+      >
+        <source src={previewUrl} />
+      </video>
+    </div>
   ) : null;
 };
 

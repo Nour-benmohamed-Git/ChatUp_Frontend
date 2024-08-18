@@ -19,7 +19,7 @@ const FriendSuggestionList: FC<FriendSuggestionListProps> = (props) => {
     offset: 10,
     total: 0,
   });
-  
+
   useEffect(() => {
     setDataSource(initialFriendSuggestions?.data);
     setPaginator((prevPaginator) => ({
@@ -43,20 +43,22 @@ const FriendSuggestionList: FC<FriendSuggestionListProps> = (props) => {
 
   return (
     <PanelContentWrapper height="calc(100vh - 12.25rem)">
-      <InfiniteScroll
-        dataLength={dataSource.length}
-        next={fetchMoreData}
-        hasMore={dataSource.length < paginator.total}
-        loader={<Loader />}
-        height="calc(100vh - 12.5rem)"
-      >
-        {dataSource.map((suggestion, index) => (
-          <FriendSuggestionItem
-            key={`${suggestion.username}-${index}`}
-            friendSuggestionData={suggestion}
-          />
-        ))}
-      </InfiniteScroll>
+      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+        <InfiniteScroll
+          dataLength={dataSource.length}
+          next={fetchMoreData}
+          hasMore={dataSource.length < paginator.total}
+          loader={<Loader />}
+          scrollableTarget="scrollableDiv"
+        >
+          {dataSource.map((suggestion, index) => (
+            <FriendSuggestionItem
+              key={`${suggestion.username}-${index}`}
+              friendSuggestionData={suggestion}
+            />
+          ))}
+        </InfiniteScroll>
+      </div>
     </PanelContentWrapper>
   );
 };

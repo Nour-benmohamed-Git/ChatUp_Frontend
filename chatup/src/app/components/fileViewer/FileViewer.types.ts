@@ -1,7 +1,8 @@
 export interface FileViewerProps {
   files: any;
   onClose: () => void;
-  messageDetails: {
+  messageDetails?: {
+    senderId?: number;
     senderPicture?: string;
     senderName: string;
     timestamp?: number;

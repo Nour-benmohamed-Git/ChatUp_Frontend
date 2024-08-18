@@ -49,7 +49,8 @@ const ProfilePicture: FC<ProfilePictureProps> = ({ id, name }) => {
             </div>
           ) : (
             <Avatar
-              additionalClasses="h-32 w-32 rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+              additionalClasses="h-32 w-32"
+              rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
               fileName={field.value}
             />
           )}

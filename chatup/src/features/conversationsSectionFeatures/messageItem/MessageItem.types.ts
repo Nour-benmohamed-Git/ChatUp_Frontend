@@ -1,4 +1,5 @@
 import { Message } from "@/types/Message";
+import { UsersResponse } from "@/types/User";
 
 export interface MessageItemProps {
   message: Message;
@@ -7,4 +8,5 @@ export interface MessageItemProps {
   };
   highlight: string;
   isHighlighted: boolean;
+  initialFriends: UsersResponse;
 }

@@ -1,49 +1,70 @@
+import { forwardMessage } from "@/app/_actions/messageActions/forwardMessage";
 import { hardRemoveMessage } from "@/app/_actions/messageActions/hardRemoveMessage";
 import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
 import Dialog from "@/app/components/dialog/Dialog";
 import FileDisplay from "@/app/components/fileDisplay/FileDisplay";
 import Menu from "@/app/components/menu/Menu";
+import MessageReactionSelector from "@/app/components/messageReactionSelector/MessageReactionSelector";
 import MessageStatus from "@/app/components/messageStatus/MessageStatus";
 import { useSocket } from "@/context/SocketContext";
+import { Message } from "@/types/Message";
 import { messageActions } from "@/utils/constants/actionLists/messageActions";
 import { MenuPosition, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
+import {
+  emitForwardedMessage,
+  emitMessage,
+} from "@/utils/helpers/socket-helpers";
 import { FC, memo, useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { BiDotsVerticalRounded, BiPencil } from "react-icons/bi";
+import { BiDotsVerticalRounded } from "react-icons/bi";
+import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
+import ForwardMessageList from "../forwardMessageList/ForwardMessageList";
+import ReactionList from "../reactionList/ReactionList";
 import styles from "./MessageItem.module.css";
 import { MessageItemProps } from "./MessageItem.types";
 
 const MessageItem: FC<MessageItemProps> = (props) => {
-  const { message, conversationRelatedData, highlight, isHighlighted } = props;
+  const {
+    message,
+    conversationRelatedData,
+    highlight,
+    isHighlighted,
+    initialFriends,
+  } = props;
+  const [tapCoordinates, setTapCoordinates] = useState<{
+    x: number;
+    y: number;
+  }>();
   const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const [isOpenSoftRemove, setIsOpenSoftRemove] = useState(false);
-  const [isOpenHardRemove, setIsOpenHardRemove] = useState(false);
-  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const [openSoftRemove, setOpenSoftRemove] = useState(false);
+  const [openHardRemove, setOpenHardRemove] = useState(false);
+  const [openForwardMessage, setOpenForwardMessage] = useState(false);
+  const [checkedUsers, setCheckedUsers] = useState<Set<number>>(new Set());
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
 
-  const handleOpenMenu = () => {
-    setIsOpenMenu(true);
+  const openForwardMessageModal = () => {
+    setOpenForwardMessage(true);
   };
-  const handleCloseMenu = () => {
-    setIsOpenMenu(false);
+  const closeForwardMessageModal = () => {
+    checkedUsers.clear();
+    setOpenForwardMessage(false);
   };
   const openSoftRemoveModal = () => {
-    setIsOpenSoftRemove(true);
+    setOpenSoftRemove(true);
   };
   const closeSoftRemoveModal = () => {
-    setIsOpenSoftRemove(false);
+    setOpenSoftRemove(false);
   };
   const openHardRemoveModal = () => {
-    setIsOpenHardRemove(true);
+    setOpenHardRemove(true);
   };
   const closeHardRemoveModal = () => {
-    setIsOpenHardRemove(false);
+    setOpenHardRemove(false);
   };
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(message.content as string);
@@ -57,6 +78,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
   const onClickFunctions: { [key: string]: () => void } = {
     edit: handleEditMessage,
     copy: handleCopyToClipboard,
+    forward: openForwardMessageModal,
     softRemove: openSoftRemoveModal,
     hardRemove: openHardRemoveModal,
   };
@@ -79,6 +101,20 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       closeSoftRemoveModal();
     }
   };
+
+  const handleForwardMessage = async () => {
+    if (message.id && socket) {
+      const forwardedMessages = (await forwardMessage(message.id, [
+        ...checkedUsers,
+      ])) as { data: { data: Message[] } };
+      toast.success("Message has been successfully forwarded.");
+      emitForwardedMessage(socket, {
+        forwardedMessages: forwardedMessages.data?.data,
+      });
+      closeForwardMessageModal();
+    }
+  };
+
   const handleHardRemoveMessage = async () => {
     if (message.id && socket) {
       await hardRemoveMessage(message.id);
@@ -119,9 +155,48 @@ const MessageItem: FC<MessageItemProps> = (props) => {
     () => getHighlightedText(message.content || "", highlight || ""),
     [message.content, highlight]
   );
+  const timerRef = useRef<number | null>(null);
+
+  const handlePressStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTapCoordinates({ x: touch.clientX, y: touch.clientY });
+    // Set a timer to show the reaction picker after 300ms
+    timerRef.current = window.setTimeout(
+      () => setShowReactionPicker(true),
+      300
+    );
+  };
+
+  const handlePressEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  // console.log(message);
   return (
     <>
-      {isOpenSoftRemove && (
+      {openForwardMessage && (
+        <Dialog
+          title="Forward message to"
+          onClose={closeForwardMessageModal}
+          actions={[
+            {
+              label: "forward",
+              onClick: handleForwardMessage,
+              category: "confirmation",
+            },
+          ]}
+        >
+          <ForwardMessageList
+            initialFriends={initialFriends}
+            checkedUsers={checkedUsers}
+            setCheckedUsers={setCheckedUsers}
+          />
+        </Dialog>
+      )}
+      {openSoftRemove && (
         <Dialog
           title="Remove message"
           onClose={closeSoftRemoveModal}
@@ -136,7 +211,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
           Are you sure you want to soft remove this message?
         </Dialog>
       )}
-      {isOpenHardRemove && (
+      {openHardRemove && (
         <Dialog
           title="Remove message"
           onClose={closeHardRemoveModal}
@@ -152,21 +227,23 @@ const MessageItem: FC<MessageItemProps> = (props) => {
         </Dialog>
       )}
       <div
-        className={`flex items-start my-1 ${
+        className={`flex items-start my-3 ${
           currentUserId && message.senderId != currentUserId
             ? "justify-start"
             : "justify-end"
         }`}
       >
         <div
-          className={`flex items-center ${
+          className={`flex items-center max-w-xs lg:max-w-lg xl:max-w-screen-xl ${
             currentUserId && message.senderId != currentUserId
               ? "flex-row"
               : "flex-row-reverse"
           } gap-2`}
         >
           <div
-            className={`rounded-xl p-4 max-w-xs md:max-w-sm break-words shadow-md ${
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd} // Handle case where tap is canceled
+            className={`relative rounded-xl p-4 w-full break-words shadow-md ${
               currentUserId && message.senderId != currentUserId
                 ? "bg-gold-400 text-gray-950 rounded-tl-none"
                 : "bg-slate-900 text-white rounded-tr-none"
@@ -179,7 +256,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
                 timestamp: message.timestamp,
               }}
             />
-            <p className="text-sm">{messageContent}</p>
+            <p className="text-sm max-w-[24.5rem]">{messageContent}</p>
             <div className="flex items-center justify-end gap-2">
               <span
                 className={`flex flex-row-reverse text-xs mt-2 ${
@@ -192,33 +269,43 @@ const MessageItem: FC<MessageItemProps> = (props) => {
               </span>
               <MessageStatus currentUserId={currentUserId} message={message} />
             </div>
+            <ReactionList
+              position={
+                currentUserId && message.senderId != currentUserId
+                  ? MenuPosition.TOP_RIGHT
+                  : MenuPosition.TOP_LEFT
+              }
+              reactions={message.reactions}
+            />
           </div>
-          <div
-            ref={buttonRef}
-            role="button"
-            onClick={handleOpenMenu}
-            className="flex justify-center items-center rounded-full h-8 w-8 bg-slate-900 text-gold-900"
-          >
-            <BiDotsVerticalRounded size={20} />
-          </div>
+          <Menu
+            actionList={updatedMessageActions}
+            position={
+              currentUserId && message.senderId != currentUserId
+                ? MenuPosition.TOP_RIGHT
+                : MenuPosition.TOP_LEFT
+            }
+            icon={BiDotsVerticalRounded}
+          />
+          <MessageReactionSelector
+            reactionSelectorPosition={tapCoordinates}
+            position={
+              currentUserId && message.senderId != currentUserId
+                ? MenuPosition.TOP_RIGHT
+                : MenuPosition.TOP_LEFT
+            }
+            showReactionPicker={showReactionPicker}
+            setShowReactionPicker={setShowReactionPicker}
+            message={message}
+            conversationRelatedData={conversationRelatedData}
+          />
           {message.edited && (
             <div className="flex justify-center items-center rounded-full h-8 w-8 text-gold-900">
-              <BiPencil size={20} />
+              <MdEdit size={20} />
             </div>
           )}
         </div>
       </div>
-      <Menu
-        actionList={updatedMessageActions}
-        isOpen={isOpenMenu}
-        onClose={handleCloseMenu}
-        buttonRef={buttonRef}
-        position={
-          currentUserId && message.senderId != currentUserId
-            ? MenuPosition.TOP_RIGHT
-            : MenuPosition.TOP_LEFT
-        }
-      />
     </>
   );
 };

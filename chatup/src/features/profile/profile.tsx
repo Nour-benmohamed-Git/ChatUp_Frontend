@@ -77,7 +77,7 @@ const Profile: FC<ProfileProps> = (props) => {
   return (
     <aside
       id="sidebar"
-      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-gray-600 to-gray-700"
+      className="md:flex md:flex-col md:col-span-5 h-full lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-slate-600 to-gray-700"
     >
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
@@ -93,7 +93,8 @@ const Profile: FC<ProfileProps> = (props) => {
                   <ProfilePicture id="profilePicture" name="profilePicture" />
                 ) : (
                   <Avatar
-                    additionalClasses="h-32 w-32 rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                    additionalClasses="h-32 w-32"
+                    rounded="rounded-full  shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
                     fileName={methods.getValues("profilePicture")}
                   />
                 )}

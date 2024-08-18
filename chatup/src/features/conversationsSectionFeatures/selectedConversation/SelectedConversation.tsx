@@ -22,8 +22,13 @@ import SearchBar from "../searchBar/SearchBar";
 import { SelectedConversationProps } from "./SelectedConversation.types";
 
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
-  const { conversation, conversationRelatedData, initialMessages, userData } =
-    props;
+  const {
+    conversation,
+    conversationRelatedData,
+    initialMessages,
+    userData,
+    initialFriends,
+  } = props;
   const messageListRef = useRef<HTMLDivElement>(null);
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
@@ -126,6 +131,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
       id: 0,
       message: "",
       files: [],
+      reaction: "",
     },
     mode: "all",
     resolver: zodResolver(sendMessageSchema),
@@ -152,7 +158,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
         id="main_content"
         className={`relative ${
           isOpen ? "flex flex-col" : "hidden"
-        } md:flex md:flex-col md:col-span-7 lg:col-span-8 bg-gradient-to-r from-gray-600 to-gray-700`}
+        } md:flex md:flex-col md:col-span-7 lg:col-span-8 bg-gradient-to-r from-slate-600 to-gray-700`}
       >
         {Object.entries(panels).map(([key, panel]) => (
           <SlidingPanel
@@ -192,6 +198,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
               setSearchResults={setSearchResults}
               currentSearchIndex={currentSearchIndex}
               setCurrentSearchIndex={setCurrentSearchIndex}
+              initialFriends={initialFriends}
             />
           </BlocContainer>
         </FormProvider>

@@ -15,6 +15,8 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
     setSenderData(user.data?.data);
     setShowFileViewer(true);
   };
+
+  // console.log("showFileViewer", showFileViewer);
   const renderFiles = () => {
     const imagesAndVideos = files.filter(
       (file: any) =>
@@ -27,22 +29,27 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
     );
     if (!files?.length) return null;
 
+    const handleCloseFileViewer = () => {
+      setShowFileViewer(false);
+    };
     return (
       <>
         {showFileViewer ? (
           <motion.div
             initial="closed"
-            animate={showFileViewer ? "open" : "closed"}
+            animate="open"
+            exit="closed"
             variants={{ open: { y: 0 }, closed: { y: "100%" } }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
             className={
-              "z-50 fixed top-0 left-0 w-full h-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4"
+              "fixed top-0 left-0 w-full h-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black p-4 z-50"
             }
           >
             <FileViewer
               files={imagesAndVideos}
-              onClose={() => setShowFileViewer(false)}
+              onClose={handleCloseFileViewer}
               messageDetails={{
+                senderId: senderData?.id,
                 senderPicture: senderData?.profilePicture,
                 senderName: senderData?.username as string,
                 timestamp: messageDetails?.timestamp,
@@ -61,7 +68,7 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
                 <div className="flex items-center justify-center">
                   <FileIcon
                     file={imagesAndVideos[0]}
-                    additionalClasses="h-40 w-40 rounded-md"
+                    additionalClasses="h-40 w-40 md:h-48 md:w-48"
                   />
                 </div>
               ) : imagesAndVideos.length > 4 ? (
@@ -71,16 +78,16 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
                       <FileIcon
                         key={file.id}
                         file={file}
-                        additionalClasses="h-40 w-40 rounded-md"
+                        additionalClasses="h-40 w-40 md:h-48 md:w-48"
                       />
                     ))}
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <FileIcon
                       file={imagesAndVideos[2]}
-                      additionalClasses="h-40 w-40 rounded-md"
+                      additionalClasses="h-40 w-40 md:h-48 md:w-48"
                     />
-                    <div className="flex items-center justify-center h-40 w-40 rounded-md border border-gold-600 text-gold-600">
+                    <div className="flex items-center justify-center h-40 w-40 md:h-48 md:w-48 rounded-md border border-gold-600 text-gold-600">
                       +{imagesAndVideos.length - 3} more
                     </div>
                   </div>
@@ -92,12 +99,12 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
                       <FileIcon
                         key={file.id}
                         file={file}
-                        additionalClasses="h-40 w-40 rounded-md"
+                        additionalClasses="h-40 w-40"
                       />
                       {imagesAndVideos[index + 1] && (
                         <FileIcon
                           file={imagesAndVideos[index + 1]}
-                          additionalClasses="h-40 w-40 rounded-md"
+                          additionalClasses="h-40 w-40"
                         />
                       )}
                     </div>
@@ -112,7 +119,7 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
                 <FileIcon
                   key={file.id}
                   file={file}
-                  additionalClasses="h-40 w-40 rounded-md"
+                  additionalClasses="h-40 w-40"
                 />
               ))}
             </div>

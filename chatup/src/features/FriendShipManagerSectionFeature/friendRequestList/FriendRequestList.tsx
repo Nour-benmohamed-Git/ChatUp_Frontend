@@ -13,7 +13,7 @@ import FriendRequestItem from "../friendRequestItem/FriendRequestItem";
 import { FriendRequestListProps } from "./FriendRequestList.types";
 
 const FriendRequestList: FC<FriendRequestListProps> = (props) => {
-  const {label, initialFriendRequests } = props;
+  const { label, initialFriendRequests } = props;
   const { socket } = useSocket();
 
   const [dataSource, setDataSource] = useState<FriendRequestResponse[]>(
@@ -103,17 +103,19 @@ const FriendRequestList: FC<FriendRequestListProps> = (props) => {
       label={label}
       setParamToSearch={setParamToSearch}
     >
-      <InfiniteScroll
+      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+        <InfiniteScroll
           dataLength={dataSource?.length}
-        next={fetchMoreData}
+          next={fetchMoreData}
           hasMore={dataSource?.length < paginator.total}
           loader={<Loader />}
-          height="calc(100vh - 12.5rem)"
+          scrollableTarget="scrollableDiv"
         >
-      {dataSource?.map?.((request) => (
-        <FriendRequestItem key={request.id} friendRequestData={request} />
-      ))}
-    </InfiniteScroll> 
+          {dataSource?.map?.((request) => (
+            <FriendRequestItem key={request.id} friendRequestData={request} />
+          ))}
+        </InfiniteScroll>{" "}
+      </div>
     </PanelContentWrapper>
   );
 };

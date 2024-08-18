@@ -19,7 +19,7 @@ const SearchField: FC<SearchFieldProps> = (props) => {
     };
   }, []);
   return (
-    <div className="flex w-full px-2 py-2.5">
+    <div className="flex w-full">
       <div className="flex items-center w-full relative bg-gray-900 h-9 rounded-md pl-16 pr-9">
         <button className="absolute left-4 text-gold-900 rounded-full">
           <MdSearch size={24} />
