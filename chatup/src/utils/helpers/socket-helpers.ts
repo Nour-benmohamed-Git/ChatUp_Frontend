@@ -9,11 +9,7 @@ export const handleJoinPrivateRoom = (
   socket.emit("join_private_room", conversationId);
 };
 
-export const handleJoinGroupRoom = (socket: Socket, groupId: number): void => {
-  socket.emit("join_group_room", groupId);
-};
-
-export const emitMessage = (
+export const emitMessage = async (
   socket: Socket,
   messageData: {
     action: "create" | "edit" | "hardRemove" | "markAsRead" | "react";

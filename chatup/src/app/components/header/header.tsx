@@ -1,4 +1,5 @@
 import { avatarActions } from "@/utils/constants/actionLists/avatarActions";
+import { ChatSessionType, MenuPosition } from "@/utils/constants/globals";
 import { useRouter } from "next/navigation";
 import { FC, memo } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
@@ -6,13 +7,17 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import Avatar from "../avatar/Avatar";
 import ConversationHeaderUserInfo from "../conversationHeaderUserInfo/ConversationHeaderUserInfo";
 import Menu from "../menu/Menu";
-
-import { MenuPosition } from "@/utils/constants/globals";
 import { HeaderProps } from "./Header.types";
 
 const Header: FC<HeaderProps> = (props) => {
-  const { actions, toggleHandlers, label, userData, menuActionList, title } =
-    props;
+  const {
+    actions,
+    toggleHandlers,
+    label,
+    combinedData,
+    menuActionList,
+    title,
+  } = props;
   const router = useRouter();
   const handleBack = () => {
     router.push("/conversations");
@@ -28,21 +33,60 @@ const Header: FC<HeaderProps> = (props) => {
             <IoMdArrowRoundBack className="text-2xl" />
           </button>
         ) : null}
-        {label === "right_container" && userData?.username ? (
+        {label === "right_container" && combinedData?.title ? (
           <div
             role="button"
             onClick={toggleHandlers?.[avatarActions[label]]?.togglePanel}
             className="flex flex-1 gap-4"
           >
-            <Avatar
-              additionalClasses="h-10 w-10"
-              rounded="rounded-full"
-              fileName={userData?.profilePicture}
-              userId={userData.id}
-            />
+
+            <div className="flex-shrink-0">
+              {combinedData.type === ChatSessionType.GROUP ? (
+                <div className="relative h-10 w-10">
+                  {typeof combinedData.image === "string" ? (
+                    <Avatar
+                      additionalClasses="h-10 w-10"
+                      rounded="rounded-full"
+                      fileName={combinedData.image as string}
+                    />
+                  ) : combinedData?.image?.length === 1 ? (
+                    [combinedData.image[0], ""].map((image, index) => (
+                      <Avatar
+                        key={index}
+                        additionalClasses={`h-7 w-7 absolute ${
+                          index === 0 ? "top-0 left-3" : "-top-3 right-0" 
+                        }`}
+                        rounded="rounded-full"
+                        fileName={image}
+                      />
+                    ))
+                  ) : (
+                    combinedData?.image
+                      ?.slice(0, 2)
+                      .map((image, index) => (
+                        <Avatar
+                          key={index}
+                          additionalClasses={`h-7 w-7 absolute ${
+                            index === 0 ? "top-0 left-3" : "-top-3 right-0"
+                          }`}
+                          rounded="rounded-full"
+                          fileName={image}
+                        />
+                      ))
+                  )}
+                </div>
+              ) : (
+                <Avatar
+                  additionalClasses="h-10 w-10"
+                  rounded="rounded-full"
+                  fileName={combinedData?.image as string}
+                  userId={combinedData.additionalInfo as number}
+                />
+              )}
+            </div>
             <ConversationHeaderUserInfo
-              username={userData?.username}
-              userId={userData.id}
+              username={combinedData?.title}
+              additionalInfo={combinedData.additionalInfo}
             />
           </div>
         ) : (

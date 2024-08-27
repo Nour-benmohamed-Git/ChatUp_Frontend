@@ -1,15 +1,13 @@
-import { ConversationResponse } from "@/types/ChatSession";
+import { ConversationCombinedType } from "@/types/ConversationCombinedType";
 import { Messages } from "@/types/Message";
 import { UsersResponse } from "@/types/User";
-import { RefObject } from "react";
 
 export interface MessageListProps {
-  conversation: ConversationResponse;
   conversationRelatedData: {
     [key: string]: string | number | boolean | undefined;
   };
+  combinedData: ConversationCombinedType
   initialMessages: Messages;
-  messageListRef: RefObject<HTMLDivElement>;
   paramToSearch: string;
   searchResults: number[];
   setSearchResults: (result: number[]) => void;

@@ -13,7 +13,7 @@ import {
 import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { FC, memo, useRef, useState } from "react";
+import { FC, memo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import ContactInfo from "../contactInfo/ContactInfo";
@@ -23,13 +23,11 @@ import { SelectedConversationProps } from "./SelectedConversation.types";
 
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const {
-    conversation,
     conversationRelatedData,
     initialMessages,
-    userData,
+    combinedData,
     initialFriends,
   } = props;
-  const messageListRef = useRef<HTMLDivElement>(null);
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
@@ -100,9 +98,7 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
       panelRef: contactInfoPanelRef,
       children: isOpenContactInfoPanel ? (
         <ContactInfo
-          userData={userData}
-          lastSeen={"azdazd"}
-          conversationId={conversationRelatedData.conversationId as number}
+          combinedData={combinedData}
           onMessage={toggleContactInfoPanel}
           onAudioCall={function (): void {
             throw new Error("Function not implemented.");
@@ -184,15 +180,13 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             label="right_container"
             menuActionList={updatedConversationMenuActions}
             conversationRelatedData={conversationRelatedData}
-            userData={userData}
+            combinedData={combinedData}
             cssClass="h-[calc(100vh-8rem)]"
-            messageListRef={messageListRef}
           >
             <MessageList
-              conversation={conversation}
               conversationRelatedData={conversationRelatedData}
+              combinedData={combinedData}
               initialMessages={initialMessages}
-              messageListRef={messageListRef}
               paramToSearch={paramToSearch}
               searchResults={searchResults}
               setSearchResults={setSearchResults}

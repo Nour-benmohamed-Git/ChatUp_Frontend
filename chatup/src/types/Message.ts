@@ -1,12 +1,18 @@
+import { MessageType } from "@/utils/constants/globals";
+
 export interface Message {
   id: number;
+  type?: MessageType;
   content?: string;
   files?: File[];
   senderId?: number;
-  receiverId?: number;
   timestamp: number;
   edited?: boolean;
-  readStatus?: boolean;
+  readBy?: {
+    id: number;
+    username: string;
+    profilePicture: string;
+  }[];
   chatSessionId?: number;
   reactions: Record<number, string>;
 }

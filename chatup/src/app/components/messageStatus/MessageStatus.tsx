@@ -1,23 +1,22 @@
 import { FC, memo } from "react";
-import { FaCheckCircle, FaRegCheckCircle } from "react-icons/fa";
+import Avatar from "../avatar/Avatar";
 import { MessageStatusProps } from "./MessageStatus.types";
 
 const MessageStatus: FC<MessageStatusProps> = (props) => {
-  const { currentUserId, message } = props;
-  if (
-    !currentUserId ||
-    !message ||
-    !message.senderId ||
-    message.senderId !== currentUserId
-  ) {
-    return null;
-  }
+  const { message } = props;
 
-  return message.readStatus ? (
-    <FaCheckCircle className="text-xs mt-2 rounded-full text-gold-900" />
-  ) : (
-    <FaRegCheckCircle className="text-xs mt-2 rounded-full text-gold-900" />
-  );
+  return message?.readBy && message.readBy.length > 0 ? (
+    <div className="flex gap-2 items-center justify-end ">
+      {message.readBy.map((item, index) => (
+        <Avatar
+          key={`${item.username + index}`}
+          additionalClasses="h-4 w-4"
+          rounded="rounded-full"
+          fileName={item?.profilePicture}
+        />
+      ))}
+    </div>
+  ) : null;
 };
 
 export default memo(MessageStatus);

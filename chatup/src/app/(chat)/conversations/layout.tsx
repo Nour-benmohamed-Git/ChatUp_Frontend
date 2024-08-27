@@ -1,8 +1,10 @@
 import { fetchConversations } from "@/app/_actions/conversationActions/fetchConversations";
+import { fetchFriends } from "@/app/_actions/friendActions/fetchFriends";
 import { fetchCurrentUser } from "@/app/_actions/userActions/fetchCurrentUser";
+import { ChatSessionProvider } from "@/context/ChatSessionContext";
 import ConversationListContainer from "@/features/conversationsSectionFeatures/conversationListContainer/ConversationListContainer";
-import { ConversationsResponse } from "@/types/ChatSession";
-import { UserResponse } from "@/types/User";
+import { ConversationResponse, ConversationsResponse } from "@/types/ChatSession";
+import { UserResponse, UsersResponse } from "@/types/User";
 import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";
 import "../../globals.css";
@@ -17,25 +19,31 @@ export default async function ConversationsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [currentUser, conversations,] = await Promise.all([
+  const [currentUser, conversations, friends] = await Promise.all([
     fetchCurrentUser(),
     fetchConversations(),
-
+    fetchFriends(),
   ]);
 
-  if (currentUser.error || conversations.error ) {
+  if (currentUser.error || conversations.error || friends.error) {
     const message =
       currentUser.error?.message ||
-      conversations.error?.message 
+      conversations.error?.message ||
+      friends.error?.message;
     throw new CustomError(message);
   }
   return (
-    <div className="h-full w-full col-span-1 md:col-span-11 md:grid md:grid-cols-12">
-      <ConversationListContainer
-        initialConversations={conversations.data as ConversationsResponse}
-        currentUser={currentUser.data?.data as UserResponse}
-      />
-      {children}
-    </div>
+    <ChatSessionProvider
+     initialChatSessions={conversations.data?.data as ConversationResponse[]}
+    >
+      <div className="h-full w-full col-span-1 md:col-span-11 md:grid md:grid-cols-12">
+        <ConversationListContainer
+          initialConversations={conversations.data as ConversationsResponse}
+          currentUser={currentUser.data?.data as UserResponse}
+          initialFriends={friends.data as UsersResponse}
+        />
+        {children}
+      </div>
+    </ChatSessionProvider>
   );
 }

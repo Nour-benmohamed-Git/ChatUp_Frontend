@@ -1,5 +1,4 @@
-import { UserResponse } from "@/types/User";
-import { RefObject } from "react";
+import { ConversationCombinedType } from "@/types/ConversationCombinedType";
 
 export interface BlocContainerProps {
   children: React.ReactNode;
@@ -14,7 +13,7 @@ export interface BlocContainerProps {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
   label: "left_container" | "right_container";
-  userData?: UserResponse;
+  combinedData?: ConversationCombinedType;
   menuActionList: {
     onClick: () => void;
     label: string;
@@ -25,5 +24,4 @@ export interface BlocContainerProps {
     [key: string]: number | boolean | string | undefined;
   };
   title?: string;
-  messageListRef?: RefObject<HTMLDivElement>;
 }

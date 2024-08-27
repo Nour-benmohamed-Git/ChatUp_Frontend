@@ -7,7 +7,7 @@ const UnreadMessagesCounter: FC<UnreadMessagesCounterProps> = (props) => {
     return null;
   }
   return conversation?.unreadMessagesCount ? (
-    <span className="flex items-center justify-center rounded-full bg-gold-600 h-7 w-7 text-xs font-medium text-gray-900">
+    <span className="flex items-center justify-center rounded-full bg-gold-600 h-6 w-6 text-xs font-medium text-gray-900">
       {conversation?.unreadMessagesCount}
     </span>
   ) : null;

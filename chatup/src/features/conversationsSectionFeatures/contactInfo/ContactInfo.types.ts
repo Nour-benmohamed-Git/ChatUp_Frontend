@@ -1,9 +1,7 @@
-import { UserResponse } from "@/types/User";
+import { ConversationCombinedType } from "@/types/ConversationCombinedType";
 
 export interface ContactInfoProps {
-  userData: UserResponse;
-  conversationId: number;
-  lastSeen: string;
+  combinedData: ConversationCombinedType;
   onMessage: () => void;
   onAudioCall: () => void;
   onVideoCall: () => void;

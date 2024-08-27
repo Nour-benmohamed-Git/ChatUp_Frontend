@@ -24,7 +24,7 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
   );
   useEffect(() => {
     const handleConversationCount = (data: { unseenConversations: number }) => {
-      console.log("handleConversationCount", data);
+      // console.log("handleConversationCount", data);
       setConversationCount(data.unseenConversations);
     };
     const handleFriendRequestCount = (data: {

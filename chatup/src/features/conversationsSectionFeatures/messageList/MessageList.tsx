@@ -2,15 +2,13 @@ import { fetchConversationMessages } from "@/app/_actions/messageActions/fetchCo
 import Chip from "@/app/components/chip/Chip";
 import MessagesLoader from "@/app/components/messagesLoader/MessagesLoader";
 import ScrollToBottomButton from "@/app/components/scrollToBottomButton/ScrollToBottomButton";
-import { useSocket } from "@/context/SocketContext";
-import { Message, Messages } from "@/types/Message";
-import { Direction, globals } from "@/utils/constants/globals";
-import { getItem } from "@/utils/helpers/cookiesHelpers";
+import { useMessages } from "@/context/MessageContext";
+import { Messages } from "@/types/Message";
+import { Direction } from "@/utils/constants/globals";
 import {
   groupMessagesByDate,
   renderDateChip,
 } from "@/utils/helpers/dateHelpers";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
 import dynamic from "next/dynamic";
 import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -21,10 +19,9 @@ const MessageItem = dynamic(() => import("../messageItem/MessageItem"), {
 });
 const MessageList: FC<MessageListProps> = (props) => {
   const {
-    conversation,
     conversationRelatedData,
+    combinedData,
     initialMessages,
-    messageListRef,
     paramToSearch,
     searchResults,
     setSearchResults,
@@ -32,9 +29,10 @@ const MessageList: FC<MessageListProps> = (props) => {
     setCurrentSearchIndex,
     initialFriends,
   } = props;
-  const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
-  const { socket } = useSocket();
-  const [dataSource, setDataSource] = useState<Message[]>(initialMessages.data);
+  const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const prevScrollBottomRef = useRef<number>(0);
+  const { messages, setMessages, messageListRef } = useMessages();
+
   const [paginator, setPaginator] = useState<{
     limit: number;
     total: number;
@@ -50,8 +48,6 @@ const MessageList: FC<MessageListProps> = (props) => {
     hasMoreBefore: initialMessages.hasMoreBefore,
     hasMoreAfter: initialMessages.hasMoreAfter,
   });
-  const prevScrollTopRef = useRef<number>(0);
-  const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const fetchMoreData = async (data: {
     limit: number;
@@ -66,7 +62,7 @@ const MessageList: FC<MessageListProps> = (props) => {
     )) as { data: Messages };
     if (paramToSearch) {
       if (!data.cursor?.earliest && !data.cursor?.latest) {
-        setDataSource(newMessages.data.data);
+        setMessages(newMessages.data.data);
         const newCursor = {
           earliest: newMessages.data.data[0].timestamp,
           latest:
@@ -80,7 +76,7 @@ const MessageList: FC<MessageListProps> = (props) => {
           hasMoreAfter: newMessages.data.hasMoreAfter,
         }));
       } else {
-        setDataSource((prevItems) => {
+        setMessages((prevItems) => {
           const combinedMessages =
             paginator.direction === Direction.FORWARD
               ? [...prevItems, ...newMessages.data.data]
@@ -101,7 +97,7 @@ const MessageList: FC<MessageListProps> = (props) => {
         });
       }
     } else {
-      setDataSource((prevItems) => {
+      setMessages((prevItems) => {
         const combinedMessages =
           paginator.direction === Direction.FORWARD
             ? [...prevItems, ...newMessages.data.data]
@@ -141,78 +137,6 @@ const MessageList: FC<MessageListProps> = (props) => {
   }, [paramToSearch]);
 
   useEffect(() => {
-    if (socket && conversationRelatedData?.conversationId) {
-      const handleJoinRoom = () => {
-        socket.emit(
-          "join_private_room",
-          conversationRelatedData.conversationId
-        );
-      };
-
-      handleJoinRoom(); // Initial join
-      socket.io.on("reconnect", handleJoinRoom); // Rejoin on reconnect
-
-      return () => {
-        socket.emit(
-          "leave_private_room",
-          conversationRelatedData.conversationId
-        );
-        socket.io.off("reconnect", handleJoinRoom);
-      };
-    }
-  }, [socket, conversationRelatedData?.conversationId]);
-
-  useEffect(() => {
-    const handleReceiveMessage = (newMessage: any) => {
-      switch (newMessage.action) {
-        case "create":
-          setDataSource((prevMessages) => [newMessage.data, ...prevMessages]);
-          break;
-        case "edit":
-          setDataSource((prevMessages) =>
-            prevMessages.map((message) => {
-              if (message.id === newMessage.data.id) {
-                return { ...message, ...newMessage.data };
-              }
-              return message;
-            })
-          );
-          break;
-        case "markAsRead":
-          setDataSource((prevMessages) =>
-            prevMessages.map((message) => {
-              if (newMessage.messageIds?.includes(message.id)) {
-                return { ...message, readStatus: true };
-              }
-              return message;
-            })
-          );
-          break;
-        case "hardRemove":
-          setDataSource((prevMessages) =>
-            prevMessages.filter((item) => item.id !== newMessage.data.id)
-          );
-          break;
-        case "react":
-          // console.log("newMessage in react", newMessage);
-          setDataSource((prevMessages) =>
-            prevMessages.map((message) => {
-              if (message.id === newMessage.data.id) {
-                return { ...message, reactions: newMessage.data.reactions };
-              }
-              return message;
-            })
-          );
-          break;
-      }
-    };
-    socket?.on("receive_Message", handleReceiveMessage);
-    return () => {
-      socket?.off("receive_Message", handleReceiveMessage);
-    };
-  }, [socket]);
-
-  useEffect(() => {
     if (searchResults.length && currentSearchIndex >= 0) {
       const highlightedMessageId = searchResults[currentSearchIndex];
       const highlightedElement = messageRefs.current[highlightedMessageId];
@@ -232,7 +156,7 @@ const MessageList: FC<MessageListProps> = (props) => {
   useEffect(() => {
     if (
       paramToSearch &&
-      !dataSource.map((el) => el.id).includes(searchResults[currentSearchIndex])
+      !messages.map((el) => el.id).includes(searchResults[currentSearchIndex])
     ) {
       fetchMoreData({
         limit: 0,
@@ -244,20 +168,7 @@ const MessageList: FC<MessageListProps> = (props) => {
     }
   }, [paramToSearch, currentSearchIndex]);
 
-  useEffect(() => {
-    if (socket && conversation && !conversation?.seen) {
-      emitMessage(socket, {
-        action: "markAsRead",
-        message: {
-          senderId: currentUserId,
-          receiverId: conversationRelatedData?.secondMemberId as number,
-          chatSessionId: conversationRelatedData?.conversationId as number,
-        },
-      });
-    }
-  }, [socket, conversation?.seen]);
-
-  const messageGroups = Object.entries(groupMessagesByDate(dataSource)).map(
+  const messageGroups = Object.entries(groupMessagesByDate(messages)).map(
     ([date, messages]) => ({
       date,
       messages,
@@ -266,18 +177,18 @@ const MessageList: FC<MessageListProps> = (props) => {
 
   const handleScroll = (scrollTop: number) => {
     const direction =
-      scrollTop > prevScrollTopRef.current
+      scrollTop > prevScrollBottomRef.current
         ? Direction.BACKWARD
         : Direction.FORWARD;
     setPaginator((prevPaginator) => ({
       ...prevPaginator,
       direction: direction,
     }));
-    prevScrollTopRef.current = scrollTop;
+    prevScrollBottomRef.current = scrollTop;
   };
 
   let content = null;
-  if (conversationRelatedData?.conversationId === "new" || !dataSource.length) {
+  if (conversationRelatedData?.conversationId === "new" || !messages.length) {
     content = (
       <div className="flex flex-col-reverse h-full py-2">
         <Chip content="Today" />
@@ -286,17 +197,17 @@ const MessageList: FC<MessageListProps> = (props) => {
   } else {
     content = (
       <div
-        ref={messageListRef}
         id="scrollableDiv"
+        ref={messageListRef}
         className={`flex ${
-          paginator.direction === Direction.FORWARD 
+          paginator.direction === Direction.FORWARD
             ? "flex-col-reverse"
             : "flex-col"
-        } px-2 md:px-8 py-2 h-[calc(100vh-8rem)] overflow-y-auto`}
+        } px-2 md:px-8 py-2 h-[calc(100vh-8rem)] overflow-y-auto w-full`}
       >
         <InfiniteScroll
           scrollableTarget="scrollableDiv"
-          dataLength={dataSource?.length}
+          dataLength={messages?.length}
           next={() =>
             fetchMoreData({
               limit: paginator.limit,
@@ -331,9 +242,11 @@ const MessageList: FC<MessageListProps> = (props) => {
                     ref={(el) =>
                       (messageRefs.current[message.id as number] = el)
                     }
+                    className="w-full"
                   >
                     <MessageItem
                       key={message.id}
+                      combinedData={combinedData}
                       message={message}
                       conversationRelatedData={conversationRelatedData}
                       highlight={paramToSearch}
@@ -351,7 +264,6 @@ const MessageList: FC<MessageListProps> = (props) => {
       </div>
     );
   }
-
   return <div className="relative h-full">{content}</div>;
 };
 export default memo(MessageList);

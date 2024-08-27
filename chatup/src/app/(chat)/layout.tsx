@@ -32,6 +32,7 @@ export default async function ChatLayout({
       friendRequests.error?.message;
     throw new CustomError(message);
   }
+
   return (
     <div className="h-full w-full grid grid-cols-1 md:grid-cols-12">
       <SocketProvider

@@ -3,7 +3,7 @@
 import { Message } from "@/types/Message";
 import { fetchFromServer } from "../fetchFromServer";
 
-export async function updateMessage(messageId: number, content: string) {
+export async function editMessage(messageId: number, content: string) {
   return fetchFromServer<{ data: Message }, { content: string }>(
     `/api/messages/${messageId}`,
     {

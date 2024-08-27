@@ -12,7 +12,7 @@ const MobileProfileItem: FC<MobileProfileItemProps> = ({
       href={"/profile"}
       className="absolute bottom-1 flex items-center justify-center h-20 w-20 rounded-full text-white shadow-2xl z-10 overflow-hidden"
     >
-      <div className="absolute bottom-0 h-9 w-full bg-slate-700" />
+      <div className="absolute bottom-0 h-7 w-full bg-slate-700" />
       <Avatar
         additionalClasses="h-16 w-16"
         rounded="rounded-full border-2 border-gold-600"

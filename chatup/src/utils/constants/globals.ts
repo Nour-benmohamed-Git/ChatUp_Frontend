@@ -48,5 +48,13 @@ export enum EnabledInput {
   PHONE = "PHONE",
 }
 
-export const predefinedReactions = ["👍", "❤️", "😂", "😮", "🙏"];
+export enum ChatSessionType {
+  INDIVIDUAL = "INDIVIDUAL",
+  GROUP = "GROUP",
+}
 
+export enum MessageType {
+  SYSTEM = "SYSTEM",
+  MANUAL = "MANUAL",
+}
+export const predefinedReactions = ["👍", "❤️", "😂", "😮", "🙏"];

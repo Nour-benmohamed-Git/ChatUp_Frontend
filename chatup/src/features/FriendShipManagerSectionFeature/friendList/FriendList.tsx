@@ -3,13 +3,13 @@ import { fetchFriends } from "@/app/_actions/friendActions/fetchFriends";
 
 import Loader from "@/app/components/loader/Loader";
 import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
+import { ConversationResponse } from "@/types/ChatSession";
 import { UserResponse, UsersResponse } from "@/types/User";
 import { useRouter } from "next/navigation";
 import { FC, memo, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import FriendItem from "../friendItem/FriendItem";
 import { FriendListProps } from "./FriendList.types";
-import { ConversationResponse } from "@/types/ChatSession";
 
 const FriendList: FC<FriendListProps> = (props) => {
   const { label, initialFriends } = props;
@@ -59,9 +59,7 @@ const FriendList: FC<FriendListProps> = (props) => {
         secondMemberId: userId,
       })) as { data: { data: ConversationResponse } };
       const conversationId = response.data.data?.id || "new";
-      const deletedByCurrentUser =
-        response.data.data?.deletedByCurrentUser || false;
-      const queryParams = `deletedByCurrentUser=${deletedByCurrentUser}&secondMemberId=${userId}`;
+      const queryParams = `secondMemberId=${userId}`;
       router.push(`/conversations/${conversationId}?${queryParams}`, {
         scroll: false,
       });

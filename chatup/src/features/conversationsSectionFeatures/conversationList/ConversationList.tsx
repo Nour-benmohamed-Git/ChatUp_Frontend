@@ -1,27 +1,23 @@
 import { fetchConversations } from "@/app/_actions/conversationActions/fetchConversations";
 import Loader from "@/app/components/loader/Loader";
 import Skeleton from "@/app/components/skeleton/Skeleton";
-import { useSocket } from "@/context/SocketContext";
 import PanelContentWrapper from "@/features/panelContentWrapper/PanelContentWrapper";
 import {
-  ConversationResponse,
-  ConversationsResponse,
+  ConversationsResponse
 } from "@/types/ChatSession";
 import dynamic from "next/dynamic";
 import { FC, memo, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { ConversationListProps } from "./ConversationList.types";
+import { useChatSessions } from "@/context/ChatSessionContext";
 
 const ConversationItem = dynamic(
   () => import("../conversationItem/ConversationItem"),
   { loading: () => <Skeleton />, ssr: false }
 );
 const ConversationList: FC<ConversationListProps> = (props) => {
-  const { label, initialConversations, currentUser } = props;
-  const { socket } = useSocket();
-  const [dataSource, setDataSource] = useState<ConversationResponse[]>(
-    initialConversations?.data
-  );
+  const { label, initialConversations } = props;
+  const { chatSessions, setChatSessions } = useChatSessions();
   const [paginator, setPaginator] = useState({
     page: 1,
     offset: 10,
@@ -35,7 +31,7 @@ const ConversationList: FC<ConversationListProps> = (props) => {
       offset: paginator.offset,
       search: paramToSearch,
     })) as { data: ConversationsResponse };
-    setDataSource((prevItems) => [
+    setChatSessions((prevItems) => [
       ...prevItems,
       ...newConversations.data?.data,
     ]);
@@ -56,118 +52,10 @@ const ConversationList: FC<ConversationListProps> = (props) => {
         page: 1,
         total: newConversations?.data?.total,
       }));
-      setDataSource(newConversations?.data?.data);
+      setChatSessions(newConversations?.data?.data);
     };
     fetchNewUsers();
   }, [paramToSearch, paginator.offset]);
-
-  useEffect(() => {
-    const handleNotification = (chatSessionData: any) => {
-      console.log("chatSessionData", chatSessionData);
-      switch (chatSessionData.type) {
-        case "updateChatListOnAddition":
-          setDataSource((prevChatSessions: any) => {
-            const chatSessionIndex = prevChatSessions.findIndex(
-              (chatSession: any) => chatSession.id === chatSessionData.data.id
-            );
-            if (chatSessionIndex !== -1) {
-              return prevChatSessions.map((chatSession: any) => {
-                if (chatSession.id === chatSessionData.data.id) {
-                  return {
-                    ...chatSession,
-                    lastMessage: chatSessionData.data.lastMessage,
-                    senderId: chatSessionData.senderId,
-                    unreadMessagesCount: chatSessionData.unreadMessagesCount,
-                  };
-                }
-                return chatSession;
-              });
-            } else {
-              return [
-                ...prevChatSessions,
-                {
-                  id: chatSessionData.data.id,
-                  title: chatSessionData.data.title,
-                  image: chatSessionData.data.image,
-                  lastMessage: chatSessionData.data.lastMessage,
-                  senderId: chatSessionData.senderId,
-                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
-                  participantsData: chatSessionData.participantsData,
-                },
-              ];
-            }
-          });
-          break;
-        case "updateChatListOnMessageEdit":
-          setDataSource((prevChatSessions: any) => {
-            return prevChatSessions?.map((chatSession: any) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  lastMessage: chatSessionData.data.lastMessage,
-                };
-              }
-              return chatSession;
-            });
-          });
-          break;
-        case "markAsReadOnChatListUpdate":
-          setDataSource((prevChatSessions: any) => {
-            return prevChatSessions?.map((chatSession: any) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  senderId: chatSessionData.senderId,
-                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
-                };
-              }
-              return chatSession;
-            });
-          });
-          break;
-        case "updateChatListOnHardRemoval":
-          setDataSource((prevChatSessions: any) => {
-            return prevChatSessions?.map((chatSession: any) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  lastMessage: chatSessionData.data.lastMessage,
-                  senderId: chatSessionData.senderId,
-                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
-                };
-              }
-              return chatSession;
-            });
-          });
-          break;
-        case "updateChatListOnReaction":
-          setDataSource((prevChatSessions: any) => {
-            return prevChatSessions?.map((chatSession: any) => {
-              if (chatSession.id === chatSessionData.data.id) {
-                return {
-                  ...chatSession,
-                  lastMessage: chatSessionData.data.lastMessage,
-                  senderId: chatSessionData.senderId,
-                  unreadMessagesCount: chatSessionData.unreadMessagesCount,
-                };
-              }
-              return chatSession;
-            });
-          });
-          break;
-        default:
-          console.log("Unknown notification type:", chatSessionData.type);
-      }
-    };
-
-    if (socket) {
-      socket.on("notification", handleNotification);
-    }
-
-    return () => {
-      socket?.off("notification", handleNotification);
-    };
-  }, [socket, currentUser]);
   return (
     <PanelContentWrapper
       hasSearchField
@@ -178,13 +66,13 @@ const ConversationList: FC<ConversationListProps> = (props) => {
     >
       <div id="scrollableDiv" className="flex-grow overflow-y-auto">
         <InfiniteScroll
-          dataLength={dataSource?.length}
+          dataLength={chatSessions?.length}
           next={fetchMoreData}
-          hasMore={dataSource?.length < paginator.total}
+          hasMore={chatSessions?.length < paginator.total}
           loader={<Loader />}
           scrollableTarget="scrollableDiv"
         >
-          {dataSource?.map?.((conversation) => (
+          {chatSessions?.map?.((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}

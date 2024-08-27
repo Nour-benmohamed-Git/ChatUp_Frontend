@@ -6,12 +6,7 @@ import avatar from "../../../../public/avatar.svg";
 import { AvatarProps } from "./Avatar.types";
 
 const Avatar: FC<AvatarProps> = (props) => {
-  const {
-    additionalClasses,
-    rounded = "rounded-md",
-    fileName,
-    userId,
-  } = props;
+  const { additionalClasses, rounded = "rounded-md", fileName, userId } = props;
   const { onlineUsers } = useOnlineUsers();
   const [imageBlur, setImageBlur] = useState<string | null>(null);
 
@@ -39,7 +34,7 @@ const Avatar: FC<AvatarProps> = (props) => {
       <div className={`relative w-full h-full overflow-hidden ${rounded}`}>
         <Image
           src={
-            typeof fileName === "string"
+            typeof fileName === "string" && fileName !== ""
               ? `${environment.baseUrl}/uploads/${fileName}`
               : avatar
           }

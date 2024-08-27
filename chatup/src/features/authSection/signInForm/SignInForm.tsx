@@ -24,7 +24,7 @@ const SignInForm: FC = () => {
     startTransition(async () => {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
+        formData.append(key, value); 
       });
 
       const response = await signIn(null, formData);

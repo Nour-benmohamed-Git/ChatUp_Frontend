@@ -4,17 +4,16 @@ import Loader from "@/app/components/loader/Loader";
 import SearchField from "@/app/components/searchField/SearchField";
 import { UserResponse, UsersResponse } from "@/types/User";
 import React, { memo, useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import { AiFillDelete } from "react-icons/ai";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
 import ForwardMessageItem from "../forwardMessageItem/ForwardMessageItem";
-import { ForwardMessageListProps } from "./ForwardMessageList.types";
+import { UsersPickerProps } from "./UsersPicker.types";
 
-const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
-  initialFriends,
-  checkedUsers,
-  setCheckedUsers,
-}) => {
+const UsersPicker: React.FC<UsersPickerProps> = ({ initialFriends }) => {
+  const { watch, setValue, getValues } = useFormContext();
+
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [dataSource, setDataSource] = useState<UserResponse[]>(
     initialFriends.data
@@ -55,26 +54,27 @@ const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
   }, [paramToSearch, paginator.offset]);
 
   const handleCheckChange = (userId: number) => {
-    if (checkedUsers.size < 5 || checkedUsers.has(userId)) {
-      setCheckedUsers((prevChecked) => {
-        const newChecked = new Set(prevChecked);
-        if (newChecked.has(userId)) {
-          newChecked.delete(userId);
-        } else {
-          newChecked.add(userId);
-        }
-        return newChecked;
-      });
+    if (
+      getValues("otherMembersIds").length < 5 ||
+      getValues("otherMembersIds").includes(userId)
+    ) {
+      const currentChecked = getValues("otherMembersIds");
+
+      const newChecked = currentChecked.includes(userId)
+        ? currentChecked.filter((id: number) => id !== userId)
+        : [...currentChecked, userId];
+
+      setValue("otherMembersIds", newChecked);
     } else {
       toast.warning("You can only select up to 5 users.");
     }
   };
   const handleRemoveUser = (userId: number) => {
-    setCheckedUsers((prevChecked) => {
-      const newChecked = new Set(prevChecked);
-      newChecked.delete(userId);
-      return newChecked;
-    });
+    const currentChecked = getValues("otherMembersIds");
+
+    const newChecked = currentChecked.filter((id: number) => id !== userId);
+
+    setValue("otherMembersIds", newChecked);
   };
   return (
     <div className="flex flex-1 flex-col gap-2 w-full">
@@ -86,9 +86,9 @@ const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
             placeholder="Search"
             setParamToSearch={setParamToSearch}
           />
-          {checkedUsers.size > 0 && (
+          {watch("otherMembersIds").length > 0 && (
             <div className="flex items-center flex-wrap gap-2 bg-white rounded-md shadow p-2">
-              {[...checkedUsers].map((userId) => {
+              {watch("otherMembersIds").map((userId: number) => {
                 const user = initialFriends.data.find(
                   (user) => user.id === userId
                 );
@@ -120,7 +120,7 @@ const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
         <InfiniteScroll
           dataLength={dataSource?.length}
           next={fetchMoreData}
-          hasMore={dataSource?.length < paginator.total} 
+          hasMore={dataSource?.length < paginator.total}
           loader={<Loader />}
           scrollableTarget="scrollableDiv"
         >
@@ -129,7 +129,7 @@ const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
               key={user.id}
               userData={user}
               onCheckChange={() => handleCheckChange(user.id)}
-              isChecked={checkedUsers.has(user.id)}
+              isChecked={watch("otherMembersIds").includes(user.id)}
             />
           ))}
         </InfiniteScroll>
@@ -138,4 +138,4 @@ const ForwardMessageList: React.FC<ForwardMessageListProps> = ({
   );
 };
 
-export default memo(ForwardMessageList);
+export default memo(UsersPicker);

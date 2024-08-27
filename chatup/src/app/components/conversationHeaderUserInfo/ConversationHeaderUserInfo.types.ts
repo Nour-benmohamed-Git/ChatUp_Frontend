@@ -1,4 +1,4 @@
 export interface ConversationHeaderUserInfoProps {
   username: string;
-  userId: number;
+  additionalInfo?: number | string[];
 }

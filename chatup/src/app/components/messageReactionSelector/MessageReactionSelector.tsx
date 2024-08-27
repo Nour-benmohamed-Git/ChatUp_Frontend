@@ -1,8 +1,7 @@
 import { addOrUpdateReaction } from "@/app/_actions/messageActions/addOrUpdateReaction";
-import { useSocket } from "@/context/SocketContext";
+import { useMessages } from "@/context/MessageContext";
 import { globals, predefinedReactions } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { FC, memo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FaSmile } from "react-icons/fa";
@@ -11,7 +10,7 @@ import ExpandedReactionPicker from "../expandedReactionPickerProps/ExpandedReact
 import PositionedWrapper from "../positionedWrapper/PositionedWrapper";
 import { MessageReactionSelectorProps } from "./MessageReactionSelector.types";
 
-const MessageReactionSelector:FC<MessageReactionSelectorProps> = ({
+const MessageReactionSelector: FC<MessageReactionSelectorProps> = ({
   showReactionPicker,
   setShowReactionPicker,
   reactionSelectorPosition,
@@ -19,7 +18,7 @@ const MessageReactionSelector:FC<MessageReactionSelectorProps> = ({
   message,
   conversationRelatedData,
 }) => {
-  const { socket } = useSocket();
+  const { reactMessage } = useMessages();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { setValue } = useFormContext();
   const [expandedReactionPicker, setExpandedReactionPicker] = useState(false);
@@ -41,13 +40,7 @@ const MessageReactionSelector:FC<MessageReactionSelectorProps> = ({
         chatSessionId: conversationRelatedData?.conversationId as number,
         reactions: res.data?.data,
       };
-      socket &&
-        emitMessage(socket, {
-          action: "react",
-          message: messageToReact,
-          reaction: emoji,
-        });
-     
+      reactMessage(messageToReact as any, emoji);
     }
   };
   const handleCloseReactionPicker = () => {

@@ -1,3 +1,4 @@
+import { ConversationCombinedType } from "@/types/ConversationCombinedType";
 import { UserResponse } from "@/types/User";
 
 export interface HeaderProps {
@@ -10,7 +11,7 @@ export interface HeaderProps {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
   label: "left_container" | "right_container";
-  userData?: UserResponse;
+  combinedData?: ConversationCombinedType
   menuActionList: {
     onClick: () => void;
     label: string;

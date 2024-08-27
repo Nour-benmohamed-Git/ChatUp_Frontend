@@ -90,7 +90,7 @@ const Profile: FC<ProfileProps> = (props) => {
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center justify-center gap-10 md:gap-6 rounded-md p-2 w-full">
                 {isEditing ? (
-                  <ProfilePicture id="profilePicture" name="profilePicture" />
+                  <ProfilePicture id="profilePicture" name="profilePicture"/>
                 ) : (
                   <Avatar
                     additionalClasses="h-32 w-32"

@@ -4,7 +4,11 @@ import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";
 import UnreadMessagesCounter from "@/app/components/unreadMessagesCounter/UnreadMessagesCounter";
 import { chatItemActions } from "@/utils/constants/actionLists/chatItemActions";
-import { MenuPosition, globals } from "@/utils/constants/globals";
+import {
+  ChatSessionType,
+  MenuPosition,
+  globals,
+} from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
@@ -14,9 +18,13 @@ import { FC, memo, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import GetLastMessagePreview from "../getLastMessagePreview/GetLastMessagePreview";
 import { ConversationItemProps } from "./ConversationItem.types";
+import { emitMessage } from "@/utils/helpers/socket-helpers";
+import { useSocket } from "@/context/SocketContext";
 
 const ConversationItem: FC<ConversationItemProps> = (props) => {
   const { conversation } = props;
+  const { socket } = useSocket();
+
   const router = useRouter();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const pathname = usePathname();
@@ -40,7 +48,19 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
     closeModal();
     router.push("/conversations");
   };
-
+  // const handleMarkAsRead = () => {
+  //   // console.log(conversation?.seen);
+  //   if (socket ) {
+  //     console.log("yess");
+  //     emitMessage(socket, {
+  //       action: "markAsRead",
+  //       message: {
+  //         senderId: currentUserId,
+  //         chatSessionId: conversation.id,
+  //       },
+  //     });
+  //   }
+  // };
   return (
     <>
       {isOpen && (
@@ -59,15 +79,19 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         </Dialog>
       )}
       <Link
+        // onClick={handleMarkAsRead}
         href={{
           pathname: `/conversations/${conversation.id}`,
-          query: {
-            deletedByCurrentUser: conversation.deletedByCurrentUser,
-            secondMemberId: getOtherUserId(
-              conversation.participantsData,
-              `${currentUserId}`
-            ),
-          },
+          ...(conversation.type === ChatSessionType.INDIVIDUAL
+            ? {
+                query: {
+                  secondMemberId: getOtherUserId(
+                    conversation.participantsData,
+                    `${currentUserId}`
+                  ),
+                },
+              }
+            : {}),
         }}
         scroll={false}
         className={`flex items-center rounded-md gap-4 m-2 px-2 py-3 ${
@@ -76,16 +100,54 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
             : "bg-gray-900"
         } hover:bg-gray-800`}
       >
-        <Avatar
-          additionalClasses="h-12 w-12"
-          rounded="rounded-full"
-          fileName={conversation.image}
-          userId={getOtherUserId(
-            conversation.participantsData,
-            `${currentUserId}`
+        <div className="flex-shrink-0">
+          {conversation.type === ChatSessionType.GROUP ? (
+            <div className="relative h-12 w-12">
+              {typeof conversation.image === "string" ? (
+                <Avatar
+                  additionalClasses="h-12 w-12"
+                  rounded="rounded-full"
+                  fileName={conversation.image as string}
+                />
+              ) : conversation?.image?.length === 1 ? (
+                [conversation.image[0], ""].map((image, index) => (
+                  <Avatar
+                    key={index}
+                    additionalClasses={`h-8 w-8 absolute ${
+                      index === 0 ? "top-0 left-4" : "-top-4 right-0"
+                    }`}
+                    rounded="rounded-full"
+                    fileName={image}
+                  />
+                ))
+              ) : (
+                conversation?.image
+                  ?.slice(0, 2)
+                  .map((image, index) => (
+                    <Avatar
+                      key={index}
+                      additionalClasses={`h-8 w-8 absolute ${
+                        index === 0 ? "top-0 left-4" : "-top-4 right-0"
+                      }`}
+                      rounded="rounded-full"
+                      fileName={image}
+                    />
+                  ))
+              )}
+            </div>
+          ) : (
+            <Avatar
+              additionalClasses="h-12 w-12"
+              rounded="rounded-full"
+              fileName={conversation.image as string}
+              userId={getOtherUserId(
+                conversation.participantsData,
+                `${currentUserId}`
+              )}
+            />
           )}
-        />
-        <div className="flex flex-col min-w-0 w-[calc(100%-4rem)] gap-2">
+        </div>
+        <div className="flex flex-col min-w-0 w-[calc(100%-4rem)]">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium text-gold-600 max-w-[calc(100%-3rem)] truncate">
               {conversation.title}
@@ -94,7 +156,7 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
               {formatChatSessionDate(conversation.lastMessage?.timestamp)}
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 h-7">
+          <div className="flex items-center justify-between gap-2">
             <GetLastMessagePreview lastMessage={conversation.lastMessage} />
             <div className="flex items-center gap-2">
               <UnreadMessagesCounter

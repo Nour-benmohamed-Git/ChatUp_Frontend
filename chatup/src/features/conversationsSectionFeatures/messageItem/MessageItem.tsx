@@ -1,39 +1,42 @@
 import { forwardMessage } from "@/app/_actions/messageActions/forwardMessage";
-import { hardRemoveMessage } from "@/app/_actions/messageActions/hardRemoveMessage";
+import { hardDeleteMessage } from "@/app/_actions/messageActions/hardDeleteMessage";
 import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
+import Avatar from "@/app/components/avatar/Avatar";
 import Dialog from "@/app/components/dialog/Dialog";
 import FileDisplay from "@/app/components/fileDisplay/FileDisplay";
 import Menu from "@/app/components/menu/Menu";
 import MessageReactionSelector from "@/app/components/messageReactionSelector/MessageReactionSelector";
 import MessageStatus from "@/app/components/messageStatus/MessageStatus";
+import SystemMessage from "@/app/components/systemMessage/SystemMessage";
+import { useMessages } from "@/context/MessageContext";
 import { useSocket } from "@/context/SocketContext";
 import { Message } from "@/types/Message";
 import { messageActions } from "@/utils/constants/actionLists/messageActions";
-import { MenuPosition, globals } from "@/utils/constants/globals";
+import { MenuPosition, MessageType, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
-import {
-  emitForwardedMessage,
-  emitMessage,
-} from "@/utils/helpers/socket-helpers";
+import { emitForwardedMessage } from "@/utils/helpers/socket-helpers";
 import { FC, memo, useMemo, useRef, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
-import ForwardMessageList from "../forwardMessageList/ForwardMessageList";
 import ReactionList from "../reactionList/ReactionList";
+import UsersPicker from "../usersPicker/UsersPicker";
 import styles from "./MessageItem.module.css";
 import { MessageItemProps } from "./MessageItem.types";
 
 const MessageItem: FC<MessageItemProps> = (props) => {
   const {
     message,
+    combinedData,
     conversationRelatedData,
     highlight,
     isHighlighted,
     initialFriends,
   } = props;
+  const { hardRemoveMessage } = useMessages();
+
   const [tapCoordinates, setTapCoordinates] = useState<{
     x: number;
     y: number;
@@ -44,14 +47,17 @@ const MessageItem: FC<MessageItemProps> = (props) => {
   const [openSoftRemove, setOpenSoftRemove] = useState(false);
   const [openHardRemove, setOpenHardRemove] = useState(false);
   const [openForwardMessage, setOpenForwardMessage] = useState(false);
-  const [checkedUsers, setCheckedUsers] = useState<Set<number>>(new Set());
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-
+  const methods = useForm({
+    defaultValues: {
+      otherMembersIds: [],
+    },
+  });
   const openForwardMessageModal = () => {
     setOpenForwardMessage(true);
   };
   const closeForwardMessageModal = () => {
-    checkedUsers.clear();
+    methods.setValue("otherMembersIds", []);
     setOpenForwardMessage(false);
   };
   const openSoftRemoveModal = () => {
@@ -104,10 +110,10 @@ const MessageItem: FC<MessageItemProps> = (props) => {
 
   const handleForwardMessage = async () => {
     if (message.id && socket) {
-      const forwardedMessages = (await forwardMessage(message.id, [
-        ...checkedUsers,
-      ])) as { data: { data: Message[] } };
-      toast.success("Message has been successfully forwarded.");
+      const forwardedMessages = (await forwardMessage(
+        message.id,
+        methods.getValues("otherMembersIds")
+      )) as { data: { data: Message[] } };
       emitForwardedMessage(socket, {
         forwardedMessages: forwardedMessages.data?.data,
       });
@@ -117,17 +123,13 @@ const MessageItem: FC<MessageItemProps> = (props) => {
 
   const handleHardRemoveMessage = async () => {
     if (message.id && socket) {
-      await hardRemoveMessage(message.id);
+      await hardDeleteMessage(message.id);
       toast.success("Message has been successfully hard removed.");
-      emitMessage(socket, {
-        action: "hardRemove",
-        message: {
-          id: message.id,
-          senderId: currentUserId,
-          receiverId: conversationRelatedData?.secondMemberId as number,
-          chatSessionId: conversationRelatedData?.conversationId as number,
-        },
-      });
+      hardRemoveMessage({
+        id: message.id,
+        senderId: currentUserId,
+        chatSessionId: conversationRelatedData?.conversationId as number,
+      } as Message);
       closeHardRemoveModal();
     }
   };
@@ -174,7 +176,6 @@ const MessageItem: FC<MessageItemProps> = (props) => {
     }
   };
 
-  // console.log(message);
   return (
     <>
       {openForwardMessage && (
@@ -189,11 +190,9 @@ const MessageItem: FC<MessageItemProps> = (props) => {
             },
           ]}
         >
-          <ForwardMessageList
-            initialFriends={initialFriends}
-            checkedUsers={checkedUsers}
-            setCheckedUsers={setCheckedUsers}
-          />
+          <FormProvider {...methods}>
+            <UsersPicker initialFriends={initialFriends} />
+          </FormProvider>
         </Dialog>
       )}
       {openSoftRemove && (
@@ -226,86 +225,106 @@ const MessageItem: FC<MessageItemProps> = (props) => {
           Are you sure you want to hard remove this message?
         </Dialog>
       )}
-      <div
-        className={`flex items-start my-3 ${
-          currentUserId && message.senderId != currentUserId
-            ? "justify-start"
-            : "justify-end"
-        }`}
-      >
-        <div
-          className={`flex items-center max-w-xs lg:max-w-lg xl:max-w-screen-xl ${
-            currentUserId && message.senderId != currentUserId
-              ? "flex-row"
-              : "flex-row-reverse"
-          } gap-2`}
-        >
+      {message.type === MessageType.MANUAL ? (
+        <div className="flex flex-col w-full gap-1">
           <div
-            onTouchStart={handlePressStart}
-            onTouchEnd={handlePressEnd} // Handle case where tap is canceled
-            className={`relative rounded-xl p-4 w-full break-words shadow-md ${
+            className={`flex w-full items-start my-3 ${
               currentUserId && message.senderId != currentUserId
-                ? "bg-gold-400 text-gray-950 rounded-tl-none"
-                : "bg-slate-900 text-white rounded-tr-none"
-            } ${isHighlighted ? styles.animatePulseOnce : ""}`}
+                ? "justify-start"
+                : "justify-end"
+            }`}
           >
-            <FileDisplay
-              files={message?.files}
-              messageDetails={{
-                senderId: message?.senderId,
-                timestamp: message.timestamp,
-              }}
-            />
-            <p className="text-sm max-w-[24.5rem]">{messageContent}</p>
-            <div className="flex items-center justify-end gap-2">
-              <span
-                className={`flex flex-row-reverse text-xs mt-2 ${
-                  currentUserId && message.senderId != currentUserId
-                    ? "text-slate-500"
-                    : "text-gold-900"
-                }`}
-              >
-                {formatMessageDate(message.timestamp)}
-              </span>
-              <MessageStatus currentUserId={currentUserId} message={message} />
-            </div>
-            <ReactionList
-              position={
+            <div
+              className={`flex items-center w-full gap-2 ${
                 currentUserId && message.senderId != currentUserId
-                  ? MenuPosition.TOP_RIGHT
-                  : MenuPosition.TOP_LEFT
-              }
-              reactions={message.reactions}
-            />
-          </div>
-          <Menu
-            actionList={updatedMessageActions}
-            position={
-              currentUserId && message.senderId != currentUserId
-                ? MenuPosition.TOP_RIGHT
-                : MenuPosition.TOP_LEFT
-            }
-            icon={BiDotsVerticalRounded}
-          />
-          <MessageReactionSelector
-            reactionSelectorPosition={tapCoordinates}
-            position={
-              currentUserId && message.senderId != currentUserId
-                ? MenuPosition.TOP_RIGHT
-                : MenuPosition.TOP_LEFT
-            }
-            showReactionPicker={showReactionPicker}
-            setShowReactionPicker={setShowReactionPicker}
-            message={message}
-            conversationRelatedData={conversationRelatedData}
-          />
-          {message.edited && (
-            <div className="flex justify-center items-center rounded-full h-8 w-8 text-gold-900">
-              <MdEdit size={20} />
+                  ? "flex-row"
+                  : "flex-row-reverse"
+              }`}
+            >
+              <div className="flex gap-2 max-w-[calc(100%-2rem)] md:max-w-md lg:max-w-lg">
+                {currentUserId && message.senderId != currentUserId && (
+                  <Avatar
+                    additionalClasses="h-6 md:h-10 w-6 md:w-10"
+                    rounded="rounded-full"
+                    fileName={
+                      combinedData?.members?.[message.senderId as number]
+                        .profilePicture
+                    }
+                  />
+                )}
+                <div
+                  onTouchStart={handlePressStart}
+                  onTouchEnd={handlePressEnd} // Handle case where tap is canceled
+                  className={`relative rounded-xl p-4 w-full shadow-md ${
+                    currentUserId && message.senderId != currentUserId
+                      ? "bg-gold-400 text-gray-950 rounded-tl-none max-w-[calc(100%-2rem)] md:max-w-[calc(100%-3rem)]"
+                      : "bg-slate-900 text-white rounded-tr-none"
+                  } ${isHighlighted ? styles.animatePulseOnce : ""}`}
+                >
+                  <FileDisplay
+                    files={message?.files}
+                    messageDetails={{
+                      senderId: message?.senderId,
+                      timestamp: message.timestamp,
+                    }}
+                  />
+                  <p className="text-sm break-words">{messageContent}</p>
+                  <div className="flex justify-end mt-2">
+                    <span
+                      className={`flex flex-row-reverse text-xs ${
+                        currentUserId && message.senderId != currentUserId
+                          ? "text-slate-500"
+                          : "text-gold-900"
+                      }`}
+                    >
+                      {formatMessageDate(message.timestamp)}
+                    </span>
+                  </div>
+                  {message.reactions && (
+                    <ReactionList
+                      position={
+                        currentUserId && message.senderId != currentUserId
+                          ? MenuPosition.TOP_RIGHT
+                          : MenuPosition.TOP_LEFT
+                      }
+                      reactions={message.reactions}
+                    />
+                  )}
+                </div>
+              </div>
+              <Menu
+                actionList={updatedMessageActions}
+                position={
+                  currentUserId && message.senderId != currentUserId
+                    ? MenuPosition.TOP_RIGHT
+                    : MenuPosition.TOP_LEFT
+                }
+                icon={BiDotsVerticalRounded}
+              />
+              <MessageReactionSelector
+                reactionSelectorPosition={tapCoordinates}
+                position={
+                  currentUserId && message.senderId != currentUserId
+                    ? MenuPosition.TOP_RIGHT
+                    : MenuPosition.TOP_LEFT
+                }
+                showReactionPicker={showReactionPicker}
+                setShowReactionPicker={setShowReactionPicker}
+                message={message}
+                conversationRelatedData={conversationRelatedData}
+              />
+              {message.edited && (
+                <div className="flex justify-center items-center rounded-full h-8 w-8 text-gold-900">
+                  <MdEdit size={20} />
+                </div>
+              )}
             </div>
-          )}
+          </div>
+          <MessageStatus message={message} />
         </div>
-      </div>
+      ) : (
+        <SystemMessage combinedData={combinedData} />
+      )}
     </>
   );
 };

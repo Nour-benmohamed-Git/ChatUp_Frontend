@@ -1,23 +1,24 @@
 import { getFilesByConversationId } from "@/app/_actions/conversationActions/getFilesByConversationId";
+import ActionButton from "@/app/components/actionButton/ActionButton";
 import Avatar from "@/app/components/avatar/Avatar";
+import DangerZone from "@/app/components/dangerZone/DangerZone";
 import FileIcon from "@/app/components/fileIcon/FileIcon";
 import FileViewer from "@/app/components/fileViewer/FileViewer";
+import { contactInfoDangerActions } from "@/utils/constants/actionLists/contactInfoDangerActions";
+import { ChatSessionType } from "@/utils/constants/globals";
 import { motion } from "framer-motion";
 import { memo, useEffect, useRef, useState } from "react";
+import { FaPhoneAlt, FaUsers, FaVideo } from "react-icons/fa";
 import {
-  FaPhoneAlt,
-  FaTrashAlt,
-  FaUserSlash,
-  FaUsers,
-  FaVideo,
-} from "react-icons/fa";
-import { MdMessage, MdOutlineKeyboardArrowRight } from "react-icons/md";
+  MdMessage,
+  MdOutlineKeyboardArrowRight,
+  MdPersonAddAlt1,
+} from "react-icons/md";
 import { ContactInfoProps } from "./ContactInfo.types";
+import ContactInfoGroupSection from "@/app/components/contactInfoGroupSection/ContactInfoGroupSection";
 
 const ContactInfo: React.FC<ContactInfoProps> = ({
-  userData,
-  lastSeen,
-  conversationId,
+  combinedData,
   onMessage,
   onAudioCall,
   onVideoCall,
@@ -26,10 +27,26 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
   const [selectedFileIndex, setSelectedFileIndex] = useState<number>(-1);
   const fileListRef = useRef<HTMLUListElement>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const contactInfoActions = [
+    { onClick: onMessage, icon: MdMessage, label: "Message" },
+    { onClick: onAudioCall, icon: FaPhoneAlt, label: "Audio" },
+    { onClick: onVideoCall, icon: FaVideo, label: "Video" },
+    ...(combinedData.type === ChatSessionType.GROUP
+      ? [
+          {
+            onClick: () => console.log("Add"),
+            icon: MdPersonAddAlt1,
+            label: "Add",
+          },
+        ]
+      : []),
+  ];
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const filesData = await getFilesByConversationId(conversationId);
+      const filesData = await getFilesByConversationId(
+        combinedData?.conversationId as number
+      );
       const imagesAndVideos = filesData.data?.data
         ?.filter(
           (file: any) =>
@@ -41,7 +58,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
     };
 
     fetchFiles();
-  }, [conversationId]);
+  }, [combinedData.conversationId]);
 
   const onSelectItem = (index: number) => {
     setSelectedFileIndex(index);
@@ -95,46 +112,65 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
         </motion.div>
       ) : null}
       <div className="flex flex-col items-center w-full h-full gap-2 overflow-y-auto">
-        <div className="flex flex-col items-center gap-2 px-4 md:px-8 py-4 w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
-          <Avatar
-            additionalClasses="h-36 w-36"
-            rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
-            fileName={userData.profilePicture}
-          />
+        <div className="flex flex-1 flex-col items-center gap-2 px-4 md:px-8 py-4 w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
+          {typeof combinedData.image === "string" ? (
+            <Avatar
+              additionalClasses="h-36 w-36"
+              rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+              fileName={combinedData.image}
+            />
+          ) : Array.isArray(combinedData.image) &&
+            combinedData.image.length === 1 ? (
+            <div className="relative">
+              {[combinedData.image[0], ""].map((image, index) => (
+                <Avatar
+                  key={index}
+                  additionalClasses={`h-16 w-16 absolute ${
+                    index === 0 ? "top-3 left-6" : "-top-6 right-3"
+                  }`}
+                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                  fileName={image}
+                />
+              ))}
+            </div>
+          ) : (
+            combinedData?.image
+              ?.slice(0, 2)
+              .map((image, index) => (
+                <Avatar
+                  key={index}
+                  additionalClasses={`h-16 w-16 absolute ${
+                    index === 0 ? "top-3 left-6" : "-top-6 right-3"
+                  }`}
+                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                  fileName={image}
+                />
+              ))
+          )}
+
           <h2 className="text-xl font-semibold text-gray-100">
-            {userData.username}
+            {combinedData?.title}
           </h2>
-          <p className="text-slate-300 mb-2">{userData.email}</p>
-          <div className="flex items-center gap-4 w-full">
-            <button
-              onClick={onMessage}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-slate-500 to-slate-600"
-            >
-              <MdMessage className="text-gold-900 h-6 w-6" />
-              Message
-            </button>
-            <button
-              onClick={onAudioCall}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-slate-500 to-slate-600"
-            >
-              <FaPhoneAlt className="text-gold-900 h-6 w-6" />
-              Audio
-            </button>
-            <button
-              onClick={onVideoCall}
-              className="flex flex-1 items-center flex-col gap-2 text-slate-200 px-6 py-2 rounded-md border border-gold-600 hover:bg-gradient-to-r from-slate-500 to-slate-600"
-            >
-              <FaVideo className="text-gold-900 h-6 w-6" />
-              Video
-            </button>
+          <p className="text-slate-300 mb-2">{combinedData?.subTitle}</p>
+          <div className="flex w-full gap-2 md:gap-4">
+            {contactInfoActions.map((action, index) => (
+              <ActionButton
+                key={index}
+                onClick={action.onClick}
+                icon={action.icon}
+                label={action.label}
+              />
+            ))}
           </div>
         </div>
         <div className="flex items-center w-full px-4 py-5 md:px-8 md:py-9 bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
-          <p className="text-gray-100">{userData.profileInfo}</p>
+          <p className="text-xs md:text-base text-gray-100">
+            {combinedData?.description}
+          </p>
         </div>
-        <div className="flex flex-col items-center justify-center w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
+        <div className="flex flex-col w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
           <h6
-            className={`flex items-center justify-start text-gold-600 px-4 md:px-8 py-2 w-full ${
+            className={`flex items-center justify-start text-xs md:text-base text-gold-600 px-4 md:px-8 py-2 w-full ${
               files.length ? "auto" : "h-24"
             }`}
           >
@@ -142,26 +178,14 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
           </h6>
           {files.length ? displayUploadedFiles() : null}
         </div>
+        <ContactInfoGroupSection combinedData={combinedData} />
         <div className="flex flex-col w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
-          <h6 className="text-gold-600 self-start px-4 md:px-8 py-2">
-            No groups in common
-          </h6>
-          <button className="flex items-center gap-4 md:gap-6 text-slate-200 hover:bg-gradient-to-r from-slate-500 to-slate-600 px-4 md:px-8 py-5 min-w-0">
-            <FaUsers className="text-gold-900 h-6 w-6 flex-shrink-0" />
-            <div className="truncate">
-              Create group with {userData.username}
-            </div>
-          </button>
-        </div>
-        <div className="flex flex-col w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
-          <button className="flex items-center gap-6 text-red-500 hover:bg-gradient-to-r from-slate-500 to-slate-600 px-4 md:px-8 py-5">
-            <FaTrashAlt className="text-red-500 h-6 w-6" />
-            Delete {userData.username}
-          </button>
-          <button className="flex items-center gap-6 text-red-500 hover:bg-gradient-to-r from-slate-500 to-slate-600 px-4 md:px-8 py-5">
-            <FaUserSlash className="text-red-500 h-6 w-6" />
-            Block {userData.username}
-          </button>
+          <DangerZone
+            title={combinedData?.title}
+            contactInfoDangerActions={
+              contactInfoDangerActions[combinedData.type]
+            }
+          />
         </div>
       </div>
     </>

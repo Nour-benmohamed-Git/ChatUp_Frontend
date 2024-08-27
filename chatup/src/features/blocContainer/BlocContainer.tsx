@@ -11,25 +11,24 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     cssClass,
     toggleHandlers,
     label,
-    userData,
+    combinedData,
     menuActionList,
     conversationRelatedData,
     title,
-    messageListRef
   } = props;
   return (
     <>
       <Header
         actions={actions}
-        toggleHandlers={toggleHandlers} 
+        toggleHandlers={toggleHandlers}
         label={label}
-        userData={userData}
+        combinedData={combinedData}
         menuActionList={menuActionList}
         title={title}
       />
       <div className={`${cssClass}`}>{children}</div>
       {hasChatControlPanel && conversationRelatedData ? (
-        <ChatControlPanel conversationRelatedData={conversationRelatedData} messageListRef={messageListRef}/>
+        <ChatControlPanel conversationRelatedData={conversationRelatedData} />
       ) : null}
     </>
   );

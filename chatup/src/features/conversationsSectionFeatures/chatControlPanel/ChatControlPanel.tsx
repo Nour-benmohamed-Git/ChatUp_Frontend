@@ -1,19 +1,18 @@
 import { addConversation } from "@/app/_actions/conversationActions/addConversation";
 import { restoreCurrentUserConversation } from "@/app/_actions/conversationActions/updateConversation";
-import { addMessage } from "@/app/_actions/messageActions/addMessage";
-import { updateMessage } from "@/app/_actions/messageActions/updateMessage";
+import { createMessage } from "@/app/_actions/messageActions/createMessage";
+import { editMessage } from "@/app/_actions/messageActions/editMessage";
 import EmojiPicker from "@/app/components/emojiPicker/EmojiPicker";
 import FileDropArea from "@/app/components/fileDropArea/FileDropArea";
 import Menu from "@/app/components/menu/Menu";
 import MessageField from "@/app/components/messageField/MessageField";
-import { useSocket } from "@/context/SocketContext";
+import { useMessages } from "@/context/MessageContext";
 import useAutoSizeTextArea from "@/hooks/useAutoSizeTextArea";
 import { ConversationResponse } from "@/types/ChatSession";
 import { Message } from "@/types/Message";
 import { fileMenuActions } from "@/utils/constants/actionLists/fileMenuActions";
-import { MenuPosition, globals } from "@/utils/constants/globals";
+import { MenuPosition, MessageType, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -27,13 +26,13 @@ import { z } from "zod";
 import { ChatControlPanelProps } from "./ChatControlPanel.types";
 
 const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
-  const { conversationRelatedData, messageListRef } = props;
+  const { conversationRelatedData } = props;
+  const { addMessage, updateMessage } = useMessages();
   const router = useRouter();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showDocumentsUploadPanel, setShowDocumentsUploadPanel] =
     useState(false);
-  const { socket } = useSocket();
   const { watch, reset, getValues, setValue, handleSubmit } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea(textAreaRef.current, getValues("message"));
@@ -66,16 +65,17 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     ...action,
     onClick: onClickFunctions[action.label],
   }));
-  const createMessage = async (
+  const handleCreateMessage = async (
     chatSessionId: number,
-    data: z.infer<typeof sendMessageSchema>
+    data: z.infer<typeof sendMessageSchema>,
+    conversation?: ConversationResponse
   ) => {
     const messageToCreate = {
       content: data.message,
       files: data.files,
       senderId: currentUserId,
-      receiverId: conversationRelatedData?.secondMemberId as number,
       chatSessionId,
+      type: MessageType.MANUAL,
     };
 
     const formData = new FormData();
@@ -87,44 +87,24 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     messageToCreate.files?.forEach((file: File) => {
       formData.append("files", file);
     });
-    await addMessage(formData)
+    await createMessage(formData)
       .then((res) => {
-        socket &&
-          emitMessage(socket, {
-            action: "create",
-            message: res.data?.data as Message,
-          });
-        reset();
-        if (messageListRef?.current) {
-          messageListRef.current?.scrollTo({
-            top: messageListRef.current.scrollHeight,
-            behavior: "smooth",
-          });
+        if (conversation) {
+          addMessage(res.data?.data as Message);
+        } else {
+          addMessage(res.data?.data as Message);
         }
+        reset();
       })
       .catch((error) => {
         toast.error(error);
       });
   };
 
-  const editMessage = async (chatSessionId: number) => {
-    console.log(getValues("files"))
-    const messageToEdit = {
-      id: getValues("id"),
-      content: getValues("message"),
-      files: getValues("files"),
-      senderId: currentUserId,
-      receiverId: conversationRelatedData?.secondMemberId as number,
-      chatSessionId,
-    };
-
-    await updateMessage(getValues("id"), getValues("message"))
-      .then(() => {
-        socket &&
-          emitMessage(socket, {
-            action: "edit",
-            message: messageToEdit,
-          });
+  const handleEditMessage = async () => {
+    await editMessage(getValues("id"), getValues("message"))
+      .then((res) => {
+        updateMessage(res.data?.data as Message);
         reset();
       })
       .catch((error) => {
@@ -140,16 +120,21 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
     }
     if (!data.id) {
       if (conversationRelatedData.conversationId === "new") {
-        const conversation = (await addConversation({
-          secondMemberId: conversationRelatedData.secondMemberId as number,
-        })) as {
+        const formData = new FormData();
+        formData.append(
+          "otherMembersIds",
+          conversationRelatedData.secondMemberId as string
+        );
+        const conversation = (await addConversation(null, formData)) as {
           data: { data: ConversationResponse };
         };
         if (conversation && conversationRelatedData?.secondMemberId) {
-          await createMessage(conversation.data.data.id, data);
-          const queryParams = `deletedByCurrentUser=${
-            conversation.data.data.deletedByCurrentUser
-          }&secondMemberId=${
+          await handleCreateMessage(
+            conversation.data.data.id,
+            data,
+            conversation.data.data
+          );
+          const queryParams = `secondMemberId=${
             conversationRelatedData?.secondMemberId as number
           }`;
           router.replace(
@@ -163,13 +148,16 @@ const ChatControlPanel: FC<ChatControlPanelProps> = (props) => {
           )) as {
             data: { data: ConversationResponse };
           };
-          createMessage(conversation.data.data.id, data);
+          handleCreateMessage(conversation.data.data.id, data);
         } else {
-          createMessage(conversationRelatedData.conversationId as number, data);
+          handleCreateMessage(
+            conversationRelatedData.conversationId as number,
+            data
+          );
         }
       }
     } else {
-      editMessage(conversationRelatedData.conversationId as number);
+      handleEditMessage();
     }
   };
 

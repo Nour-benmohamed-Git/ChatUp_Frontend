@@ -61,11 +61,11 @@ const ReactionList: React.FC<ReactionListProps> = ({ position, reactions }) => {
       >
         <div className="flex w-80 md:w-96 h-80 flex-col bg-white p-2 rounded-md">
           {/* Header with "All" option and emojis */}
-          <div className="flex gap-2 mb-2 px-2 justify-start items-center overflow-x-auto">
+          <div className="flex gap-2 px-2 justify-start items-center overflow-x-auto">
             {/* "All" button */}
             <div
               onClick={() => handleEmojiClick(null)}
-              className={`cursor-pointer text-gray-900 flex items-center justify-center w-10 h-10 text-md border-b-2 ${
+              className={`cursor-pointer text-gray-900 flex items-center justify-center w-10 h-8 text-md border-b-2 ${
                 selectedEmoji === null
                   ? "border-gold-600"
                   : "border-transparent"
@@ -77,7 +77,7 @@ const ReactionList: React.FC<ReactionListProps> = ({ position, reactions }) => {
               <div
                 key={emoji}
                 onClick={() => handleEmojiClick(emoji)}
-                className={`cursor-pointer text-gray-900 flex items-center justify-center w-10 h-10 text-md border-b-2 ${
+                className={`cursor-pointer text-gray-900 flex items-center justify-center w-10 h-8 text-md border-b-2 ${
                   selectedEmoji === emoji
                     ? "border-gold-600"
                     : "border-transparent"

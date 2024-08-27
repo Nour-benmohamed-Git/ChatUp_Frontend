@@ -3,7 +3,13 @@ import { FC, memo } from "react";
 import { IoIosClose } from "react-icons/io";
 import { DialogProps } from "./Dialog.types";
 
-const Dialog: FC<DialogProps> = ({ title, onClose, children, actions }) => {
+const Dialog: FC<DialogProps> = ({
+  title,
+  onClose,
+  children,
+  actions,
+  showCancelButton = true,
+}) => {
   const handleOverlayClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
@@ -52,21 +58,24 @@ const Dialog: FC<DialogProps> = ({ title, onClose, children, actions }) => {
             {children}
           </div>
           <div className="flex flex-col md:flex-row md:justify-end gap-4 border-t border-gray-300 p-4 md:p-4 mt-auto">
-            <button
-              onClick={onClose}
-              className="rounded-md bg-gray-900 px-6 py-3 text-base uppercase text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Cancel
-            </button>
-            {actions.map((action) => (
+          {showCancelButton && (
+              <button
+                onClick={onClose}
+                className="rounded-md bg-gray-900 px-6 py-3 text-base uppercase text-white transition duration-150 ease-in-out hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+            )}
+            {actions?.map((action) => (
               <button
                 key={action.label}
                 onClick={action.onClick}
                 className={`rounded-md px-6 py-3 text-base uppercase text-white transition duration-150 ease-in-out ${
                   action.category === "dismissal"
-                    ? "bg-red-600 hover:bg-red-500 focus:ring-2 focus:ring-red-400"
-                    : "bg-gold-900 hover:bg-gold-700 focus:ring-2 focus:ring-gold-400"
-                }`}
+                    ? "bg-red-600 hover:bg-red-500 disabled:bg-red-500 disabled:cursor-not-allowed"
+                    : "bg-gold-900 hover:bg-gold-700 disabled:bg-gold-700 disabled:cursor-not-allowed"
+                } ${action.disabled && "opacity-50"}`}
+                disabled={action.disabled}
               >
                 {action.label}
               </button>
