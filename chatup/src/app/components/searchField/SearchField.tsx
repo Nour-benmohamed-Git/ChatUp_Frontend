@@ -29,6 +29,7 @@ const SearchField: FC<SearchFieldProps> = (props) => {
           name={name}
           placeholder={placeholder}
           onChange={debouncedResults}
+          // autoFocus
           className="w-full bg-gray-900 text-sm outline-none text-slate-200"
         />
       </div>

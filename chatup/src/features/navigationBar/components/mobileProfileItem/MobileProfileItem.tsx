@@ -17,7 +17,6 @@ const MobileProfileItem: FC<MobileProfileItemProps> = ({
         additionalClasses="h-16 w-16"
         rounded="rounded-full border-2 border-gold-600"
         fileName={profilePicture}
-        userId={currentUser.id}
       />
     </Link>
   );

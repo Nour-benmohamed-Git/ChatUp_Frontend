@@ -1,24 +1,25 @@
-import { useState } from 'react';
+import { filters } from "@/utils/constants/actionLists/filterActions";
+import { FC, memo } from "react";
+import { FilterBarProps } from "./FilterBar.types";
 
-const FilterBar = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-
-  const filters = ['All', 'Unread', 'Groups'];
-
+const FilterBar: FC<FilterBarProps> = ({ activeFilter, setActiveFilter }) => {
   return (
-    <div className="mx-2"> 
+    <div className="mx-2">
       <div className="flex items-center gap-2 py-2.5">
         {filters.map((filter) => (
           <button
-            key={filter}
-            className={`filter-btn px-4 py-2 rounded-md focus:outline-none font-medium ${
-              activeFilter === filter
-                ? 'bg-gray-900 text-slate-200'
-                : 'bg-gray-800 hover:bg-gray-800 text-slate-400'
+            key={filter.label}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md shadow-2xl transition-all duration-300 ease-in-out focus:outline-none text-sm font-medium ${
+              activeFilter === filter.name
+                ? "bg-gray-900 text-slate-100"
+                : "bg-slate-800 hover:bg-gradient-to-bl from-slate-600 to-slate-700 text-slate-300"
             }`}
-            onClick={() => setActiveFilter(filter)}
+            onClick={() => {
+              setActiveFilter(filter.name);
+            }}
           >
-            {filter}
+            {filter.icon}
+            {filter.name}
           </button>
         ))}
       </div>
@@ -26,4 +27,4 @@ const FilterBar = () => {
   );
 };
 
-export default FilterBar;
+export default memo(FilterBar);

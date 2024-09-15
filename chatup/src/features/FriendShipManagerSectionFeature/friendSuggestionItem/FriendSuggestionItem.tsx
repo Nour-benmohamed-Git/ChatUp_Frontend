@@ -55,7 +55,12 @@ const FriendSuggestionItem: React.FC<FriendSuggestionItemProps> = (props) => {
     <div className="flex items-center rounded-md gap-4 px-2 py-3 mt-2 bg-gray-900">
       <Avatar
         additionalClasses="h-24 w-24"
-         rounded="rounded-full"
+        rounded={`rounded-full ${
+          typeof friendSuggestionData?.profilePicture === "string" &&
+          friendSuggestionData?.profilePicture !== ""
+            ? ""
+            : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+        }`}
         fileName={friendSuggestionData?.profilePicture}
       />
       <div className="flex flex-col flex-1 min-w-0 gap-1">
@@ -72,7 +77,7 @@ const FriendSuggestionItem: React.FC<FriendSuggestionItemProps> = (props) => {
                   <Avatar
                     key={`${image}-${index}`}
                     additionalClasses="h-7 w-7"
-                    rounded="rounded-full border-2 border-gray-900"
+                    rounded="rounded-full border-2 border-gray-600"
                     fileName={image}
                   />
                 ))}

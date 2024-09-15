@@ -6,13 +6,18 @@ import Dialog from "@/app/components/dialog/Dialog";
 import { useSocket } from "@/context/SocketContext";
 import useConversation from "@/hooks/useConversation";
 import { ConversationResponse } from "@/types/ChatSession";
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
-import { ChatSessionType, MessageType } from "@/utils/constants/globals";
+import {
+  ChatSessionType,
+  ConversationFilter,
+  MessageType,
+} from "@/utils/constants/globals";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import { groupConversationSchema } from "@/utils/schemas/conversationSchemaSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, memo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FC, memo, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,6 +31,11 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
 ) => {
   const { initialConversations, currentUser, initialFriends } = props;
   const { isOpen } = useConversation();
+  const router = useRouter();
+  const [activeFilter, setActiveFilter] = useState<ConversationFilter>(
+    ConversationFilter.ALL
+  );
+
   const { socket } = useSocket();
   const [openNewGroup, setOpenNewGroup] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -42,16 +52,29 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
   const openNewGroupModal = () => {
     setOpenNewGroup(true);
   };
+  const toggleToArchive = () => {
+    setActiveFilter(ConversationFilter.ARCHIVED);
+  };
 
   const onClickFunctions: { [key: string]: () => void } = {
     newGroup: openNewGroupModal,
+    archived: toggleToArchive,
     logout: logout,
   };
 
-  const updatedSideBarMenuActions = sideBarMenuActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const handleGoBackToConversations = () => {
+    setActiveFilter(ConversationFilter.ALL);
+
+    router.push("/conversations");
+  };
+  const updatedSideBarMenuActions = useMemo(
+    () =>
+      sideBarMenuActions["chat"].map((action) => ({
+        ...action,
+        onClick: onClickFunctions[action.label],
+      })),
+    [sideBarMenuActions]
+  );
   const closeNewGroupModal = () => {
     setOpenNewGroup(false);
     setCurrentStep(1);
@@ -83,7 +106,7 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
         socket &&
           emitMessage(socket, {
             action: "create",
-            message: res.data?.data as Message,
+            message: res.data?.data as MessageResponse,
           });
       })
       .catch((error) => {
@@ -160,15 +183,28 @@ const ConversationListContainer: FC<ConversationListContainerProps> = (
         } md:flex md:flex-col md:col-span-5 lg:col-span-4 md:border-r md:border-slate-500 bg-gradient-to-r from-slate-600 to-gray-700`}
       >
         <BlocContainer
-          title="Chat"
-          label="left_container"
+          title={
+            activeFilter !== ConversationFilter.ARCHIVED ? "Chat" : "Archived"
+          }
+          label={
+            activeFilter === ConversationFilter.ARCHIVED
+              ? "archived"
+              : undefined
+          }
           menuActionList={updatedSideBarMenuActions}
           cssClass="p-2 h-[calc(100vh-4rem)]"
+          handleBack={handleGoBackToConversations}
         >
           <ConversationList
-            label="Friends"
+            label={
+              activeFilter !== ConversationFilter.ARCHIVED
+                ? "conversations"
+                : "archived"
+            }
             initialConversations={initialConversations}
             currentUser={currentUser}
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
           />
         </BlocContainer>
       </aside>

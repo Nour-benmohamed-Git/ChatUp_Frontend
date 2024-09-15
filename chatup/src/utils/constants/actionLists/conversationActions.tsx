@@ -2,13 +2,14 @@ import { IoMdCloseCircle, IoMdTrash } from "react-icons/io";
 import { MdAppBlocking, MdCall, MdSearch } from "react-icons/md";
 
 export const conversationActions = [
-  {
-    name: "call",
-    icon: <MdCall size={24} />,
-  },
+  // {
+  //   label: "call",
+  //   name: "Call",
+  //   icon: <MdCall size={24} />,
+  // },
   {
     label: "searchMessages",
-    name: "search",
+    name: "Search",
     icon: <MdSearch size={24} />,
   },
 ];

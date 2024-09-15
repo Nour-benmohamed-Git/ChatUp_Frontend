@@ -3,23 +3,27 @@ import { FC, memo } from "react";
 import { FaFileAlt } from "react-icons/fa";
 import Avatar from "../avatar/Avatar";
 import { FileIconProps } from "./FileIcon.types";
+import { FileType } from "@/utils/constants/globals";
 const FileIcon: FC<FileIconProps> = (props) => {
   const { file, additionalClasses } = props;
-  const isImage = file.mimetype.startsWith("image/");
-  const isVideo = file.mimetype.startsWith("video/");
-
+  const isImage = file.fileType === FileType.IMAGE;
+  const isVideo = file.fileType === FileType.VIDEO;
+  const isAudio = file.fileType === FileType.AUDIO;
   if (isImage) {
     return (
-      <Avatar
-        fileName={file.filename}
-        additionalClasses={additionalClasses}
-      />
+      <Avatar fileName={file.filename} additionalClasses={additionalClasses} />
     );
   } else if (isVideo) {
     return (
       <video controls className="rounded-md">
         <source src={`${environment.baseUrl}/uploads/${file.filename}`} />
       </video>
+    );
+  } else if (isAudio) {
+    return (
+      <audio controls controlsList="nodownload" className="rounded-md">
+        <source src={`${environment.baseUrl}/uploads/${file.filename}`} />
+      </audio>
     );
   } else {
     return (

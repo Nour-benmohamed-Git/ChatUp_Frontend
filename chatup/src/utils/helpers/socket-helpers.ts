@@ -1,5 +1,5 @@
 import { FriendRequestResponse } from "@/types/FriendRequest";
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 import { Socket } from "socket.io-client";
 
 export const handleJoinPrivateRoom = (
@@ -12,8 +12,14 @@ export const handleJoinPrivateRoom = (
 export const emitMessage = async (
   socket: Socket,
   messageData: {
-    action: "create" | "edit" | "hardRemove" | "markAsRead" | "react";
-    message: Partial<Message>;
+    action:
+      | "create"
+      | "edit"
+      | "hardRemove"
+      | "softRemove"
+      | "markAsRead"
+      | "react";
+    message: Partial<MessageResponse>;
     reaction?: string;
   }
 ) => {
@@ -33,7 +39,7 @@ export const emitFriendRequest = (
 export const emitForwardedMessage = (
   socket: Socket,
   forwardData: {
-    forwardedMessages: Message[];
+    forwardedMessages: MessageResponse[];
   }
 ) => {
   socket?.emit("forward_message", forwardData);

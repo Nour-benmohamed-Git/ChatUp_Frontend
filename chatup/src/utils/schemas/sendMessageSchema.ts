@@ -13,7 +13,7 @@ export const sendMessageSchema = z
       .refine((msg) => !msg || msg.trim() !== "", {
         message: "Message cannot be empty.",
       }),
-    files: z.array(z.any()).optional(),
+    files: z.array(z.instanceof(File)).optional(),
     reaction: z.string().optional(),
   })
   .superRefine((val, ctx) => {

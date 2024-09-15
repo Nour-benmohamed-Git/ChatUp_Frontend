@@ -98,7 +98,7 @@ export const ChatSessionProvider: FC<{
             });
           });
           break;
-        case "updateChatListOnHardRemoval":
+        case "updateChatListOnRemoval":
           setChatSessions((prevChatSessions: any) => {
             return prevChatSessions?.map((chatSession: any) => {
               if (chatSession.id === chatSessionData.data.id) {
@@ -112,6 +112,7 @@ export const ChatSessionProvider: FC<{
             });
           });
           break;
+       
         case "updateChatListOnReaction":
           setChatSessions((prevChatSessions: any) => {
             return prevChatSessions?.map((chatSession: any) => {

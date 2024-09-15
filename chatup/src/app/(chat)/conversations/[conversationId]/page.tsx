@@ -1,12 +1,12 @@
+import { fetchConversations } from "@/app/_actions/conversationActions/fetchConversations";
 import { getConversation } from "@/app/_actions/conversationActions/getConversation";
-import { fetchFriends } from "@/app/_actions/friendActions/fetchFriends";
-import { fetchConversationMessages } from "@/app/_actions/messageActions/fetchConversationMessages";
 import { getUserById } from "@/app/_actions/userActions/getUserById";
 import { MessageProvider } from "@/context/MessageContext";
 import SelectedConversation from "@/features/conversationsSectionFeatures/selectedConversation/SelectedConversation";
-import { ConversationResponse } from "@/types/ChatSession";
-import { Message, Messages } from "@/types/Message";
-import { UsersResponse } from "@/types/User";
+import {
+  ConversationResponse,
+  ConversationsResponse,
+} from "@/types/ChatSession";
 import { CustomError } from "@/utils/config/exceptions";
 import {
   convertSearchParams,
@@ -24,21 +24,18 @@ const Conversation = async ({
   const { conversationId } = params;
   const currentUserId = cookies().get("currentUserId")?.value;
 
-  const [conversation, messages, friends] = await Promise.all([
+  const [conversation, conversations] = await Promise.all([
     getConversation(conversationId),
-    fetchConversationMessages(conversationId),
-    fetchFriends(),
+    fetchConversations(),
   ]);
 
-  if (conversation.error || messages.error || friends.error) {
+  if (conversation.error || conversations.error) {
     const message =
       conversation.error?.message ||
-      messages.error?.message ||
-      friends.error?.message;
+      conversations.error?.message;
     throw new CustomError(message);
   }
 
-  console.log("hello from page");
 
   if (searchParams?.secondMemberId) {
     userData = await getUserById(searchParams?.secondMemberId as string);
@@ -56,7 +53,6 @@ const Conversation = async ({
 
   return (
     <MessageProvider
-      initialMessages={messages.data?.data as Message[]}
       conversationRelatedData={convertSearchParams({
         conversationId,
         seen: `${conversation.data?.data?.seen}`,
@@ -72,8 +68,7 @@ const Conversation = async ({
           deletedByCurrentUser: `${conversation.data?.data?.deletedByCurrentUser}`,
           ...searchParams,
         })}
-        initialMessages={messages.data as Messages}
-        initialFriends={friends.data as UsersResponse}
+        initialConversations={conversations.data as ConversationsResponse}
         combinedData={combinedData}
       />
     </MessageProvider>

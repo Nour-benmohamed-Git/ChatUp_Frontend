@@ -1,12 +1,16 @@
 "use client";
+import { fetchConversationMessages } from "@/app/_actions/messageActions/fetchConversationMessages";
 import { useSocket } from "@/context/SocketContext";
 import { ConversationResponse } from "@/types/ChatSession";
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
+import { Direction } from "@/utils/constants/globals";
 import { emitMessage } from "@/utils/helpers/socket-helpers";
 import {
   createContext,
+  Dispatch,
   FC,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useRef,
@@ -14,12 +18,40 @@ import {
 } from "react";
 
 interface MessageContextProps {
-  messages: Message[];
-  addMessage: (message: Message, conversation?: ConversationResponse) => void;
-  updateMessage: (message: Message) => void;
-  hardRemoveMessage: (message: Message) => void;
-  reactMessage: (message: Message, reaction?: string) => void;
-  setMessages: (messages: Message[]) => void;
+  messages: MessageResponse[];
+  addMessage: (
+    message: MessageResponse,
+    conversation?: ConversationResponse
+  ) => void;
+  updateMessage: (message: MessageResponse) => void;
+  hardRemoveMessage: (message: MessageResponse) => void;
+  softRemoveMessage: (message: MessageResponse) => void;
+  reactMessage: (message: MessageResponse, reaction?: string) => void;
+  setMessages: (messages: MessageResponse[]) => void;
+  paginator: {
+    limit: number;
+    total: number;
+    cursor: {
+      earliest?: number;
+      latest?: number;
+    };
+    direction: Direction;
+    hasMoreBefore: boolean;
+    hasMoreAfter: boolean;
+  };
+  setPaginator: Dispatch<
+    SetStateAction<{
+      limit: number;
+      total: number;
+      cursor: {
+        earliest?: number;
+        latest?: number;
+      };
+      direction: Direction;
+      hasMoreBefore: boolean;
+      hasMoreAfter: boolean;
+    }>
+  >;
   messageListRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -40,13 +72,53 @@ export const MessageProvider: FC<{
   conversationRelatedData: {
     [key: string]: string | number | boolean | undefined;
   };
-  initialMessages: Message[];
-}> = ({ children, conversationRelatedData, initialMessages }) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-
+}> = ({ children, conversationRelatedData }) => {
   const { socket } = useSocket();
   const messageListRef = useRef<HTMLDivElement>(null);
   const isNewMessageAdded = useRef<boolean>(false);
+  const [messages, setMessages] = useState<MessageResponse[]>([]);
+  const [paginator, setPaginator] = useState<{
+    limit: number;
+    total: number;
+    cursor: { earliest?: number; latest?: number };
+    direction: Direction;
+    hasMoreBefore: boolean;
+    hasMoreAfter: boolean;
+  }>({
+    limit: 30,
+    total: 0,
+    cursor: {},
+    direction: Direction.FORWARD,
+    hasMoreBefore: false,
+    hasMoreAfter: false,
+  });
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetchConversationMessages(
+          conversationRelatedData?.conversationId as string
+        );
+        if (response.data) {
+          setMessages(response.data.data);
+          setPaginator({
+            limit: 30,
+            total: response.data.total,
+            cursor: response.data.newCursor,
+            direction: Direction.FORWARD,
+            hasMoreBefore: response.data.hasMoreBefore,
+            hasMoreAfter: response.data.hasMoreAfter,
+          });
+        } else {
+          console.warn("No data returned from fetchConversationMessages");
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [conversationRelatedData?.conversationId]);
 
   const scrollToBottom = () => {
     if (messageListRef.current) {
@@ -62,22 +134,31 @@ export const MessageProvider: FC<{
       isNewMessageAdded.current = false;
     }
   }, [messages]);
-  const addMessage = async (messageToAdd: Message) => {
-    socket &&
-      (await emitMessage(socket, { action: "create", message: messageToAdd }));
-    isNewMessageAdded.current = true;
+  const addMessage = async (messageToAdd: MessageResponse) => {
+    if (socket) {
+      await emitMessage(socket, { action: "create", message: messageToAdd });
+      isNewMessageAdded.current = true;
+    }
   };
 
-  const updateMessage = (updatedMessage: Message) => {
+  const updateMessage = (updatedMessage: MessageResponse) => {
     socket && emitMessage(socket, { action: "edit", message: updatedMessage });
   };
 
-  const hardRemoveMessage = (messageToRemove: Message) => {
+  const hardRemoveMessage = (messageToRemove: MessageResponse) => {
     socket &&
       emitMessage(socket, { action: "hardRemove", message: messageToRemove });
   };
 
-  const reactMessage = (messageToReact: Message, reaction?: string) => {
+  const softRemoveMessage = (messageToRemove: MessageResponse) => {
+    setMessages((prevMessages) =>
+      prevMessages.filter((message) => message.id !== messageToRemove.id)
+    );
+    socket &&
+      emitMessage(socket, { action: "softRemove", message: messageToRemove });
+  };
+
+  const reactMessage = (messageToReact: MessageResponse, reaction?: string) => {
     socket &&
       emitMessage(socket, {
         action: "react",
@@ -123,7 +204,6 @@ export const MessageProvider: FC<{
 
   useEffect(() => {
     const handleReceiveMessage = (newMessage: any) => {
-      // console.log("newMessage", newMessage.lastSeenMessages);
       switch (newMessage.action) {
         case "create":
           setMessages((prevMessages) => {
@@ -220,7 +300,6 @@ export const MessageProvider: FC<{
   }, [socket]);
 
   useEffect(() => {
-    console.log(conversationRelatedData.seen);
     if (socket && !conversationRelatedData.seen) {
       markMessagesAsRead();
     }
@@ -233,8 +312,11 @@ export const MessageProvider: FC<{
         addMessage,
         updateMessage,
         hardRemoveMessage,
+        softRemoveMessage,
         reactMessage,
         setMessages,
+        paginator,
+        setPaginator,
         messageListRef,
       }}
     >

@@ -8,6 +8,7 @@ import { fetchConversations } from "../_actions/conversationActions/fetchConvers
 import { fetchFriendRequests } from "../_actions/friendRequestActions/fetchFriendRequests";
 import { fetchCurrentUser } from "../_actions/userActions/fetchCurrentUser";
 import "../globals.css";
+import { AudioCallProvider } from "@/context/AudioCallContext";
 
 export const metadata: Metadata = {
   title: "ChatUp | Conversations",
@@ -39,16 +40,18 @@ export default async function ChatLayout({
         currentUserId={(currentUser.data?.data as UserResponse).id}
       >
         <OnlineUsersProvider>
-          <NavigationBar
-            currentUser={currentUser.data?.data as UserResponse}
-            initialUnseenConversationsCount={
-              conversations.data?.unseenCount as number
-            }
-            initialUnseenFriendRequestsCount={
-              friendRequests.data?.unseenCount as number
-            }
-          />
-          {children}
+          <AudioCallProvider>
+            <NavigationBar
+              currentUser={currentUser.data?.data as UserResponse}
+              initialUnseenConversationsCount={
+                conversations.data?.unseenCount as number
+              }
+              initialUnseenFriendRequestsCount={
+                friendRequests.data?.unseenCount as number
+              }
+            />
+            {children}
+          </AudioCallProvider>
         </OnlineUsersProvider>
       </SocketProvider>
     </div>

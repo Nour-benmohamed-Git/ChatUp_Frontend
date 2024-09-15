@@ -1,4 +1,4 @@
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 import { MenuPosition } from "@/utils/constants/globals";
 import { Dispatch, SetStateAction } from "react";
 
@@ -10,7 +10,7 @@ export interface MessageReactionSelectorProps {
     y: number;
   };
   position?: MenuPosition;
-  message: Message 
+  message: MessageResponse;
   conversationRelatedData: {
     [key: string]: string | number | boolean | undefined;
   };

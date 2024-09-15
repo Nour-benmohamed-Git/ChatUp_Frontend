@@ -4,6 +4,7 @@ export const paths = {
     friends: "/friends",
     friend: "/add-friend",
     profile: "/profile",
+    // archive: "/archive",
   },
   authRoutes: { signIn: "/sign-in", signUp: "/sign-up" },
 };

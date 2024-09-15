@@ -2,15 +2,16 @@ import { logout } from "@/app/_actions/authActions/logout";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { BsPersonFillAdd } from "react-icons/bs";
+import { FaUsers } from "react-icons/fa";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { TbLogout2 } from "react-icons/tb";
-import { FaUsers } from "react-icons/fa";
 
 import useConversation from "./useConversation";
 export const labelsWithBadge = ["chat", "friends"];
 const useRoutes = () => {
   const pathname = usePathname();
   const { isOpen } = useConversation();
+
   const routes = useMemo(
     () => [
       {
@@ -33,7 +34,7 @@ const useRoutes = () => {
       },
       {
         label: "logout",
-        onClick: () => logout(),
+        onClick: logout,
         href: "#",
         icon: TbLogout2,
       },

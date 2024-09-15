@@ -20,10 +20,7 @@ import MessageField from "../messageField/MessageField";
 import VideoPicker from "../videoPicker/VideoPicker";
 import { FileDropAreaProps } from "./FileDropArea.types";
 
-const FileDropArea: FC<FileDropAreaProps> = ({
-  onClose,
-  handleSendMessage,
-}) => {
+const FileDropArea: FC<FileDropAreaProps> = ({ onClose, handleSubmitForm }) => {
   const { watch, setValue, getValues, formState } = useFormContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea(textAreaRef.current, getValues("message"));
@@ -55,9 +52,8 @@ const FileDropArea: FC<FileDropAreaProps> = ({
   };
 
   const handleUpload = () => {
-    handleSendMessage();
+    handleSubmitForm();
     setValue("files", [], { shouldValidate: true });
-
     onClose();
   };
   const handleRemoveFile = (indexToRemove: number, event: React.MouseEvent) => {
@@ -97,20 +93,11 @@ const FileDropArea: FC<FileDropAreaProps> = ({
               />
             )}
             {file.type.startsWith("image/") ? (
-              <ImagePicker
-                file={file}
-                additionalClasses="h-14 w-14"
-              />
+              <ImagePicker file={file} additionalClasses="h-14 w-14" />
             ) : file.type.startsWith("video/") ? (
-              <VideoPicker
-                file={file}
-                additionalClasses="h-14 w-14"
-              />
+              <VideoPicker file={file} additionalClasses="h-14 w-14" />
             ) : (
-              <FilePicker
-                file={file}
-                additionalClasses="h-14 w-14"
-              />
+              <FilePicker file={file} additionalClasses="h-14 w-14" />
             )}
           </li>
         ))}
@@ -209,7 +196,7 @@ const FileDropArea: FC<FileDropAreaProps> = ({
                   name="message"
                   placeholder="Type your message"
                   messageFieldRef={textAreaRef}
-                  handleSendMessage={handleSendMessage}
+                  handleSendMessage={handleSubmitForm}
                 />
               </div>
               <div className="flex items-center w-full">

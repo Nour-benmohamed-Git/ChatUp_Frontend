@@ -7,7 +7,7 @@ export interface ConversationCombinedType {
   title?: string;
   subTitle?: string;
   description?: string;
-  members?: { [userId: string]: { [userId: string]: string } };
+  members?: { [userId: string]: string };
   admins?: { [userId: string]: string };
   additionalInfo?: number | string[];
 }

@@ -1,4 +1,6 @@
+import { archiveConversation } from "@/app/_actions/conversationActions/archiveConversation";
 import { removeConversation } from "@/app/_actions/conversationActions/removeConversation";
+import { unArchiveConversation } from "@/app/_actions/conversationActions/unArchiveConversation";
 import Avatar from "@/app/components/avatar/Avatar";
 import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";
@@ -14,17 +16,14 @@ import { formatChatSessionDate } from "@/utils/helpers/dateHelpers";
 import { getOtherUserId } from "@/utils/helpers/sharedHelpers";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FC, memo, useState } from "react";
+import { FC, memo, useMemo, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
+import { MdArchive, MdUnarchive } from "react-icons/md";
 import GetLastMessagePreview from "../getLastMessagePreview/GetLastMessagePreview";
 import { ConversationItemProps } from "./ConversationItem.types";
-import { emitMessage } from "@/utils/helpers/socket-helpers";
-import { useSocket } from "@/context/SocketContext";
 
 const ConversationItem: FC<ConversationItemProps> = (props) => {
   const { conversation } = props;
-  const { socket } = useSocket();
-
   const router = useRouter();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const pathname = usePathname();
@@ -35,32 +34,51 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
   const closeModal = () => {
     setIsOpen(false);
   };
+  const handleArchiveConversation = async () => {
+    await archiveConversation({ conversationId: conversation.id });
+  };
+
+  const handleUnArchiveConversation = async () => {
+    await unArchiveConversation({ conversationId: conversation.id });
+  };
+  const archiveAction = {
+    label: conversation.archived ? "Unarchive" : "Archive",
+    name: conversation.archived ? "Unarchive" : "Archive",
+    icon: conversation.archived ? (
+      <MdUnarchive size={22} />
+    ) : (
+      <MdArchive size={22} />
+    ),
+    onClick: conversation.archived
+      ? handleUnArchiveConversation
+      : handleArchiveConversation,
+  };
   const onClickFunctions: { [key: string]: () => void } = {
     rename: () => console.log("edit"),
     remove: openModal,
   };
-  const updatedChatItemActions = chatItemActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedChatItemActions = useMemo(() => {
+    const actions = chatItemActions.map((action) => {
+      if (action.label === "archive") {
+        return {
+          ...action,
+          ...archiveAction,
+        };
+      }
+      return {
+        ...action,
+        onClick: onClickFunctions[action.label],
+      };
+    });
+    return actions;
+  }, [chatItemActions, archiveAction]);
+
   const handleRemoveConversation = async () => {
     await removeConversation({ conversationId: conversation.id });
     closeModal();
     router.push("/conversations");
   };
-  // const handleMarkAsRead = () => {
-  //   // console.log(conversation?.seen);
-  //   if (socket ) {
-  //     console.log("yess");
-  //     emitMessage(socket, {
-  //       action: "markAsRead",
-  //       message: {
-  //         senderId: currentUserId,
-  //         chatSessionId: conversation.id,
-  //       },
-  //     });
-  //   }
-  // };
+
   return (
     <>
       {isOpen && (
@@ -79,7 +97,6 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
         </Dialog>
       )}
       <Link
-        // onClick={handleMarkAsRead}
         href={{
           pathname: `/conversations/${conversation.id}`,
           ...(conversation.type === ChatSessionType.INDIVIDUAL
@@ -116,7 +133,11 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
                     additionalClasses={`h-8 w-8 absolute ${
                       index === 0 ? "top-0 left-4" : "-top-4 right-0"
                     }`}
-                    rounded="rounded-full"
+                    rounded={`rounded-full ${
+                      typeof image === "string" && image !== ""
+                        ? ""
+                        : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+                    }`}
                     fileName={image}
                   />
                 ))
@@ -129,7 +150,11 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
                       additionalClasses={`h-8 w-8 absolute ${
                         index === 0 ? "top-0 left-4" : "-top-4 right-0"
                       }`}
-                      rounded="rounded-full"
+                      rounded={`rounded-full ${
+                        typeof image === "string" && image !== ""
+                          ? ""
+                          : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+                      }`}
                       fileName={image}
                     />
                   ))
@@ -138,7 +163,12 @@ const ConversationItem: FC<ConversationItemProps> = (props) => {
           ) : (
             <Avatar
               additionalClasses="h-12 w-12"
-              rounded="rounded-full"
+              rounded={`rounded-full ${
+                typeof conversation.image === "string" &&
+                conversation.image !== ""
+                  ? ""
+                  : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+              }`}
               fileName={conversation.image as string}
               userId={getOtherUserId(
                 conversation.participantsData,

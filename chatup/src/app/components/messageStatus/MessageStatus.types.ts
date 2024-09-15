@@ -1,5 +1,5 @@
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 
 export interface MessageStatusProps {
-  message: Message;
+  message: MessageResponse;
 }

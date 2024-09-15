@@ -23,7 +23,12 @@ const ReactionItem: FC<ReactionItemProps> = ({ userId, emoji }) => {
     >
       <Avatar
         additionalClasses="h-12 w-12"
-        rounded="rounded-full"
+        rounded={`rounded-full ${
+          typeof senderData?.profilePicture === "string" &&
+          senderData?.profilePicture !== ""
+            ? ""
+            : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+        }`}
         fileName={senderData?.profilePicture}
         userId={senderData?.id}
       />
@@ -31,9 +36,7 @@ const ReactionItem: FC<ReactionItemProps> = ({ userId, emoji }) => {
         <div className="text-sm font-medium text-gold-600 truncate">
           {senderData?.username}
         </div>
-        <div className="text-xs text-white truncate">
-          Click to remove
-        </div>
+        <div className="text-xs text-white truncate">Click to remove</div>
       </div>
       <div className="ml-auto flex items-center text-2xl">{emoji}</div>
     </div>

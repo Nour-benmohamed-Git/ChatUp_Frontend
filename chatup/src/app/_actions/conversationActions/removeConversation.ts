@@ -12,8 +12,7 @@ export async function removeConversation(data: { conversationId: number }) {
   >(
     `/api/chat-sessions/${data.conversationId}`,
     {
-      method: "POST",
-      body: data,
+      method: "DELETE",
     },
     { tag: "conversations" }
   );

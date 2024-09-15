@@ -17,9 +17,9 @@ export const allowedProfilePictureExtensions = [
 ];
 export const allowedExtensions = [
   "jpg",
+  "webp",
   "jpeg",
   "png",
-  "webp",
   "gif",
   "mp4",
   "mov",
@@ -29,6 +29,11 @@ export const allowedExtensions = [
   "pdf",
   "docx",
   "txt",
+  "mp3",
+  "wav",
+  "ogg",
+  "flac",
+  "webm",
 ];
 
 export enum MenuPosition {
@@ -56,5 +61,20 @@ export enum ChatSessionType {
 export enum MessageType {
   SYSTEM = "SYSTEM",
   MANUAL = "MANUAL",
+}
+
+export enum ConversationFilter {
+  ALL = "ALL",
+  UNREAD = "UNREAD",
+  GROUP = "GROUP",
+  ARCHIVED = "ARCHIVED",
+}
+
+export enum FileType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO",
+  DOCUMENT = "DOCUMENT",
+  OTHER = "OTHER",
 }
 export const predefinedReactions = ["👍", "❤️", "😂", "😮", "🙏"];

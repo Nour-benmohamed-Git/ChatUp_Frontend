@@ -3,6 +3,12 @@ import { removeConversation } from "@/app/_actions/conversationActions/removeCon
 import Dialog from "@/app/components/dialog/Dialog";
 import SlidingPanel from "@/app/components/slidingPanel/SlidingPanel";
 import { SlidingPanelProps } from "@/app/components/slidingPanel/SlidingPanel.types";
+import { useRouter } from "next/navigation";
+import { FC, memo, useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import BlocContainer from "@/features/blocContainer/BlocContainer";
 import useConversation from "@/hooks/useConversation";
 import usePanel from "@/hooks/usePanel";
@@ -10,31 +16,35 @@ import {
   conversationActions,
   conversationMenuActions,
 } from "@/utils/constants/actionLists/conversationActions";
-import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { FC, memo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
 import ContactInfo from "../contactInfo/ContactInfo";
 import MessageList from "../messageList/MessageList";
 import SearchBar from "../searchBar/SearchBar";
+import { useAudioCall } from "@/context/AudioCallContext";
 import { SelectedConversationProps } from "./SelectedConversation.types";
 
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
-  const {
-    conversationRelatedData,
-    initialMessages,
-    combinedData,
-    initialFriends,
-  } = props;
+  const { conversationRelatedData, combinedData, initialConversations } = props;
+  const { isOpen } = useConversation();
+  const router = useRouter();
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
-  const { isOpen } = useConversation();
-  const router = useRouter();
+  const { startAudioCall, setCombinedData } = useAudioCall();
+
   const handleCloseConversation = () => {
+    router.push("/conversations");
+  };
+  useEffect(() => {
+    if (combinedData) {
+      setCombinedData(combinedData);
+    }
+  }, [combinedData]);
+
+  const handleRemoveConversation = async () => {
+    await removeConversation({
+      conversationId: conversationRelatedData.conversationId as number,
+    });
     router.push("/conversations");
   };
   const openModal = () => {
@@ -43,34 +53,33 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const closeModal = () => {
     setOpenDialog(false);
   };
-  const handleRemoveConversation = async () => {
-    await removeConversation({
-      conversationId: conversationRelatedData.conversationId as number,
-    });
-    closeModal();
-    router.push("/conversations");
-  };
   const onClickFunctions: { [key: string]: () => void } = {
     closeConversation: handleCloseConversation,
     removeConversation: openModal,
     block: () => console.log("block"),
   };
-  const updatedConversationMenuActions = conversationMenuActions.map(
-    (action) => ({
-      ...action,
-      onClick: onClickFunctions[action.label],
-    })
+
+  const updatedConversationMenuActions = useMemo(
+    () =>
+      conversationMenuActions.map((action) => ({
+        ...action,
+        onClick: onClickFunctions[action.label],
+      })),
+    [conversationMenuActions]
   );
+
   const {
     isOpen: isOpenSearchMessagesPanel,
     togglePanel: toggleSearchMessagesPanel,
     panelRef: searchMessagesPanelRef,
   } = usePanel(false);
+
   const {
     isOpen: isOpenContactInfoPanel,
     togglePanel: toggleContactInfoPanel,
     panelRef: contactInfoPanelRef,
   } = usePanel();
+
   const panels: Record<string, SlidingPanelProps> = {
     searchMessages: {
       isOpen: isOpenSearchMessagesPanel,
@@ -100,18 +109,10 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
         <ContactInfo
           combinedData={combinedData}
           onMessage={toggleContactInfoPanel}
-          onAudioCall={function (): void {
-            throw new Error("Function not implemented.");
-          }}
-          onVideoCall={function (): void {
-            throw new Error("Function not implemented.");
-          }}
-          onBlock={function (): void {
-            throw new Error("Function not implemented.");
-          }}
-          onRemoveConversation={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onAudioCall={() => {}}
+          onVideoCall={() => {}}
+          onBlock={() => {}}
+          onRemoveConversation={() => {}}
         />
       ) : null,
       fromSide: "right",
@@ -164,10 +165,10 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             panelRef={panel.panelRef}
             fromSide={panel.fromSide}
             title={panel.title}
-            panelHeight={panel?.panelHeight}
-            panelWidth={panel?.panelWidth}
-            hasHeader={panel?.hasHeader}
-            zIndex={panel?.zIndex}
+            panelHeight={panel.panelHeight}
+            panelWidth={panel.panelWidth}
+            hasHeader={panel.hasHeader}
+            zIndex={panel.zIndex}
           >
             {panel.children}
           </SlidingPanel>
@@ -177,22 +178,23 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             actions={conversationActions}
             hasChatControlPanel
             toggleHandlers={toggleHandlers}
-            label="right_container"
+            label="selected_conversation"
             menuActionList={updatedConversationMenuActions}
             conversationRelatedData={conversationRelatedData}
             combinedData={combinedData}
             cssClass="h-[calc(100vh-8rem)]"
+            handleBack={handleCloseConversation}
+            startAudioCall={startAudioCall}
           >
             <MessageList
               conversationRelatedData={conversationRelatedData}
               combinedData={combinedData}
-              initialMessages={initialMessages}
               paramToSearch={paramToSearch}
               searchResults={searchResults}
               setSearchResults={setSearchResults}
               currentSearchIndex={currentSearchIndex}
               setCurrentSearchIndex={setCurrentSearchIndex}
-              initialFriends={initialFriends}
+              initialConversations={initialConversations}
             />
           </BlocContainer>
         </FormProvider>
@@ -200,4 +202,5 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
     </>
   );
 };
+
 export default memo(SelectedConversation);

@@ -1,6 +1,7 @@
-import FilterBar from "@/app/components/filterBar/filterBar";
+import FilterBar from "@/app/components/filterBar/FilterBar";
 import SearchField from "@/app/components/searchField/SearchField";
-import { FC, memo } from "react";
+import { ConversationFilter } from "@/utils/constants/globals";
+import { Dispatch, FC, memo, SetStateAction } from "react";
 import { PanelContentWrapperProps } from "./PanelContentWrapper.types";
 
 const PanelContentWrapper: FC<PanelContentWrapperProps> = (props) => {
@@ -12,11 +13,13 @@ const PanelContentWrapper: FC<PanelContentWrapperProps> = (props) => {
     label,
     setParamToSearch,
     hasFilterBar,
+    activeFilter,
+    setActiveFilter,
   } = props;
 
   return (
     <>
-      {hasSearchField ? (
+      {hasSearchField && label !== "archived" ? (
         <div className="px-2 py-2.5">
           <SearchField
             id={`${label}_search_field`}
@@ -26,10 +29,17 @@ const PanelContentWrapper: FC<PanelContentWrapperProps> = (props) => {
           />
         </div>
       ) : null}
-      {hasFilterBar ? <FilterBar /> : null}
+      {hasFilterBar && label !== "archived" ? (
+        <FilterBar
+          activeFilter={activeFilter as ConversationFilter}
+          setActiveFilter={
+            setActiveFilter as Dispatch<SetStateAction<ConversationFilter>>
+          }
+        />
+      ) : null}
       <div
-        className={`overflow-y-auto ${paddingClass}`}
-        style={{ height: height }}
+        className={`overflow-y-auto ${paddingClass} ${height}`}
+        // style={{ height: height }}
       >
         {children}
       </div>

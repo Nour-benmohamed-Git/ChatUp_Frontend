@@ -10,7 +10,7 @@ import {
   renderDateChip,
 } from "@/utils/helpers/dateHelpers";
 import dynamic from "next/dynamic";
-import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
+import { FC, Fragment, memo, useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { MessageListProps } from "./MessageList.types";
 
@@ -21,33 +21,17 @@ const MessageList: FC<MessageListProps> = (props) => {
   const {
     conversationRelatedData,
     combinedData,
-    initialMessages,
     paramToSearch,
     searchResults,
     setSearchResults,
     currentSearchIndex,
     setCurrentSearchIndex,
-    initialFriends,
+    initialConversations,
   } = props;
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const prevScrollBottomRef = useRef<number>(0);
-  const { messages, setMessages, messageListRef } = useMessages();
-
-  const [paginator, setPaginator] = useState<{
-    limit: number;
-    total: number;
-    cursor: { earliest?: number; latest?: number };
-    direction: Direction;
-    hasMoreBefore: boolean;
-    hasMoreAfter: boolean;
-  }>({
-    limit: 30,
-    total: initialMessages.total,
-    cursor: initialMessages.newCursor,
-    direction: Direction.FORWARD,
-    hasMoreBefore: initialMessages.hasMoreBefore,
-    hasMoreAfter: initialMessages.hasMoreAfter,
-  });
+  const { messages, setMessages, paginator, setPaginator, messageListRef } =
+    useMessages();
 
   const fetchMoreData = async (data: {
     limit: number;
@@ -197,7 +181,7 @@ const MessageList: FC<MessageListProps> = (props) => {
   } else {
     content = (
       <div
-        id="scrollableDiv"
+        id="messagesContainer"
         ref={messageListRef}
         className={`flex ${
           paginator.direction === Direction.FORWARD
@@ -206,24 +190,27 @@ const MessageList: FC<MessageListProps> = (props) => {
         } px-2 md:px-8 py-2 h-[calc(100vh-8rem)] overflow-y-auto w-full`}
       >
         <InfiniteScroll
-          scrollableTarget="scrollableDiv"
+          scrollableTarget="messagesContainer"
           dataLength={messages?.length}
-          next={() =>
+          next={() => {
             fetchMoreData({
               limit: paginator.limit,
               search: paramToSearch,
               cursor: paginator.cursor,
               direction: paginator.direction,
               startIndex: currentSearchIndex,
-            })
-          }
+            });
+          }}
           hasMore={
             paginator.direction === Direction.FORWARD
               ? paginator.hasMoreBefore
               : paginator.hasMoreAfter
           }
           loader={<MessagesLoader />}
-          style={{ display: "flex", flexDirection: "column-reverse" }}
+          style={{
+            display: "flex",
+            flexDirection: "column-reverse",
+          }}
           inverse={paginator.direction === Direction.FORWARD}
           onScroll={(event) => {
             const target = event.target as HTMLDivElement;
@@ -251,7 +238,7 @@ const MessageList: FC<MessageListProps> = (props) => {
                       conversationRelatedData={conversationRelatedData}
                       highlight={paramToSearch}
                       isHighlighted={isHighlighted}
-                      initialFriends={initialFriends}
+                      initialConversations={initialConversations}
                     />
                   </div>
                 );

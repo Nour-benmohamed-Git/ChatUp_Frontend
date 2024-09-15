@@ -15,7 +15,7 @@ const SystemMessage: FC<SystemMessageProps> = ({
         {typeof combinedData.image === "string" ? (
           <Avatar
             additionalClasses="h-24 w-24"
-            rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+            rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
             fileName={combinedData.image}
           />
         ) : Array.isArray(combinedData.image) &&
@@ -27,7 +27,7 @@ const SystemMessage: FC<SystemMessageProps> = ({
                 additionalClasses={`h-16 w-16 absolute ${
                   index === 0 ? "top-3 left-6" : "-top-6 right-3"
                 }`}
-                rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
                 fileName={image}
               />
             ))}
@@ -41,7 +41,7 @@ const SystemMessage: FC<SystemMessageProps> = ({
                 additionalClasses={`h-16 w-16 absolute ${
                   index === 0 ? "top-3 left-6" : "-top-6 right-3"
                 }`}
-                rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
                 fileName={image}
               />
             ))
@@ -52,7 +52,7 @@ const SystemMessage: FC<SystemMessageProps> = ({
         </h3>
         <p className="text-sm text-center max-w-[24.5rem]">{combinedData.description}</p>
         <p className="text-gold-900">{combinedData?.subTitle}</p>
-        <div className="flex flex-col md:flex-row gap-4 w-full">
+        <div className="flex flex-wrap flex-col md:flex-row gap-4 w-full">
           <button
             onClick={onViewInfo}
             className="flex flex-1 text-xs md:text-sm items-center font-medium justify-center gap-2 text-gold-900 px-4 md:px-6 py-2 rounded-md border border-gray-700 hover:bg-gold-100 w-full"

@@ -1,6 +1,6 @@
 import { forwardMessage } from "@/app/_actions/messageActions/forwardMessage";
 import { hardDeleteMessage } from "@/app/_actions/messageActions/hardDeleteMessage";
-import { softRemoveMessage } from "@/app/_actions/messageActions/softRemoveMessage";
+import { softDeleteMessage } from "@/app/_actions/messageActions/softDeleteMessage";
 import Avatar from "@/app/components/avatar/Avatar";
 import Dialog from "@/app/components/dialog/Dialog";
 import FileDisplay from "@/app/components/fileDisplay/FileDisplay";
@@ -10,22 +10,44 @@ import MessageStatus from "@/app/components/messageStatus/MessageStatus";
 import SystemMessage from "@/app/components/systemMessage/SystemMessage";
 import { useMessages } from "@/context/MessageContext";
 import { useSocket } from "@/context/SocketContext";
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 import { messageActions } from "@/utils/constants/actionLists/messageActions";
 import { MenuPosition, MessageType, globals } from "@/utils/constants/globals";
 import { getItem } from "@/utils/helpers/cookiesHelpers";
 import { formatMessageDate } from "@/utils/helpers/dateHelpers";
 import { emitForwardedMessage } from "@/utils/helpers/socket-helpers";
-import { FC, memo, useMemo, useRef, useState } from "react";
+import { FC, memo, useMemo, useReducer, useRef } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
+import ConversationsPicker from "../conversationsPicker/ConversationsPicker";
 import ReactionList from "../reactionList/ReactionList";
-import UsersPicker from "../usersPicker/UsersPicker";
 import styles from "./MessageItem.module.css";
-import { MessageItemProps } from "./MessageItem.types";
-
+import { Action, MessageItemProps, State } from "./MessageItem.types";
+const initialState: State = {
+  openSoftRemove: false,
+  openHardRemove: false,
+  openForwardMessage: false,
+  showReactionPicker: false,
+  tapCoordinates: { x: 0, y: 0 },
+};
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "TOGGLE_SOFT_REMOVE":
+      return { ...state, openSoftRemove: !state.openSoftRemove };
+    case "TOGGLE_HARD_REMOVE":
+      return { ...state, openHardRemove: !state.openHardRemove };
+    case "TOGGLE_FORWARD_MESSAGE":
+      return { ...state, openForwardMessage: !state.openForwardMessage };
+    case "TOGGLE_REACTION_PICKER":
+      return { ...state, showReactionPicker: !state.showReactionPicker };
+    case "SET_TAP_COORDINATES":
+      return { ...state, tapCoordinates: action.payload };
+    default:
+      return state;
+  }
+};
 const MessageItem: FC<MessageItemProps> = (props) => {
   const {
     message,
@@ -33,45 +55,36 @@ const MessageItem: FC<MessageItemProps> = (props) => {
     conversationRelatedData,
     highlight,
     isHighlighted,
-    initialFriends,
+    initialConversations,
   } = props;
-  const { hardRemoveMessage } = useMessages();
-
-  const [tapCoordinates, setTapCoordinates] = useState<{
-    x: number;
-    y: number;
-  }>();
+  const { hardRemoveMessage, softRemoveMessage } = useMessages();
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const {
+    tapCoordinates,
+    showReactionPicker,
+    openSoftRemove,
+    openHardRemove,
+    openForwardMessage,
+  } = state;
+  const openForwardMessageModal = () =>
+    dispatch({ type: "TOGGLE_FORWARD_MESSAGE" });
+  const closeForwardMessageModal = () => {
+    methods.setValue("conversationIds", []);
+    dispatch({ type: "TOGGLE_FORWARD_MESSAGE" });
+  };
+  const toggleSoftRemoveModal = () => dispatch({ type: "TOGGLE_SOFT_REMOVE" });
+  const toggleHardRemoveModal = () => dispatch({ type: "TOGGLE_HARD_REMOVE" });
+  const toggleReactionPicker = () =>
+    dispatch({ type: "TOGGLE_REACTION_PICKER" });
   const { setValue } = useFormContext();
   const currentUserId = parseInt(getItem(globals.currentUserId) as string, 10);
   const { socket } = useSocket();
-  const [openSoftRemove, setOpenSoftRemove] = useState(false);
-  const [openHardRemove, setOpenHardRemove] = useState(false);
-  const [openForwardMessage, setOpenForwardMessage] = useState(false);
-  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const methods = useForm({
     defaultValues: {
-      otherMembersIds: [],
+      conversationIds: [],
     },
   });
-  const openForwardMessageModal = () => {
-    setOpenForwardMessage(true);
-  };
-  const closeForwardMessageModal = () => {
-    methods.setValue("otherMembersIds", []);
-    setOpenForwardMessage(false);
-  };
-  const openSoftRemoveModal = () => {
-    setOpenSoftRemove(true);
-  };
-  const closeSoftRemoveModal = () => {
-    setOpenSoftRemove(false);
-  };
-  const openHardRemoveModal = () => {
-    setOpenHardRemove(true);
-  };
-  const closeHardRemoveModal = () => {
-    setOpenHardRemove(false);
-  };
+
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(message.content as string);
     toast.success("Copied to Clipboard.");
@@ -85,26 +98,34 @@ const MessageItem: FC<MessageItemProps> = (props) => {
     edit: handleEditMessage,
     copy: handleCopyToClipboard,
     forward: openForwardMessageModal,
-    softRemove: openSoftRemoveModal,
-    hardRemove: openHardRemoveModal,
+    softRemove: toggleSoftRemoveModal,
+    hardRemove: toggleHardRemoveModal,
   };
 
-  const updatedMessageActions = messageActions
-    .filter((action) => {
-      if (currentUserId && message.senderId !== currentUserId) {
-        return !["edit", "hardRemove"].includes(action.label);
-      }
-      return true;
-    })
-    .map((action) => ({
-      ...action,
-      onClick: onClickFunctions[action.label],
-    }));
+  const updatedMessageActions = useMemo(() => {
+    return messageActions
+      .filter((action) => {
+        // Exclude actions based on user and message sender conditions
+        if (currentUserId && message.senderId !== currentUserId) {
+          return !["edit", "hardRemove"].includes(action.label);
+        }
+        return true;
+      })
+      .map((action) => ({
+        ...action,
+        onClick: onClickFunctions[action.label],
+      }));
+  }, [messageActions, currentUserId, message.senderId]);
   const handleSoftRemoveMessage = async () => {
     if (message.id && socket) {
-      await softRemoveMessage(message.id);
+      await softDeleteMessage(message.id);
       toast.success("Message has been successfully soft removed.");
-      closeSoftRemoveModal();
+      softRemoveMessage({
+        id: message.id,
+        senderId: currentUserId,
+        chatSessionId: conversationRelatedData?.conversationId as number,
+      });
+      toggleSoftRemoveModal();
     }
   };
 
@@ -112,8 +133,8 @@ const MessageItem: FC<MessageItemProps> = (props) => {
     if (message.id && socket) {
       const forwardedMessages = (await forwardMessage(
         message.id,
-        methods.getValues("otherMembersIds")
-      )) as { data: { data: Message[] } };
+        methods.getValues("conversationIds")
+      )) as { data: { data: MessageResponse[] } };
       emitForwardedMessage(socket, {
         forwardedMessages: forwardedMessages.data?.data,
       });
@@ -129,8 +150,8 @@ const MessageItem: FC<MessageItemProps> = (props) => {
         id: message.id,
         senderId: currentUserId,
         chatSessionId: conversationRelatedData?.conversationId as number,
-      } as Message);
-      closeHardRemoveModal();
+      });
+      toggleHardRemoveModal();
     }
   };
   const getHighlightedText = (text: string, highlight: string) => {
@@ -138,7 +159,6 @@ const MessageItem: FC<MessageItemProps> = (props) => {
 
     const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
     const regex = new RegExp(`(${escapedHighlight})`, "gi"); // Remove word boundary to match partial words
-
     // Split text into parts based on the regex
     const parts = text.split(regex);
 
@@ -161,10 +181,12 @@ const MessageItem: FC<MessageItemProps> = (props) => {
 
   const handlePressStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-    setTapCoordinates({ x: touch.clientX, y: touch.clientY });
-    // Set a timer to show the reaction picker after 300ms
+    dispatch({
+      type: "SET_TAP_COORDINATES",
+      payload: { x: touch.clientX, y: touch.clientY },
+    }); // Set a timer to show the reaction picker after 300ms
     timerRef.current = window.setTimeout(
-      () => setShowReactionPicker(true),
+      () => dispatch({ type: "TOGGLE_REACTION_PICKER" }),
       300
     );
   };
@@ -175,7 +197,6 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       timerRef.current = null;
     }
   };
-
   return (
     <>
       {openForwardMessage && (
@@ -191,14 +212,14 @@ const MessageItem: FC<MessageItemProps> = (props) => {
           ]}
         >
           <FormProvider {...methods}>
-            <UsersPicker initialFriends={initialFriends} />
+            <ConversationsPicker initialConversations={initialConversations} />
           </FormProvider>
         </Dialog>
       )}
       {openSoftRemove && (
         <Dialog
           title="Remove message"
-          onClose={closeSoftRemoveModal}
+          onClose={toggleSoftRemoveModal}
           actions={[
             {
               label: "remove",
@@ -213,7 +234,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       {openHardRemove && (
         <Dialog
           title="Remove message"
-          onClose={closeHardRemoveModal}
+          onClose={toggleHardRemoveModal}
           actions={[
             {
               label: "remove",
@@ -309,7 +330,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
                     : MenuPosition.TOP_LEFT
                 }
                 showReactionPicker={showReactionPicker}
-                setShowReactionPicker={setShowReactionPicker}
+                setShowReactionPicker={toggleReactionPicker}
                 message={message}
                 conversationRelatedData={conversationRelatedData}
               />

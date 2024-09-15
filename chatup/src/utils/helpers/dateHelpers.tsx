@@ -1,10 +1,14 @@
-import { Message } from "@/types/Message";
+import { MessageResponse } from "@/types/Message";
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dynamic from "next/dynamic";
 const Chip = dynamic(() => import("@/app/components/chip/Chip"), {
   ssr: false,
 });
+
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
 export const formatChatSessionDate = (day?: number) => {
   if (!day) return "";
   const currentTime = dayjs();
@@ -23,7 +27,10 @@ export const formatMessageDate = (day?: number) => {
   const targetTime = dayjs(day * 1000);
   return targetTime.format("HH:mm");
 };
-dayjs.extend(relativeTime);
+
+export const formatRecordingTime = (seconds: number) => {
+  return dayjs.duration(seconds, "seconds").format("mm:ss");
+};
 
 export const renderDateChip = (messageDate: string) => {
   const now = dayjs(); // Current date/time
@@ -59,9 +66,10 @@ export const renderDateChip = (messageDate: string) => {
 export const compactDateAndTimeFormatter = (timestamp: number) => {
   return dayjs(timestamp * 1000).format("MMMM D, YYYY [at] hh:mm A");
 };
-export const groupMessagesByDate = (messages: Message[]) => {
+
+export const groupMessagesByDate = (messages: MessageResponse[]) => {
   return messages.reduce(
-    (acc: { [date: string]: Message[] }, message: Message) => {
+    (acc: { [date: string]: MessageResponse[] }, message: MessageResponse) => {
       const messageDate = dayjs(message.timestamp * 1000).format("YYYY-MM-DD");
 
       if (!acc[messageDate]) {
@@ -72,4 +80,10 @@ export const groupMessagesByDate = (messages: Message[]) => {
     },
     {}
   );
+};
+
+export const formatDuration = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 };

@@ -39,7 +39,9 @@ const ReactionList: React.FC<ReactionListProps> = ({ position, reactions }) => {
           ref={buttonRef}
           role="button"
           onClick={handleOpenMenu}
-          className="absolute bottom-[-10px] right-4 flex items-center gap-1 bg-gray-100 rounded-lg p-1 shadow-md"
+          className={`absolute bottom-[-10px] right-4 flex items-center ${
+            Object.keys(reactions).length > 1 && "gap-1"
+          } bg-gray-100 rounded-lg p-1 shadow-md`}
         >
           <span className="text-xs">
             {
@@ -49,7 +51,7 @@ const ReactionList: React.FC<ReactionListProps> = ({ position, reactions }) => {
             }
           </span>
           <span className="text-xs text-gray-900">
-            {Object.keys(reactions).length}
+            {Object.keys(reactions).length > 1 && Object.keys(reactions).length}
           </span>
         </div>
       ) : null}

@@ -6,7 +6,7 @@ export interface ConversationResponse {
   type: ChatSessionType;
   title?: string;
   image?: string | string[];
-  participantsData: { [userId: string]: { [userId: string]: string } },
+  participantsData: { [userId: string]: string };
   creationDate: number;
   lastActiveDate: number;
   lastMessage?: {
@@ -17,6 +17,7 @@ export interface ConversationResponse {
   senderId?: number;
   unreadMessagesCount?: number;
   seen?: boolean;
+  archived: boolean;
   groupAdmins: { [userId: string]: string };
 }
 export type ConversationsResponse = {

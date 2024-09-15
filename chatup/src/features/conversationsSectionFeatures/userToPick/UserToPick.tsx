@@ -1,8 +1,8 @@
 import Avatar from "@/app/components/avatar/Avatar";
 import { FC, memo } from "react";
-import { ForwardMessageItemProps } from "./ForwardMessageItem.types";
+import { UserToPickProps } from "./UserToPick.types";
 
-const ForwardMessageItem: FC<ForwardMessageItemProps> = ({
+const UserToPick: FC<UserToPickProps> = ({
   userData,
   onCheckChange,
   isChecked,
@@ -15,7 +15,12 @@ const ForwardMessageItem: FC<ForwardMessageItemProps> = ({
     >
       <Avatar
         additionalClasses="h-12 w-12"
-        rounded="rounded-full"
+        rounded={`rounded-full ${
+          typeof userData.profilePicture === "string" &&
+          userData.profilePicture !== ""
+            ? ""
+            : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+        }`}
         fileName={userData.profilePicture}
         userId={userData.id}
       />
@@ -39,4 +44,4 @@ const ForwardMessageItem: FC<ForwardMessageItemProps> = ({
   );
 };
 
-export default memo(ForwardMessageItem);
+export default memo(UserToPick);

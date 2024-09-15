@@ -8,12 +8,11 @@ import { useFormContext } from "react-hook-form";
 import { AiFillDelete } from "react-icons/ai";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
-import ForwardMessageItem from "../forwardMessageItem/ForwardMessageItem";
+import UserToPick from "../userToPick/UserToPick";
 import { UsersPickerProps } from "./UsersPicker.types";
 
 const UsersPicker: React.FC<UsersPickerProps> = ({ initialFriends }) => {
   const { watch, setValue, getValues } = useFormContext();
-
   const [paramToSearch, setParamToSearch] = useState<string>("");
   const [dataSource, setDataSource] = useState<UserResponse[]>(
     initialFriends.data
@@ -100,7 +99,12 @@ const UsersPicker: React.FC<UsersPickerProps> = ({ initialFriends }) => {
                     <Avatar
                       fileName={user.profilePicture}
                       additionalClasses="w-8 h-8"
-                      rounded="rounded-full"
+                      rounded={`rounded-full ${
+                        typeof user.profilePicture === "string" &&
+                        user.profilePicture !== ""
+                          ? ""
+                          : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+                      }`}
                     />
                     <span className="flex-grow">{user.username}</span>
                     <button
@@ -116,16 +120,16 @@ const UsersPicker: React.FC<UsersPickerProps> = ({ initialFriends }) => {
           )}
         </div>
       </div>
-      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+      <div id="usersPickerContainer" className="flex-grow overflow-y-auto">
         <InfiniteScroll
           dataLength={dataSource?.length}
           next={fetchMoreData}
           hasMore={dataSource?.length < paginator.total}
           loader={<Loader />}
-          scrollableTarget="scrollableDiv"
+          scrollableTarget="usersPickerContainer"
         >
           {dataSource?.map?.((user) => (
-            <ForwardMessageItem
+            <UserToPick
               key={user.id}
               userData={user}
               onCheckChange={() => handleCheckChange(user.id)}

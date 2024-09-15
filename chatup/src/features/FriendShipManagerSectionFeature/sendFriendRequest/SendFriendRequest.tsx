@@ -9,7 +9,7 @@ import { EnabledInput } from "@/utils/constants/globals";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
 import { sendFriendRequestSchema } from "@/utils/schemas/sendFriendRequestSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useTransition } from "react";
+import { FC, useMemo, useTransition } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { AiOutlineMail, AiOutlinePhone } from "react-icons/ai";
 import { ImSpinner9 } from "react-icons/im";
@@ -37,10 +37,14 @@ const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
     logout: logout,
   };
 
-  const updatedSideBarMenuActions = sideBarMenuActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedSideBarMenuActions = useMemo(
+    () =>
+      sideBarMenuActions["friendRequest"].map((action) => ({
+        ...action,
+        onClick: onClickFunctions[action.label],
+      })),
+    [sideBarMenuActions]
+  );
 
   const onSubmit = async (data: z.infer<typeof sendFriendRequestSchema>) => {
     startTransition(async () => {
@@ -69,7 +73,7 @@ const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
           emitFriendRequest(socket, {
             action: "send",
             friendRequest: (
-              response?.data  as {
+              response?.data as {
                 data: FriendRequestResponse;
               }
             ).data,
@@ -100,7 +104,6 @@ const SendFriendRequest: FC<SendFriendRequestProps> = (props) => {
     >
       <BlocContainer
         title="Add Friend"
-        label="left_container"
         menuActionList={updatedSideBarMenuActions}
         cssClass="p-4 h-[calc(100vh-3.5rem)]"
       >

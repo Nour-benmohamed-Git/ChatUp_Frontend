@@ -51,10 +51,12 @@ const Profile: FC<ProfileProps> = (props) => {
     logout: logout,
   };
 
-  const updatedSideBarMenuActions = sideBarMenuActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedSideBarMenuActions = sideBarMenuActions["profile"].map(
+    (action) => ({
+      ...action,
+      onClick: onClickFunctions[action.label],
+    })
+  );
 
   const onSubmit = async (data: z.infer<typeof updateProfileSchema>) => {
     startTransition(async () => {
@@ -83,14 +85,13 @@ const Profile: FC<ProfileProps> = (props) => {
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <BlocContainer
             title="Profile"
-            label="left_container"
             menuActionList={updatedSideBarMenuActions}
             cssClass="p-2 h-[calc(100vh-3.5rem)]"
           >
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center justify-center gap-10 md:gap-6 rounded-md p-2 w-full">
                 {isEditing ? (
-                  <ProfilePicture id="profilePicture" name="profilePicture"/>
+                  <ProfilePicture id="profilePicture" name="profilePicture" />
                 ) : (
                   <Avatar
                     additionalClasses="h-32 w-32"

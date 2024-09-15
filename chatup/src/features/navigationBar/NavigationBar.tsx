@@ -1,7 +1,7 @@
 "use client";
 import { useSocket } from "@/context/SocketContext";
 import useRoutes, { labelsWithBadge } from "@/hooks/useRoutes";
-import { FC, memo, useEffect, useState } from "react";
+import { FC, memo, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { NavigationBarProps } from "./NavigationBar.types";
 import DesktopNavigationBar from "./components/desktopNavigationBar/DesktopNavigationBar";
@@ -38,7 +38,6 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
       socket.on("friend_request_count", handleFriendRequestCount);
     }
     const handleFriendRequestNotification = (friendRequestData: any) => {
-      console.log("friendRequestData", friendRequestData);
       switch (friendRequestData.action) {
         case "accept":
           toast.info(friendRequestData.message);
@@ -69,13 +68,13 @@ const NavigationBar: FC<NavigationBarProps> = (props) => {
     chat: conversationCount,
     friends: friendRequestCount,
   };
-  const routesWithBadge = routes
-    .filter((item) => labelsWithBadge.includes(item.label))
-    .map((el) => ({ ...el, count: countSections[el.label] }));
+  
+  const routesWithBadge = useMemo(() => {
+    return routes
+      .filter((item) => labelsWithBadge.includes(item.label))
+      .map((el) => ({ ...el, count: countSections[el.label] }));
+  }, [routes, countSections]);
 
-  useEffect(() => {
-    return () => {};
-  }, [socket]);
   return (
     <>
       <DesktopNavigationBar

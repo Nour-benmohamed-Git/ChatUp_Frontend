@@ -1,8 +1,8 @@
-
+import { MessageFile } from "@/types/Message";
 
 type Message = {
   content?: string;
-  files?: any[];
+  files?: MessageFile[];
 };
 
 export type LastMessagePreviewProps = {

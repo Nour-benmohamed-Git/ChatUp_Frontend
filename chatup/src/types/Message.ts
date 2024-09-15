@@ -1,10 +1,14 @@
-import { MessageType } from "@/utils/constants/globals";
+import { FileType, MessageType } from "@/utils/constants/globals";
 
-export interface Message {
+export type MessageFile = {
+  filename?: string;
+  fileType: FileType;
+};
+export interface MessageResponse {
   id: number;
   type?: MessageType;
   content?: string;
-  files?: File[];
+  files?: MessageFile[];
   senderId?: number;
   timestamp: number;
   edited?: boolean;
@@ -17,8 +21,17 @@ export interface Message {
   reactions: Record<number, string>;
 }
 
-export type Messages = {
-  data: Message[];
+export interface MessageRequest {
+  id: number;
+  type?: MessageType;
+  content?: string;
+  files?: File[];
+  senderId?: number;
+  chatSessionId?: number;
+  reactions: Record<number, string>;
+}
+export type MessagesResponse = {
+  data: MessageResponse[];
   total: number;
   newCursor: { earliest?: number; latest?: number };
   hasMoreBefore: boolean;

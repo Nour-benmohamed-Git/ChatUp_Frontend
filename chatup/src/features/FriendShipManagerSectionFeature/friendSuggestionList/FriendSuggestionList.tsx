@@ -42,14 +42,17 @@ const FriendSuggestionList: FC<FriendSuggestionListProps> = (props) => {
   };
 
   return (
-    <PanelContentWrapper height="calc(100vh - 12.25rem)">
-      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+    <PanelContentWrapper height="h-[calc(100vh-12.25rem)]">
+      <div
+        id="friendSuggestionsContainer"
+        className="flex-grow overflow-y-auto"
+      >
         <InfiniteScroll
           dataLength={dataSource.length}
           next={fetchMoreData}
           hasMore={dataSource.length < paginator.total}
           loader={<Loader />}
-          scrollableTarget="scrollableDiv"
+          scrollableTarget="friendSuggestionsContainer"
         >
           {dataSource.map((suggestion, index) => (
             <FriendSuggestionItem

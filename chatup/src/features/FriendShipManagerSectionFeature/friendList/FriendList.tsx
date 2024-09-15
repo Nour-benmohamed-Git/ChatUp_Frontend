@@ -70,17 +70,17 @@ const FriendList: FC<FriendListProps> = (props) => {
   return (
     <PanelContentWrapper
       hasSearchField
-      height="calc(100vh - 12.25rem)"
+      height="h-[calc(100vh-12.25rem)]"
       label={label}
       setParamToSearch={setParamToSearch}
     >
-      <div id="scrollableDiv" className="flex-grow overflow-y-auto">
+      <div id="friendsContainer" className="flex-grow overflow-y-auto">
         <InfiniteScroll
           dataLength={dataSource?.length}
           next={fetchMoreData}
           hasMore={dataSource?.length < paginator.total}
           loader={<Loader />}
-          scrollableTarget="scrollableDiv"
+          scrollableTarget="friendsContainer"
         >
           {dataSource?.map?.((user) => (
             <FriendItem

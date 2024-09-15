@@ -12,7 +12,7 @@ import {
 import { compactDateAndTimeFormatter } from "./dateHelpers";
 
 export function getOtherUserId(
-  participantsData: { [userId: string]: { [userId: string]: string } },
+  participantsData: { [userId: string]: string },
   currentUserId: string
 ) {
   const userIds = Object?.keys(participantsData);
@@ -118,8 +118,7 @@ export const createConversationCombinedData = (
     };
   } else {
     const updatedMembers = Object.entries(conversation.participantsData).map(
-      ([id, participantData]) =>
-        id === currentUserId ? "you" : participantData.username
+      ([id, username]) => (id === currentUserId ? "you" : username)
     );
 
     const [creatorId, creatorName] = Object.entries(
@@ -141,4 +140,50 @@ export const createConversationCombinedData = (
       additionalInfo: updatedMembers,
     };
   }
+};
+
+export const getMediaRecordError = async (error: string) => {
+  switch (error) {
+    case "permission_denied":
+      toast.error(
+        "Permission to access the microphone was denied. Please enable it in your browser settings."
+      );
+      break;
+
+    case "media_aborted":
+      toast.error("Media recording was aborted.");
+      break;
+
+    case "no_specified_media_found":
+      toast.error("No media device found.");
+      break;
+
+    case "media_in_use":
+      toast.error("Media device is currently in use.");
+      break;
+
+    case "invalid_media_constraints":
+      toast.error("Invalid media constraints.");
+      break;
+
+    case "no_constraints":
+      toast.error("No media constraints provided.");
+      break;
+
+    case "recorder_error":
+      toast.error("An error occurred with the media recorder.");
+      break;
+
+    default:
+      toast.error("An unknown error occurred.");
+      break;
+  }
+};
+export const convertBlobToFile = async (
+  blobUrl: string,
+  filename: string
+): Promise<File> => {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type });
 };

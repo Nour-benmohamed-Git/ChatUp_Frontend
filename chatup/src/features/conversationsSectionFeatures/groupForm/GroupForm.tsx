@@ -9,7 +9,7 @@ const GroupForm: FC<GroupFormProps> = (props) => {
   const { checkedUsers, initialFriends } = props;
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full p-4 bg-gradient-to-r from-black via-gray-900 to-gray-700 shadow-md rounded-md">
+    <div className="flex flex-col gap-4 h-full w-full p-4 bg-gradient-to-br from-gray-800 via-gray-900 to-black shadow-md rounded-md">
       {checkedUsers.length > 0 && (
         <div className="w-full flex flex-col gap-4">
           <p className="text-gold-600 text-sm">Selected members</p>
@@ -26,7 +26,12 @@ const GroupForm: FC<GroupFormProps> = (props) => {
                   <Avatar
                     fileName={user.profilePicture}
                     additionalClasses="w-8 h-8"
-                    rounded="rounded-full"
+                    rounded={`rounded-full ${
+                      typeof user.profilePicture === "string" &&
+                      user.profilePicture !== ""
+                        ? ""
+                        : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+                    }`}
                   />
                   <span className="flex-grow text-gray-700">
                     {user.username}

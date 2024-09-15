@@ -1,5 +1,4 @@
 import { ConversationCombinedType } from "@/types/ConversationCombinedType";
-import { UserResponse } from "@/types/User";
 
 export interface HeaderProps {
   actions?: {
@@ -10,8 +9,8 @@ export interface HeaderProps {
   toggleHandlers?: {
     [key: string]: { togglePanel: (event?: React.MouseEvent) => void };
   };
-  label: "left_container" | "right_container";
-  combinedData?: ConversationCombinedType
+  label?: "archived" | "selected_conversation";
+  combinedData?: ConversationCombinedType;
   menuActionList: {
     onClick: () => void;
     label: string;
@@ -19,4 +18,5 @@ export interface HeaderProps {
     icon: JSX.Element;
   }[];
   title?: string;
-}
+  handleBack?: () => void
+  startAudioCall: () => void}

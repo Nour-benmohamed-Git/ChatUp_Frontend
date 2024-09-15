@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import FileViewer from "../fileViewer/FileViewer";
 import { getUserById } from "@/app/_actions/userActions/getUserById";
 import { UserResponse } from "@/types/User";
+import { MessageFile } from "@/types/Message";
+import { FileType } from "@/utils/constants/globals";
 
 const FileDisplay: FC<FileDisplayProps> = (props) => {
   const { files, messageDetails } = props;
@@ -15,17 +17,20 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
     setSenderData(user.data?.data);
     setShowFileViewer(true);
   };
-
   // console.log("showFileViewer", showFileViewer);
   const renderFiles = () => {
     const imagesAndVideos = files.filter(
-      (file: any) =>
-        file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")
+      (file: MessageFile) =>
+        file.fileType === FileType.IMAGE || file.fileType === FileType.VIDEO
+    );
+    const audioFiles = files.filter(
+      (file: any) => file.fileType === FileType.AUDIO
+    );
+    const documentFiles = files.filter(
+      (file: any) => file.fileType === FileType.DOCUMENT
     );
     const otherFiles = files.filter(
-      (file: any) =>
-        !file.mimetype.startsWith("image/") &&
-        !file.mimetype.startsWith("video/")
+      (file: any) => file.fileType === FileType.OTHER
     );
     if (!files?.length) return null;
 
@@ -116,6 +121,17 @@ const FileDisplay: FC<FileDisplayProps> = (props) => {
           {otherFiles.length > 0 && (
             <div className="flex flex-col items-start gap-2">
               {otherFiles.map((file: any) => (
+                <FileIcon
+                  key={file.id}
+                  file={file}
+                  additionalClasses="h-40 w-40"
+                />
+              ))}
+            </div>
+          )}
+           {audioFiles.length > 0 && (
+            <div className="flex flex-col items-start gap-2">
+              {audioFiles.map((file: any) => (
                 <FileIcon
                   key={file.id}
                   file={file}

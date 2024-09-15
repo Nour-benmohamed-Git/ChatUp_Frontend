@@ -37,7 +37,7 @@ const Dialog: FC<DialogProps> = ({
       >
         <div
           className="flex flex-col bg-white md:rounded-md w-full h-full md:h-auto md:max-w-md lg:max-w-lg xl:max-w-xl max-h-screen"
-          onClick={(e) => e.stopPropagation()}
+          // onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center border-b border-gray-300 p-4">
             <h2

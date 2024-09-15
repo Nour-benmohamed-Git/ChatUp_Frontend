@@ -83,7 +83,12 @@ const FileViewer: FC<FileViewerProps> = ({
           <div className="flex flex-1 gap-4">
             <Avatar
               additionalClasses="h-10 w-10"
-              rounded="rounded-full"
+              rounded={`rounded-full ${
+                typeof messageDetails?.senderPicture === "string" &&
+                messageDetails?.senderPicture !== ""
+                  ? ""
+                  : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+              }`}
               fileName={messageDetails?.senderPicture}
               userId={messageDetails?.senderId}
             />
@@ -127,7 +132,6 @@ const FileViewer: FC<FileViewerProps> = ({
             >
               <IoIosArrowBack className="text-2xl text-gold-900 hover:text-gold-600" />
             </motion.button>
-
             <motion.div
               className="w-72 h-96"
               drag="x"

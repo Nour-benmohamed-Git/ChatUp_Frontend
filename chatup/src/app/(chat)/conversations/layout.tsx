@@ -3,7 +3,10 @@ import { fetchFriends } from "@/app/_actions/friendActions/fetchFriends";
 import { fetchCurrentUser } from "@/app/_actions/userActions/fetchCurrentUser";
 import { ChatSessionProvider } from "@/context/ChatSessionContext";
 import ConversationListContainer from "@/features/conversationsSectionFeatures/conversationListContainer/ConversationListContainer";
-import { ConversationResponse, ConversationsResponse } from "@/types/ChatSession";
+import {
+  ConversationResponse,
+  ConversationsResponse,
+} from "@/types/ChatSession";
 import { UserResponse, UsersResponse } from "@/types/User";
 import { CustomError } from "@/utils/config/exceptions";
 import type { Metadata } from "next";
@@ -34,7 +37,7 @@ export default async function ConversationsLayout({
   }
   return (
     <ChatSessionProvider
-     initialChatSessions={conversations.data?.data as ConversationResponse[]}
+      initialChatSessions={conversations.data?.data as ConversationResponse[]}
     >
       <div className="h-full w-full col-span-1 md:col-span-11 md:grid md:grid-cols-12">
         <ConversationListContainer

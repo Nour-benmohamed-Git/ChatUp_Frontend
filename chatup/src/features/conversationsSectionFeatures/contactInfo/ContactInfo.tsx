@@ -5,7 +5,7 @@ import DangerZone from "@/app/components/dangerZone/DangerZone";
 import FileIcon from "@/app/components/fileIcon/FileIcon";
 import FileViewer from "@/app/components/fileViewer/FileViewer";
 import { contactInfoDangerActions } from "@/utils/constants/actionLists/contactInfoDangerActions";
-import { ChatSessionType } from "@/utils/constants/globals";
+import { ChatSessionType, FileType } from "@/utils/constants/globals";
 import { motion } from "framer-motion";
 import { memo, useEffect, useRef, useState } from "react";
 import { FaPhoneAlt, FaUsers, FaVideo } from "react-icons/fa";
@@ -16,6 +16,7 @@ import {
 } from "react-icons/md";
 import { ContactInfoProps } from "./ContactInfo.types";
 import ContactInfoGroupSection from "@/app/components/contactInfoGroupSection/ContactInfoGroupSection";
+import { MessageFile } from "@/types/Message";
 
 const ContactInfo: React.FC<ContactInfoProps> = ({
   combinedData,
@@ -26,7 +27,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
   const [showFileViewer, setShowFileViewer] = useState(false);
   const [selectedFileIndex, setSelectedFileIndex] = useState<number>(-1);
   const fileListRef = useRef<HTMLUListElement>(null);
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<MessageFile[]>([]);
   const contactInfoActions = [
     { onClick: onMessage, icon: MdMessage, label: "Message" },
     { onClick: onAudioCall, icon: FaPhoneAlt, label: "Audio" },
@@ -49,9 +50,8 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
       );
       const imagesAndVideos = filesData.data?.data
         ?.filter(
-          (file: any) =>
-            file.mimetype.startsWith("image/") ||
-            file.mimetype.startsWith("video/")
+          (file) =>
+            file.fileType === FileType.IMAGE || file.fileType === FileType.VIDEO
         )
         .slice(0, 12);
       setFiles(imagesAndVideos || []);
@@ -64,6 +64,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
     setSelectedFileIndex(index);
     setShowFileViewer(true);
   };
+
   const displayUploadedFiles = () => (
     <ul
       ref={fileListRef}
@@ -113,10 +114,10 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
       ) : null}
       <div className="flex flex-col items-center w-full h-full gap-2 overflow-y-auto">
         <div className="flex flex-1 flex-col items-center gap-2 px-4 md:px-8 py-4 w-full bg-gradient-to-r from-slate-600 to-gray-700 shadow-2xl border-b border-slate-500">
-          {typeof combinedData.image === "string" ? (
+          {!combinedData.image || typeof combinedData.image === "string" ? (
             <Avatar
               additionalClasses="h-36 w-36"
-              rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+              rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
               fileName={combinedData.image}
             />
           ) : Array.isArray(combinedData.image) &&
@@ -128,7 +129,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
                   additionalClasses={`h-16 w-16 absolute ${
                     index === 0 ? "top-3 left-6" : "-top-6 right-3"
                   }`}
-                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
                   fileName={image}
                 />
               ))}
@@ -142,7 +143,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({
                   additionalClasses={`h-16 w-16 absolute ${
                     index === 0 ? "top-3 left-6" : "-top-6 right-3"
                   }`}
-                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-900"
+                  rounded="rounded-full shadow-[0_0_10px_5px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
                   fileName={image}
                 />
               ))

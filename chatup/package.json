@@ -27,6 +27,9 @@
     "react-hook-form": "^7.49.3",
     "react-icons": "^5.0.1",
     "react-infinite-scroll-component": "^6.1.0",
+    "react-media-recorder": "^1.7.1",
+    "react-tooltip": "^5.28.0",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.4",
     "sonner": "^1.4.0",
     "zod": "^3.22.4"
@@ -36,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/simple-peer": "^9.11.8",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",

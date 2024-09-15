@@ -6,7 +6,7 @@ import BlocContainer from "@/features/blocContainer/BlocContainer";
 import { sideBarMenuActions } from "@/utils/constants/actionLists/sideBarActions";
 import { tabsActions } from "@/utils/constants/actionLists/tabsActions";
 import { emitFriendRequest } from "@/utils/helpers/socket-helpers";
-import { FC, ReactNode, memo, useEffect } from "react";
+import { FC, ReactNode, memo, useEffect, useMemo } from "react";
 import FriendList from "../friendList/FriendList";
 import FriendRequestList from "../friendRequestList/FriendRequestList";
 import { FriendsContainerProps } from "./FriendsContainer.types";
@@ -15,23 +15,32 @@ const FriendsContainer: FC<FriendsContainerProps> = (props) => {
   const { initialFriendRequests, initialFriends, currentUser } = props;
   const components: { [key: string]: ReactNode } = {
     FriendRequests: (
-      <FriendRequestList label="FriendRequests" initialFriendRequests={initialFriendRequests} />
+      <FriendRequestList
+        label="friend_requests"
+        initialFriendRequests={initialFriendRequests}
+      />
     ),
-    friends: <FriendList label="Friends" initialFriends={initialFriends} />,
+    friends: <FriendList label="friends" initialFriends={initialFriends} />,
   };
-  const updatedTabsActions = tabsActions.map((action) => ({
-    ...action,
-    content: components[action.key],
-  }));
+  const updatedTabsActions = useMemo(
+    () =>
+      tabsActions.map((action) => ({
+        ...action,
+        content: components[action.key],
+      })),
+    [tabsActions]
+  );
 
   const onClickFunctions: { [key: string]: () => void } = {
     logout: logout,
   };
 
-  const updatedSideBarMenuActions = sideBarMenuActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedSideBarMenuActions = sideBarMenuActions["friends"].map(
+    (action) => ({
+      ...action,
+      onClick: onClickFunctions[action.label],
+    })
+  );
 
   const { socket } = useSocket();
 
@@ -49,7 +58,6 @@ const FriendsContainer: FC<FriendsContainerProps> = (props) => {
     >
       <BlocContainer
         title="Friends"
-        label="left_container"
         menuActionList={updatedSideBarMenuActions}
         cssClass="p-2 h-[calc(100vh-4rem)]"
       >

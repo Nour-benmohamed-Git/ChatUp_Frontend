@@ -5,48 +5,51 @@ import Dialog from "@/app/components/dialog/Dialog";
 import Menu from "@/app/components/menu/Menu";
 import { FriendItemActions } from "@/utils/constants/actionLists/friendItemActions";
 import { MenuPosition } from "@/utils/constants/globals";
-import { FC, memo, useState } from "react";
+import { FC, memo, useMemo, useState } from "react";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { FriendItemProps } from "./FriendItem.types";
 
 const FriendItem: FC<FriendItemProps> = (props) => {
   const { userData, handleCreateNewChat } = props;
-  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
-  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
-  const openRemoveModal = () => {
-    setIsRemoveDialogOpen(true);
-  };
-  const closeRemoveModal = () => {
-    setIsRemoveDialogOpen(false);
-  };
-  const openBlockModal = () => {
-    setIsBlockDialogOpen(true);
-  };
-  const closeBlockModal = () => {
-    setIsBlockDialogOpen(false);
-  };
+  const [dialogState, setDialogState] = useState({
+    remove: false,
+    block: false,
+  });
+
+  const openDialog = (type: "remove" | "block") =>
+    setDialogState({ ...dialogState, [type]: true });
+  const closeDialog = (type: "remove" | "block") =>
+    setDialogState({ ...dialogState, [type]: false });
+
   const onClickFunctions: { [key: string]: () => void } = {
-    remove: openRemoveModal,
-    block: openBlockModal,
+    remove: () => openDialog("remove"),
+    block: () => openDialog("block"),
   };
-  const updatedFriendItemActions = FriendItemActions.map((action) => ({
-    ...action,
-    onClick: onClickFunctions[action.label],
-  }));
+  const updatedFriendItemActions = useMemo(
+    () =>
+      FriendItemActions.map((action) => ({
+        ...action,
+        onClick: onClickFunctions[action.label],
+      })),
+    []
+  );
   const handleRemoveFriend = async () => {
     await removeFriend(userData.id);
-    closeRemoveModal();
+    closeDialog("remove");
   };
   const handleBlockFriend = async () => {
     await blockFriend(userData.id);
-    closeBlockModal();
+    closeDialog("block");
   };
+
+  const handleChatClick = () => handleCreateNewChat(userData.id);
+
   return (
     <>
-      {isRemoveDialogOpen && (
+      {dialogState.remove && (
         <Dialog
           title="Remove Friend"
-          onClose={closeRemoveModal}
+          onClose={() => closeDialog("remove")}
           actions={[
             {
               label: "remove",
@@ -59,10 +62,10 @@ const FriendItem: FC<FriendItemProps> = (props) => {
         </Dialog>
       )}
 
-      {isBlockDialogOpen && (
+      {dialogState.block && (
         <Dialog
           title="Block Friend"
-          onClose={closeBlockModal}
+          onClose={() => closeDialog("block")}
           actions={[
             {
               label: "block",
@@ -76,12 +79,17 @@ const FriendItem: FC<FriendItemProps> = (props) => {
       )}
       <div
         role="button"
-        onClick={() => handleCreateNewChat(userData.id)}
+        onClick={handleChatClick}
         className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900 hover:bg-gray-800"
       >
         <Avatar
           additionalClasses="h-12 w-12"
-          rounded="rounded-full"
+          rounded={`rounded-full ${
+            typeof userData.profilePicture === "string" &&
+            userData.profilePicture !== ""
+              ? ""
+              : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+          }`}
           fileName={userData.profilePicture}
           userId={userData.id}
         />

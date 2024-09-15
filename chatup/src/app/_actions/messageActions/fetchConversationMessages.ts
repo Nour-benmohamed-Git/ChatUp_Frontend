@@ -1,8 +1,8 @@
 "use server";
 
-import { Messages } from "@/types/Message";
 import { Direction } from "@/utils/constants/globals";
 import { fetchFromServer } from "../fetchFromServer";
+import { MessagesResponse } from "@/types/Message";
 
 export async function fetchConversationMessages(
   conversationId: string,
@@ -21,7 +21,7 @@ export async function fetchConversationMessages(
   }
 ) {
   return fetchFromServer<
-    Messages,
+    MessagesResponse,
     {
       limit: number;
       search: string;
@@ -32,6 +32,6 @@ export async function fetchConversationMessages(
   >(`/api/messages/${conversationId}/chat-sessions`, {
     method: "POST",
     body: data,
-    next: { tags: ["messages"] },
+    // next: { tags: ["messages"] },
   });
 }

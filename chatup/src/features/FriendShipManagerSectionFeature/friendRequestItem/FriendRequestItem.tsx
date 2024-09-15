@@ -46,7 +46,12 @@ const FriendRequestItem: FC<FriendRequestItemProps> = (props) => {
     <div className="flex items-center rounded-md gap-4 m-2 px-2 py-3 bg-gray-900">
       <Avatar
         additionalClasses="h-12 w-12"
-        rounded="rounded-full"
+        rounded={`rounded-full ${
+          typeof friendRequestData?.image === "string" &&
+          friendRequestData?.image !== ""
+            ? ""
+            : "shadow-[0_0_8px_3px_rgba(255,_165,_0,_0.4)] border-2 border-gold-600"
+        }`}
         fileName={friendRequestData?.image}
       />
       <div className="flex flex-col flex-1 min-w-0 gap-2">

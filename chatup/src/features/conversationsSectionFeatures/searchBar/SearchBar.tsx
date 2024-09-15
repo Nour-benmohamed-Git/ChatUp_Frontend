@@ -65,8 +65,9 @@ const SearchBar: FC<SearchBarProps> = ({
       </div>
       <div className="hidden md:flex items-center gap-2">
         <span className="hidden md:inline-block text-center text-gray-100 text-sm min-w-24 max-w-24 truncate">
-          {searchResults?.length ? currentSearchIndex + 1 : currentSearchIndex}{" "}
-          of {searchResults?.length}
+          {searchResults?.length
+            ? `${currentSearchIndex + 1} of ${searchResults.length}`
+            : "0 of 0"}
         </span>
         <button
           disabled={!searchResults?.length}
