@@ -18,5 +18,5 @@ export interface HeaderProps {
     icon: JSX.Element;
   }[];
   title?: string;
-  handleBack?: () => void
-  startAudioCall: () => void}
+  handleBack?: () => void;
+}

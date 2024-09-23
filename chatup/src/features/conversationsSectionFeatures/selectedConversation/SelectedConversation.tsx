@@ -3,12 +3,6 @@ import { removeConversation } from "@/app/_actions/conversationActions/removeCon
 import Dialog from "@/app/components/dialog/Dialog";
 import SlidingPanel from "@/app/components/slidingPanel/SlidingPanel";
 import { SlidingPanelProps } from "@/app/components/slidingPanel/SlidingPanel.types";
-import { useRouter } from "next/navigation";
-import { FC, memo, useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
 import BlocContainer from "@/features/blocContainer/BlocContainer";
 import useConversation from "@/hooks/useConversation";
 import usePanel from "@/hooks/usePanel";
@@ -16,10 +10,15 @@ import {
   conversationActions,
   conversationMenuActions,
 } from "@/utils/constants/actionLists/conversationActions";
+import { sendMessageSchema } from "@/utils/schemas/sendMessageSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { FC, memo, useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
 import ContactInfo from "../contactInfo/ContactInfo";
 import MessageList from "../messageList/MessageList";
 import SearchBar from "../searchBar/SearchBar";
-import { useAudioCall } from "@/context/AudioCallContext";
 import { SelectedConversationProps } from "./SelectedConversation.types";
 
 const SelectedConversation: FC<SelectedConversationProps> = (props) => {
@@ -30,16 +29,10 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
-  const { startAudioCall, setCombinedData } = useAudioCall();
 
   const handleCloseConversation = () => {
     router.push("/conversations");
   };
-  useEffect(() => {
-    if (combinedData) {
-      setCombinedData(combinedData);
-    }
-  }, [combinedData]);
 
   const handleRemoveConversation = async () => {
     await removeConversation({
@@ -184,7 +177,6 @@ const SelectedConversation: FC<SelectedConversationProps> = (props) => {
             combinedData={combinedData}
             cssClass="h-[calc(100vh-8rem)]"
             handleBack={handleCloseConversation}
-            startAudioCall={startAudioCall}
           >
             <MessageList
               conversationRelatedData={conversationRelatedData}

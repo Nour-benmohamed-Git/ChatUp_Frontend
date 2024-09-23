@@ -16,7 +16,6 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
     conversationRelatedData,
     title,
     handleBack,
-    startAudioCall,
   } = props;
   return (
     <>
@@ -28,7 +27,6 @@ const BlocContainer: FC<BlocContainerProps> = (props) => {
         menuActionList={menuActionList}
         title={title}
         handleBack={handleBack}
-        startAudioCall={startAudioCall}
       />
       <div className={`${cssClass}`}>{children}</div>
       {hasChatControlPanel && conversationRelatedData ? (

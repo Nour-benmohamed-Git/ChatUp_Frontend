@@ -5,7 +5,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   webpack: (config) => {
     config.externals = [...config.externals, "canvas", "jsdom"];
     return config;

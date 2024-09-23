@@ -25,5 +25,4 @@ export interface BlocContainerProps {
   };
   title?: string;
   handleBack?: () => void;
-  startAudioCall: () => void
 }

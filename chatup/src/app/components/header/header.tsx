@@ -1,3 +1,4 @@
+import { useAudioCall } from "@/context/AudioCallContext";
 import { avatarActions } from "@/utils/constants/actionLists/avatarActions";
 import { ChatSessionType, MenuPosition } from "@/utils/constants/globals";
 import { FC, memo } from "react";
@@ -18,8 +19,8 @@ const Header: FC<HeaderProps> = (props) => {
     menuActionList,
     title,
     handleBack,
-    startAudioCall
   } = props;
+  const { startCall } = useAudioCall();
 
   return (
     <header className="sticky top-0 bg-gray-900 shadow-lg h-16 z-40 px-4 py-2.5">
@@ -109,7 +110,7 @@ const Header: FC<HeaderProps> = (props) => {
         </div>
         <div className="flex gap-7 h-full">
           {label === "selected_conversation" && (
-            <button onClick={startAudioCall}>
+            <button onClick={() => startCall(combinedData)}>
               <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                 <MdCall size={24} />
               </div>
