@@ -18,29 +18,22 @@ import { CallWindowProps } from "./CallWindow.types";
 
 const CallWindow: FC<CallWindowProps> = ({
   socket,
+  peersRef,
+  userAudioRefs,
+  callDuration,
+  isMuted,
+  localStreamRef,
   callInfo,
   setCallInfo,
+  startCallTimer,
   onAccept,
-  handleRecall,
-  handleDismiss,
+  onDismiss,
+  onRecall,
   onReject,
   onEnd,
-  isMuted,
+
   onMuteToggle,
 }) => {
-  const peersRef = useRef<Map<number, SimplePeer.Instance>>(new Map());
-  const userAudioRefs = useRef<Map<number, HTMLAudioElement>>(new Map());
-  const callDurationRef = useRef<NodeJS.Timeout | null>(null);
-  const [callDuration, setCallDuration] = useState(0);
-
-  const startCallTimer = () => {
-    if (!callDurationRef.current) {
-      callDurationRef.current = setInterval(() => {
-        setCallDuration((prev) => prev + 1);
-      }, 1000);
-    }
-  };
-
   async function createPeer(peerId: number, stream: MediaStream) {
     const peer = new SimplePeer({
       initiator: true,
@@ -154,7 +147,7 @@ const CallWindow: FC<CallWindowProps> = ({
       peersRef.current.delete(callerId);
       peer.destroy();
     });
-   
+
     peer.signal(incomingSignal);
     return peer;
   }
@@ -165,7 +158,7 @@ const CallWindow: FC<CallWindowProps> = ({
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-
+        localStreamRef.current = stream;
         const handleMediaRoomMembers = (users: number[]) => {
           console.log("users", users);
           for (const userId of users) {
@@ -241,14 +234,15 @@ const CallWindow: FC<CallWindowProps> = ({
           </div>
 
           {/* Show the add user button only if the call is accepted */}
-          {callInfo?.status === "accepted" && (
-            <div
-              role="button"
-              className="flex items-center bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition-colors duration-300"
-            >
-              <HiMiniUserPlus />
-            </div>
-          )}
+          {callInfo?.status &&
+            ["accepted", "connected"].includes(callInfo.status) && (
+              <div
+                role="button"
+                className="flex items-center bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition-colors duration-300"
+              >
+                <HiMiniUserPlus />
+              </div>
+            )}
         </div>
 
         {/* Main Content */}
@@ -267,6 +261,10 @@ const CallWindow: FC<CallWindowProps> = ({
                 ? callDuration > 0
                   ? formatDuration(callDuration)
                   : "Call Accepted"
+                : callInfo?.status === "connected"
+                ? callDuration > 0
+                  ? formatDuration(callDuration)
+                  : "Connected"
                 : callInfo?.status === "rejected"
                 ? "Call Rejected"
                 : callInfo?.status === "incoming"
@@ -283,7 +281,7 @@ const CallWindow: FC<CallWindowProps> = ({
               <div className="flex flex-col items-center">
                 <button
                   className="bg-gray-700 hover:bg-gray-800 text-white p-5 rounded-full shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl hover:ring-4 hover:ring-gray-400"
-                  onClick={handleDismiss}
+                  onClick={onDismiss}
                 >
                   <IoMdClose size={28} />
                 </button>
@@ -293,7 +291,7 @@ const CallWindow: FC<CallWindowProps> = ({
                 <button
                   disabled={callInfo?.status === "recall"}
                   className="bg-green-500 hover:bg-green-600 text-white p-5 rounded-full shadow-xl transition-all duration-300 ease-in-out hover:shadow-2xl hover:ring-4 hover:ring-green-300 disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:shadow-none"
-                  onClick={handleRecall}
+                  onClick={onRecall}
                 >
                   <MdCall size={28} />
                 </button>

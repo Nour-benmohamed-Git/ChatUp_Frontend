@@ -40,7 +40,7 @@ export default async function ChatLayout({
         currentUserId={(currentUser.data?.data as UserResponse).id}
       >
         <OnlineUsersProvider>
-          <AudioCallProvider>
+          <AudioCallProvider  currentUserId={(currentUser.data?.data as UserResponse).id}>
             <NavigationBar
               currentUser={currentUser.data?.data as UserResponse}
               initialUnseenConversationsCount={
