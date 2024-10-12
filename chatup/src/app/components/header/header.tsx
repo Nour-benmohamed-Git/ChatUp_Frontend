@@ -9,6 +9,7 @@ import Avatar from "../avatar/Avatar";
 import ConversationHeaderUserInfo from "../conversationHeaderUserInfo/ConversationHeaderUserInfo";
 import Menu from "../menu/Menu";
 import { HeaderProps } from "./Header.types";
+import { IoVideocam } from "react-icons/io5";
 
 const Header: FC<HeaderProps> = (props) => {
   const {
@@ -110,9 +111,16 @@ const Header: FC<HeaderProps> = (props) => {
         </div>
         <div className="flex gap-7 h-full">
           {label === "selected_conversation" && (
-            <button onClick={() => startCall(combinedData)}>
+            <button onClick={() => startCall("audio", combinedData)}>
               <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
                 <MdCall size={24} />
+              </div>
+            </button>
+          )}
+          {label === "selected_conversation" && (
+            <button onClick={() => startCall("video", combinedData)}>
+              <div className="flex justify-center items-center rounded-md text-gold-900 hover:text-gold-300">
+                <IoVideocam size={24} />
               </div>
             </button>
           )}

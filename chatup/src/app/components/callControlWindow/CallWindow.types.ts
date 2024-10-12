@@ -25,7 +25,13 @@ export interface CallWindowProps {
   onDismiss: () => void;
   onMuteToggle: () => void;
   onVideoToggle: () => void;
-  toggleNoiseReduction: () => Promise<void>;
-  switchCamera: () => Promise<void>
-  toggleScreenShare: () => Promise<void>
+  toggleNoiseReduction: () => void;
+  switchCamera: () => Promise<void>;
+  toggleScreenShare: () => Promise<void>;
+  setMediaSettings: Dispatch<SetStateAction<{
+    isMuted: boolean;
+    isVideoEnabled: boolean;
+    isSharingScreen: boolean;
+    isNoiseReductionEnabled: boolean;
+}>>
 }

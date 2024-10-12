@@ -32,7 +32,6 @@ export const createPeer = async (
   });
   if (!peer.destroyed) {
     peer.on("signal", (signal) => {
-      console.log("Sending signal back to peer:", peerId, signal);
       socket?.emit("audio_call_notification", {
         action: "send_signal",
         peerId,
@@ -59,7 +58,7 @@ export const createPeer = async (
   });
 
   peer.on("close", () => {
-    console.log("createPeer===>Peer connection closed.");
+    // console.log("createPeer===>Peer connection closed.");
     peersRef.current.delete(peerId);
 
     peer.destroy();
@@ -99,7 +98,7 @@ export const addPeer = async (
 
   if (!peer.destroyed) {
     peer.on("signal", (signal) => {
-      console.log("Sending signal back to peer:", callerId, signal);
+      // console.log("Sending signal back to peer:", callerId, signal);
       socket?.emit("audio_call_notification", {
         action: "return_signal",
         signal,
@@ -121,17 +120,30 @@ export const addPeer = async (
   });
 
   peer.on("error", (err) => {
-    console.error("addPeer===>Peer connection error:", err);
+    // console.error("addPeer===>Peer connection error:", err);
     peersRef.current.delete(callerId);
     peer.destroy();
   });
 
   peer.on("close", () => {
-    console.log("addPeer===>Peer connection closed.");
+    // console.log("addPeer===>Peer connection closed.");
     peersRef.current.delete(callerId);
     peer.destroy();
   });
 
   peer.signal(incomingSignal);
   return peer;
+};
+
+export const replaceVideoTrackForPeers = (
+  peersRef: MutableRefObject<Map<number, SimplePeer.Instance>>,
+  newTrack: MediaStreamTrack
+) => {
+  peersRef.current.forEach((peer) => {
+    peer.replaceTrack(
+      peer.streams[0].getVideoTracks()[0],
+      newTrack,
+      peer.streams[0]
+    );
+  });
 };
